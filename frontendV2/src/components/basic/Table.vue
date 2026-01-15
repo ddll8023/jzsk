@@ -59,27 +59,16 @@
     </div>
     
     <!-- 分页 -->
-    <div v-if="showPagination && total > 0" class="flex items-center justify-between px-4 py-3 border-t border-gray-200">
-      <div class="text-sm text-gray-500">
-        共 {{ total }} 条
-      </div>
-      <div class="flex items-center gap-2">
-        <button
-          :disabled="currentPage <= 1"
-          class="px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          @click="handlePageChange(currentPage - 1)"
-        >
-          <i class="fa fa-angle-left" aria-hidden="true"></i>
-        </button>
-        <span class="text-sm text-gray-700">{{ currentPage }} / {{ totalPages }}</span>
-        <button
-          :disabled="currentPage >= totalPages"
-          class="px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          @click="handlePageChange(currentPage + 1)"
-        >
-          <i class="fa fa-angle-right" aria-hidden="true"></i>
-        </button>
-      </div>
+    <div v-if="showPagination && total > 0" class="flex items-center justify-center px-4 pt-4 pb-2 border-t border-gray-200">
+      <Pagination
+        :total="total"
+        :current-page="currentPage"
+        :page-size="pageSize"
+        :page-sizes="pageSizes"
+        class="border-0 shadow-none px-0 py-0"
+        @change="handlePageChange"
+        @update:page-size="handleSizeChange"
+      />
     </div>
   </div>
 </template>
@@ -91,6 +80,7 @@
  * 遵循 KISS 原则：简洁实现
  */
 import { computed } from 'vue'
+import Pagination from './Pagination.vue'
 
 const props = defineProps({
   columns: {
@@ -124,20 +114,40 @@ const props = defineProps({
   pageSize: {
     type: Number,
     default: 10
+  },
+  pageSizes: {
+    type: Array,
+    default: () => [10, 20, 50]
   }
 })
 
-const emit = defineEmits(['page-change'])
+const emit = defineEmits(['page-change', 'update:pageSize', 'update:currentPage'])
 
-// 计算总页数
 const totalPages = computed(() => Math.ceil(props.total / props.pageSize))
 
 /**
- * 处理分页变化
+ * 处理分页变化 - 兼用两种事件格式以保持兼容性
+ * Pagination 组件发出 ({ page, pageSize }) 
+ * 同时也发出 update:currentPage 和 update:pageSize
  */
-const handlePageChange = (page) => {
-  if (page >= 1 && page <= totalPages.value) {
-    emit('page-change', page)
+const handlePageChange = (payload) => {
+  // 如果是对象（来自 Pagination 组件）
+  if (typeof payload === 'object') {
+    emit('page-change', payload.page)
+    emit('update:currentPage', payload.page)
+    emit('update:pageSize', payload.pageSize)
+  } else {
+    // 兼容旧的数字调用方式
+    emit('page-change', payload)
+    emit('update:currentPage', payload)
   }
+}
+
+/**
+ * 处理每页条数变化
+ */
+const handleSizeChange = (size) => {
+  emit('update:pageSize', size)
+  // 当改变页大小时，通常重置到第一页，但这由 Pagination 组件控制触发 change 事件
 }
 </script>
