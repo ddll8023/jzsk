@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szy.mapper.VideoConfigurationMapper">
+    <select id="getAllTypes" resultType="java.lang.String">
+        select distinct(type) from video_configuration
+    </select>
+    <select id="getAllTowns" resultType="java.lang.String">
+        select distinct(town) from video_configuration
+    </select>
+    <select id="getVillagesByTown" resultType="java.lang.String">
+        select distinct(village) from video_configuration
+        where town = #{town}
+    </select>
+</mapper>

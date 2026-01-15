@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szy.mapper.WarningInformationMapper">
+    <insert id="add">
+        insert into warning_information (
+            position,
+            project,
+            content,
+            type,
+            level,
+            status,
+            latitude,
+            longitude,
+            start_time,
+            over_time,
+            stay_time,
+            create_time,
+            update_time,
+            point
+        ) values (
+            #{position},
+            #{project},
+            #{content},
+            #{type},
+            #{level},
+            #{status},
+            #{latitude},
+            #{longitude},
+            #{startTime},
+            #{overTime},
+            #{stayTime},
+            #{createTime},
+            #{updateTime},
+            <choose>
+                <when test="longitude != null and latitude != null">
+                    st_pointfromtext(#{geom})
+                </when>
+                <otherwise>
+                    null
+                </otherwise>
+            </choose>
+        )
+    </insert>
+    <update id="addPosition">
+        update warning_information set
+        point = st_pointfromtext(${geom})
+        where id = #{id}
+    </update>
+    <select id="getAllTypes" resultType="java.lang.String">
+        select distinct(type) from warning_information
+    </select>
+    <select id="getWarningLevels" resultType="com.szy.common.vo.WarningCount">
+        SELECT level, COUNT(id) as number
+        FROM warning_information
+        WHERE level IN ('一般预警', '严重预警')
+          AND start_time BETWEEN #{start} AND #{end}
+          AND status = #{status}
+        GROUP BY level;
+    </select>
+</mapper>

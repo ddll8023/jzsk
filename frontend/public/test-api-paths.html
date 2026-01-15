@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API路径测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>API路径测试</h1>
+    
+    <div class="test-section">
+        <h3>测试不同的登录接口路径</h3>
+        <button onclick="testPath('http://111.4.68.108:8081/login')">测试 /login</button>
+        <button onclick="testPath('http://111.4.68.108:8081/api/login')">测试 /api/login</button>
+        <button onclick="testPath('http://111.4.68.108:8081/auth/login')">测试 /auth/login</button>
+        <button onclick="testPath('http://111.4.68.108:8081/user/login')">测试 /user/login</button>
+        <button onclick="testPath('http://111.4.68.108:8081/system/login')">测试 /system/login</button>
+        <div id="pathResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>测试健康检查接口</h3>
+        <button onclick="testHealth('http://111.4.68.108:8081/actuator/health')">测试 /actuator/health</button>
+        <button onclick="testHealth('http://111.4.68.108:8081/health')">测试 /health</button>
+        <button onclick="testHealth('http://111.4.68.108:8081/')">测试根路径 /</button>
+        <div id="healthResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>测试登录请求（POST）</h3>
+        <button onclick="testLoginPost('http://111.4.68.108:8081/login')">POST /login</button>
+        <button onclick="testLoginPost('http://111.4.68.108:8081/api/login')">POST /api/login</button>
+        <button onclick="testLoginPost('http://111.4.68.108:8081/auth/login')">POST /auth/login</button>
+        <div id="loginPostResult"></div>
+    </div>
+
+    <script>
+        // 测试API路径
+        async function testPath(url) {
+            const resultDiv = document.getElementById('pathResult');
+            resultDiv.innerHTML = '<p>测试中...</p>';
+            
+            try {
+                console.log(`测试路径: ${url}`);
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                const text = await response.text();
+                
+                resultDiv.innerHTML = `<div class="${response.ok ? 'success' : 'error'}">
+                    <h4>${response.ok ? '✅' : '❌'} 路径测试结果</h4>
+                    <p><strong>URL:</strong> ${url}</p>
+                    <p><strong>状态:</strong> ${response.status} ${response.statusText}</p>
+                    <p><strong>响应:</strong></p>
+                    <pre>${text}</pre>
+                </div>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">
+                    <h4>❌ 路径测试错误</h4>
+                    <p><strong>URL:</strong> ${url}</p>
+                    <p><strong>错误:</strong> ${error.message}</p>
+                </div>`;
+            }
+        }
+
+        // 测试健康检查
+        async function testHealth(url) {
+            const resultDiv = document.getElementById('healthResult');
+            resultDiv.innerHTML = '<p>测试中...</p>';
+            
+            try {
+                console.log(`测试健康检查: ${url}`);
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    mode: 'cors'
+                });
+                
+                const text = await response.text();
+                
+                resultDiv.innerHTML = `<div class="${response.ok ? 'success' : 'error'}">
+                    <h4>${response.ok ? '✅' : '❌'} 健康检查结果</h4>
+                    <p><strong>URL:</strong> ${url}</p>
+                    <p><strong>状态:</strong> ${response.status} ${response.statusText}</p>
+                    <p><strong>响应:</strong></p>
+                    <pre>${text}</pre>
+                </div>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">
+                    <h4>❌ 健康检查错误</h4>
+                    <p><strong>URL:</strong> ${url}</p>
+                    <p><strong>错误:</strong> ${error.message}</p>
+                </div>`;
+            }
+        }
+
+        // 测试POST登录
+        async function testLoginPost(url) {
+            const resultDiv = document.getElementById('loginPostResult');
+            resultDiv.innerHTML = '<p>测试中...</p>';
+            
+            try {
+                console.log(`测试POST登录: ${url}`);
+                
+                const loginData = new URLSearchParams({
+                    username: 'admin01',
+                    password: '123456'
+                });
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: loginData
+                });
+                
+                const text = await response.text();
+                
+                resultDiv.innerHTML = `<div class="${response.ok ? 'success' : 'error'}">
+                    <h4>${response.ok ? '✅' : '❌'} POST登录结果</h4>
+                    <p><strong>URL:</strong> ${url}</p>
+                    <p><strong>状态:</strong> ${response.status} ${response.statusText}</p>
+                    <p><strong>响应:</strong></p>
+                    <pre>${text}</pre>
+                </div>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">
+                    <h4>❌ POST登录错误</h4>
+                    <p><strong>URL:</strong> ${url}</p>
+                    <p><strong>错误:</strong> ${error.message}</p>
+                </div>`;
+            }
+        }
+    </script>
+</body>
+</html> 

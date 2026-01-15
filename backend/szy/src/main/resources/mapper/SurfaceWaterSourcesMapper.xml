@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szy.mapper.SurfaceWaterSourcesMapper">
+
+    <insert id="add">
+        insert into surface_water_sources (name, longitude, latitude, type, area, water_quality_objectives,
+                                           water_supply_continuity, object, manage_unit, water_supply_project,
+                                           whether_emergency_source, create_time, update_time, point)
+        values (#{name}, #{longitude}, #{latitude}, #{type}, #{area}, #{waterQualityObjectives},
+                #{waterSupplyContinuity}, #{object}, #{manageUnit}, #{waterSupplyProject},
+                #{whetherEmergencySource}, #{createTime}, #{updateTime}, st_pointfromtext(#{geom}))
+    </insert>
+    <update id="addPosition">
+        update surface_water_sources
+        set point = st_pointfromtext(#{geom})
+        where id = #{id}
+    </update>
+</mapper>

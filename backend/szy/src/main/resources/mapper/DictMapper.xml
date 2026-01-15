@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szy.mapper.DictMapper">
+    <resultMap id="BaseResultMap" type="com.szy.entity.Dict">
+        <id column="dict_id" property="id" jdbcType="BIGINT"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="description" property="description" jdbcType="VARCHAR"/>
+        <result column="create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        <result column="update_time" property="updateTime" jdbcType="TIMESTAMP"/>
+        <collection property="dictDetails" ofType="com.szy.entity.DictDetail">
+            <id column="dd_id" property="id" jdbcType="BIGINT"/>
+            <result column="label" property="label" jdbcType="VARCHAR"/>
+            <result column="value" property="value" jdbcType="VARCHAR"/>
+            <result column="dict_sort" property="dictSort" jdbcType="INTEGER"/>
+            <result column="dd_create_time" property="createTime" jdbcType="TIMESTAMP"/>
+        </collection>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        d.dict_id, d.name, d.description, d.create_time, d.update_time
+    </sql>
+
+    <sql id="Dict_Details_Column_List">
+        dd.detail_id as dd_id, dd.label, dd.`value`, dd.dict_sort , dd.create_time as dd_create_time
+    </sql>
+
+    <sql id="Where_sql">
+        <where>
+            <if test="criteria != null and criteria != ''">
+                and (
+                    d.name like concat('%', #{criteria.blurry}, '%')
+                )
+            </if>
+        </where>
+    </sql>
+    <select id="getAllNames" resultType="java.lang.String">
+        select distinct(name)
+        from dict
+    </select>
+    <select id="getAllLabels" resultType="java.lang.String">
+        select label
+        from (
+            select d.dict_id, dd.label, dd.dict_sort
+            from dict d
+            left join dict_detail dd on d.dict_id = dd.dict_id
+            where d.name = #{name}
+        ) as sorted_labels
+        order by sorted_labels.dict_sort asc
+    </select>
+    <select id="queryAll" resultMap="BaseResultMap">
+        select d.*,
+        <include refid="Dict_Details_Column_List"/>
+        from(
+            select <include refid="Base_Column_List"/>
+            from dict d
+            <include refid="Where_sql"/>
+            <if test="criteria.offset != null">
+                limit #{criteria.offset}, #{criteria.size}
+            </if>
+        ) d
+        left join dict_detail dd on d.dict_id = dd.dict_id
+        order by d.dict_id asc , dd.dict_sort asc
+    </select>
+    <select id="countAll" resultType="java.lang.Long">
+        select count(*)
+        from dict d
+        <include refid="Where_sql"/>
+    </select>
+    <select id="getAllLabelValues" resultType="com.szy.common.vo.DictVO">
+        select label,value
+        from (
+                 select d.dict_id, dd.label, dd.value, dd.dict_sort
+                 from dict d
+                          left join dict_detail dd on d.dict_id = dd.dict_id
+                 where d.name = #{name}
+             ) as sorted_labels
+        order by sorted_labels.dict_sort asc
+    </select>
+    <!--        <select id="queryAll" resultType="com.szy.entity.Dict">-->
+<!--        select d.*,-->
+<!--        <include refid="Dict_Details_Column_List"/>-->
+<!--        from(-->
+<!--        select <include refid="Base_Column_List"/>-->
+<!--        from dict d-->
+<!--        <include refid="Where_sql"/>-->
+<!--        ) d-->
+<!--        left join dict_detail dd on d.dict_id = dd.dict_id-->
+<!--        order by d.dict_id asc , dd.dict_sort asc-->
+<!--    </select>-->
+</mapper>

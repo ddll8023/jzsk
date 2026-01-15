@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szy.mapper.ImpoundmentMapper">
+
+    <update id="addPosition">
+        update impoundment
+        set point = st_pointfromtext(#{geom})
+        where id = #{id}
+    </update>
+    <insert id="add">
+        insert into impoundment (company, name, address, longitude, latitude, date, manage_unit, volume,
+                                 control_water_level, responsible_person, phone, rtu_code, note, create_time,
+                                 update_time, point)
+        values (#{company}, #{name}, #{address}, #{longitude}, #{latitude}, #{date}, #{manageUnit}, #{volume},
+                #{controlWaterLevel}, #{responsiblePerson}, #{phone}, #{rtuCode}, #{note}, #{createTime},
+                #{updateTime}, st_pointfromtext(#{geom}))
+    </insert>
+</mapper>
