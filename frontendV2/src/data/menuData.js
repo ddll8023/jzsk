@@ -12,7 +12,7 @@ export const staticMenuData = [
     id: generateId(),
     name: '一张图',
     code: 'map',
-    path: '/map',
+    path: '',
     icon: 'fa fa-map',
     ordernum: 1,
     status: '启用',
@@ -29,7 +29,7 @@ export const staticMenuData = [
     status: '启用',
     subsystemid: 0,
     children: [
-      { id: generateId(), name: '降雨查询', code: 'water_rain_rainfall', path: '/water-rain/rainfall', ordernum: 1, status: '启用', subsystemid: 101, children: [] },
+      { id: generateId(), name: '降雨查询', code: 'water_rain_rainfall', path: 'hydrology/rainfall', ordernum: 1, status: '启用', subsystemid: 101, children: [] },
       { id: generateId(), name: '水库水位查询', code: 'water_rain_reservoir', path: '/water-rain/reservoir', ordernum: 2, status: '启用', subsystemid: 101, children: [] }
     ]
   },
@@ -37,7 +37,7 @@ export const staticMenuData = [
     id: generateId(),
     name: '视频监测',
     code: 'video',
-    path: '/video',
+    path: '',
     icon: 'fa fa-video-camera',
     ordernum: 3,
     status: '启用',

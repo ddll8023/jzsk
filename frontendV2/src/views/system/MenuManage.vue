@@ -1,218 +1,163 @@
 <template>
-  <div class="h-full flex flex-col">
+  <div class="min-h-full bg-slate-50 flex flex-col">
     <!-- 面包屑 -->
-    <nav class="px-4 py-2 text-sm text-gray-500">
+    <nav class="px-6 py-3 text-sm text-slate-500">
       <span>首页</span>
       <i class="fa fa-angle-right mx-2"></i>
       <span>系统管理</span>
       <i class="fa fa-angle-right mx-2"></i>
-      <span class="text-gray-900">菜单管理</span>
+      <span class="text-slate-900 font-medium">菜单管理</span>
     </nav>
 
     <!-- 工具栏 -->
-    <div class="flex items-center justify-between px-4 py-3 bg-white border-b">
-      <button 
-        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2"
-        @click="showAddDialog(null)"
-      >
-        <i class="fa fa-plus"></i>
-        新增菜单
-      </button>
-      <button 
-        class="px-4 py-2 border border-gray-300 rounded hover:bg-gray-100 flex items-center gap-2"
-        @click="loadMenuList"
-      >
-        <i class="fa fa-refresh"></i>
-        刷新
-      </button>
+    <div class="px-6">
+      <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow-sm border border-slate-200">
+        <Button type="primary" @click="showAddDialog(null)">
+          <i class="fa fa-plus mr-2"></i>新增菜单
+        </Button>
+        <Button @click="loadMenuList">
+          <i class="fa fa-refresh mr-2"></i>刷新
+        </Button>
+      </div>
     </div>
 
     <!-- 表格区域 -->
-    <div class="flex-1 overflow-auto px-4 py-2">
-      <table class="w-full border-collapse">
-        <thead class="bg-blue-100 sticky top-0">
-          <tr>
-            <th class="border border-gray-300 px-4 py-2 text-left">菜单名称</th>
-            <th class="border border-gray-300 px-4 py-2 text-center w-32">权限代码</th>
-            <th class="border border-gray-300 px-4 py-2 text-center w-48">路由路径</th>
-            <th class="border border-gray-300 px-4 py-2 text-center w-20">排序</th>
-            <th class="border border-gray-300 px-4 py-2 text-center w-20">状态</th>
-            <th class="border border-gray-300 px-4 py-2 text-center w-64">操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- 使用计算属性渲染扁平化的菜单列表 -->
-          <tr v-for="row in displayMenuList" :key="row.id" class="hover:bg-gray-50">
-            <!-- 菜单名称 -->
-            <td class="border border-gray-300 px-4 py-2">
-              <div class="flex items-center" :style="{ paddingLeft: row.level * 20 + 'px' }">
-                <!-- 展开/折叠按钮 -->
-                <button
-                  v-if="row.hasChildren"
-                  class="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-gray-700 mr-2"
-                  @click="toggleExpand(row.id)"
+    <div class="flex-1 overflow-auto px-6 py-4 custom-scrollbar">
+      <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+        <table class="w-full border-collapse">
+          <thead class="bg-slate-50/80 sticky top-0">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200">菜单名称</th>
+              <th class="px-4 py-3 text-center text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200 w-32">权限代码</th>
+              <th class="px-4 py-3 text-center text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200 w-48">路由路径</th>
+              <th class="px-4 py-3 text-center text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200 w-20">排序</th>
+              <th class="px-4 py-3 text-center text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200 w-20">状态</th>
+              <th class="px-4 py-3 text-center text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200 w-64">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr 
+              v-for="row in displayMenuList" 
+              :key="row.id" 
+              class="hover:bg-slate-50 transition-colors duration-150"
+            >
+              <!-- 菜单名称 -->
+              <td class="px-4 py-3 border-b border-slate-100">
+                <div class="flex items-center" :style="{ paddingLeft: row.level * 20 + 'px' }">
+                  <button
+                    v-if="row.hasChildren"
+                    class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-blue-600 transition-colors mr-2"
+                    @click="toggleExpand(row.id)"
+                  >
+                    <i :class="row.isExpanded ? 'fa fa-chevron-down' : 'fa fa-chevron-right'" class="text-xs"></i>
+                  </button>
+                  <span v-else class="w-6 mr-2"></span>
+                  <span class="text-slate-800">{{ row.name }}</span>
+                </div>
+              </td>
+              <!-- 权限代码 -->
+              <td class="px-4 py-3 text-center text-sm text-slate-600 border-b border-slate-100">
+                <span class="px-2 py-0.5 bg-slate-100 rounded text-xs font-mono">{{ row.code }}</span>
+              </td>
+              <!-- 路由路径 -->
+              <td class="px-4 py-3 text-center text-sm text-slate-500 border-b border-slate-100">{{ row.path || '-' }}</td>
+              <!-- 排序 -->
+              <td class="px-4 py-3 text-center text-slate-600 border-b border-slate-100">{{ row.ordernum }}</td>
+              <!-- 状态 -->
+              <td class="px-4 py-3 text-center border-b border-slate-100">
+                <button 
+                  @click="toggleStatus(row)"
+                  :class="isEnabled(row.status) ? 'bg-blue-600' : 'bg-slate-300'"
+                  class="relative w-11 h-6 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 cursor-pointer"
+                  :title="isEnabled(row.status) ? '点击禁用' : '点击启用'"
                 >
-                  <!-- 使用 Font Awesome 5/6 兼容的图标类名 -->
-                  <i :class="row.isExpanded ? 'far fa-minus-square' : 'far fa-plus-square'"></i>
+                  <span 
+                    :class="isEnabled(row.status) ? 'translate-x-5' : 'translate-x-1'"
+                    class="absolute top-1 left-0 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200"
+                  ></span>
                 </button>
-                <span v-else class="w-6 mr-2"></span>
-                <span>{{ row.name }}</span>
-              </div>
-            </td>
-            <!-- 权限代码 -->
-            <td class="border border-gray-300 px-4 py-2 text-center text-sm text-gray-600">{{ row.code }}</td>
-            <!-- 路由路径 -->
-            <td class="border border-gray-300 px-4 py-2 text-center text-sm text-gray-600">{{ row.path || '-' }}</td>
-            <!-- 排序 -->
-            <td class="border border-gray-300 px-4 py-2 text-center">{{ row.ordernum }}</td>
-            <!-- 状态：Switch 开关，点击可切换启用/禁用 -->
-            <td class="border border-gray-300 px-4 py-2 text-center">
-              <button 
-                @click="toggleStatus(row)"
-                :class="isEnabled(row.status) ? 'bg-blue-600' : 'bg-gray-300'"
-                class="relative w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                :title="isEnabled(row.status) ? '点击禁用' : '点击启用'"
-              >
-                <span 
-                  :class="isEnabled(row.status) ? 'translate-x-6' : 'translate-x-1'"
-                  class="absolute top-1 left-0 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200"
-                ></span>
-              </button>
-            </td>
-            <!-- 操作 -->
-            <td class="border border-gray-300 px-4 py-2 text-center">
-              <div class="flex items-center justify-center gap-2">
-                <button 
-                  class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
-                  @click="showAddDialog(row)"
-                >新增</button>
-                <button 
-                  class="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-100"
-                  @click="showEditDialog(row)"
-                >编辑</button>
-                <button 
-                  class="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
-                  @click="handleDelete(row)"
-                >删除</button>
-              </div>
-            </td>
-          </tr>
-          <!-- 空数据提示 -->
-          <tr v-if="!loading && displayMenuList.length === 0">
-            <td colspan="6" class="border border-gray-300 px-4 py-8 text-center text-gray-500">暂无数据</td>
-          </tr>
-        </tbody>
-      </table>
+              </td>
+              <!-- 操作 -->
+              <td class="px-4 py-3 text-center border-b border-slate-100">
+                <div class="flex items-center justify-center gap-2">
+                  <Button type="primary" size="sm" @click="showAddDialog(row)">新增</Button>
+                  <Button size="sm" @click="showEditDialog(row)">编辑</Button>
+                  <Button type="danger" size="sm" @click="handleDelete(row)">删除</Button>
+                </div>
+              </td>
+            </tr>
+            <!-- 空数据提示 -->
+            <tr v-if="!loading && displayMenuList.length === 0">
+              <td colspan="6" class="px-4 py-12 text-center">
+                <i class="fa fa-inbox text-4xl text-slate-300 mb-3"></i>
+                <p class="text-slate-400">暂无数据</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- 新增/编辑弹窗 -->
-    <div v-if="dialogVisible" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-white rounded-lg w-[550px] shadow-xl">
-        <div class="flex items-center justify-between px-4 py-3 border-b">
-          <h3 class="text-lg font-medium">{{ isEdit ? '编辑菜单' : '新增菜单' }}</h3>
-          <button class="text-gray-400 hover:text-gray-600" @click="dialogVisible = false">
-            <i class="fa fa-times"></i>
-          </button>
+    <Modal v-model="dialogVisible" :title="isEdit ? '编辑菜单' : '新增菜单'">
+      <div class="space-y-4">
+        <!-- 父级菜单 -->
+        <div class="flex items-center">
+          <label class="w-24 text-right pr-2 text-slate-600">父级菜单:</label>
+          <select 
+            v-model="form.subsystemid" 
+            class="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+          >
+            <option :value="0">顶级菜单</option>
+            <option v-for="item in flatMenuList" :key="item.id" :value="item.id">
+              {{ item.displayName }}
+            </option>
+          </select>
         </div>
-        <div class="p-4 space-y-4">
-          <!-- 父级菜单 -->
-          <div class="flex items-center">
-            <label class="w-24 text-right pr-2">父级菜单:</label>
-            <select 
-              v-model="form.subsystemid" 
-              class="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option :value="0">顶级菜单</option>
-              <option v-for="item in flatMenuList" :key="item.id" :value="item.id">
-                {{ item.displayName }}
-              </option>
-            </select>
-          </div>
-          <!-- 菜单名称 -->
-          <div class="flex items-center">
-            <label class="w-24 text-right pr-2"><span class="text-red-500">*</span>菜单名称:</label>
-            <input 
-              v-model="form.name" 
-              type="text" 
-              placeholder="请输入菜单名称"
-              class="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" 
-            />
-          </div>
-          <!-- 权限代码 -->
-          <div class="flex items-center">
-            <label class="w-24 text-right pr-2"><span class="text-red-500">*</span>权限代码:</label>
-            <input 
-              v-model="form.code" 
-              type="text" 
-              placeholder="如: sys_menu"
-              class="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" 
-            />
-          </div>
-          <!-- 路由路径 -->
-          <div class="flex items-center">
-            <label class="w-24 text-right pr-2">路由路径:</label>
-            <input 
-              v-model="form.path" 
-              type="text" 
-              placeholder="如: /home/menumanage"
-              class="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" 
-            />
-          </div>
-          <!-- 排序 -->
-          <div class="flex items-center">
-            <label class="w-24 text-right pr-2"><span class="text-red-500">*</span>排序:</label>
-            <input 
-              v-model.number="form.ordernum" 
-              type="number" 
-              min="0"
-              class="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" 
-            />
-          </div>
-          <!-- 状态 -->
-          <div class="flex items-center">
-            <label class="w-24 text-right pr-2"><span class="text-red-500">*</span>状态:</label>
-            <select 
-              v-model="form.status" 
-              class="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="启用">启用</option>
-              <option value="禁用">禁用</option>
-            </select>
-          </div>
-          <!-- 备注 -->
-          <div class="flex items-center">
-            <label class="w-24 text-right pr-2">备注:</label>
-            <input 
-              v-model="form.note" 
-              type="text" 
-              placeholder="请输入备注"
-              class="flex-1 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" 
-            />
-          </div>
+        <Input v-model="form.name" label="菜单名称" required placeholder="请输入菜单名称" />
+        <Input v-model="form.code" label="权限代码" required placeholder="如: sys_menu" />
+        <Input v-model="form.path" label="路由路径" placeholder="如: /home/menumanage" />
+        <Input v-model="form.ordernum" type="number" label="排序" required />
+        <!-- 状态 -->
+        <div class="flex items-center">
+          <label class="w-24 text-right pr-2 text-slate-600"><span class="text-red-500">*</span>状态:</label>
+          <select 
+            v-model="form.status" 
+            class="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+          >
+            <option value="启用">启用</option>
+            <option value="禁用">禁用</option>
+          </select>
         </div>
-        <div class="flex justify-center gap-4 px-4 py-3 border-t">
-          <button class="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" @click="submitForm">确 定</button>
-          <button class="px-6 py-2 border border-gray-300 rounded hover:bg-gray-100" @click="dialogVisible = false">取 消</button>
-        </div>
+        <Input v-model="form.note" label="备注" placeholder="请输入备注" />
       </div>
-    </div>
+      <template #footer>
+        <Button type="primary" @click="submitForm">确 定</Button>
+        <Button @click="dialogVisible = false">取 消</Button>
+      </template>
+    </Modal>
   </div>
 </template>
+
 
 <script setup>
 /**
  * 菜单管理页面
- * 功能：菜单的增删改查，树形结构展示
+ * 设计风格：Dimensional Layering + Minimalism（与 DictManage 统一）
+ * 色彩方案：SaaS标准 (Primary: #2563EB, Background: #F8FAFC)
  * 遵循原则：KISS - 简洁实现，SOLID - 职责分离
  * Source: backend/szy/src/main/java/com/szy/controller/ResourceController.java
  */
 import { ref, computed, onMounted } from 'vue'
 import { getMenuList, saveMenu, updateMenu, deleteMenu } from '@/api/menu'
+// 基础组件
+import Button from '@/components/basic/Button.vue'
+import Modal from '@/components/basic/Modal.vue'
+import Input from '@/components/basic/Input.vue'
 
 // ==================== 列表状态 ====================
 const menuList = ref([])
 const loading = ref(false)
-// 使用数组存储展开的ID，确保响应式
 const expandedIds = ref([])
 
 // ==================== 弹窗状态 ====================
@@ -240,29 +185,30 @@ const isEnabled = (status) => {
 
 /**
  * 扁平化显示的菜单列表（响应式计算属性）
- * 根据展开状态动态生成要显示的行
  */
 const displayMenuList = computed(() => {
   const result = []
   
   const flatten = (list, level = 0) => {
+    // 防御性检查：确保 list 是数组
+    if (!Array.isArray(list)) return
+    
     list.forEach(menu => {
-      const hasChildren = menu.children && menu.children.length > 0
+      // 防御性检查：确保 children 存在且为数组
+      const children = Array.isArray(menu.children) ? menu.children : []
+      const hasChildren = children.length > 0
       const isExpanded = expandedIds.value.includes(menu.id)
       
-      // 添加当前菜单行
       result.push({
         ...menu,
         level,
         hasChildren,
         isExpanded,
-        // 保留原始children用于删除检查
-        children: menu.children
+        children
       })
       
-      // 如果展开且有子菜单，递归添加子菜单
       if (hasChildren && isExpanded) {
-        flatten(menu.children, level + 1)
+        flatten(children, level + 1)
       }
     })
   }
@@ -303,7 +249,6 @@ const loadMenuList = async () => {
     const res = await getMenuList()
     if (res.data?.code === 200) {
       menuList.value = res.data.data || []
-      console.log('菜单数据加载成功，共', menuList.value.length, '个顶级菜单')
     }
   } catch (error) {
     console.error('加载菜单列表失败:', error)
@@ -318,18 +263,14 @@ const loadMenuList = async () => {
 const toggleExpand = (id) => {
   const index = expandedIds.value.indexOf(id)
   if (index > -1) {
-    // 已展开，移除
     expandedIds.value.splice(index, 1)
   } else {
-    // 未展开，添加
     expandedIds.value.push(id)
   }
-  console.log('展开状态:', expandedIds.value)
 }
 
 /**
  * 显示新增弹窗
- * @param {Object|null} parent - 父级菜单，null表示顶级
  */
 const showAddDialog = (parent) => {
   isEdit.value = false
@@ -369,7 +310,6 @@ const showEditDialog = (item) => {
  * 提交表单
  */
 const submitForm = async () => {
-  // 表单验证
   if (!form.value.name?.trim()) {
     alert('请输入菜单名称')
     return
@@ -396,8 +336,6 @@ const submitForm = async () => {
 
 /**
  * 切换菜单启用/禁用状态
- * 遵循 KISS 原则：复用现有 updateMenu 接口
- * @param {Object} row - 菜单行数据
  */
 const toggleStatus = async (row) => {
   const newStatus = isEnabled(row.status) ? '禁用' : '启用'
@@ -407,7 +345,6 @@ const toggleStatus = async (row) => {
       status: newStatus
     })
     if (res.data?.code === 200) {
-      // 直接更新本地状态，避免重新加载整个列表
       row.status = newStatus
     } else {
       alert(res.data?.message || '状态更新失败')
@@ -422,7 +359,6 @@ const toggleStatus = async (row) => {
  * 删除菜单
  */
 const handleDelete = async (item) => {
-  // 检查是否有子菜单
   if (item.children?.length > 0) {
     alert('该菜单下有子菜单，请先删除子菜单')
     return
@@ -448,3 +384,29 @@ onMounted(() => {
   loadMenuList()
 })
 </script>
+
+<style scoped>
+/* 滚动条样式 - 与 DictManage 统一 */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.25);
+}
+</style>

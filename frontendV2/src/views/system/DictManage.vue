@@ -1,102 +1,119 @@
 <template>
-  <div class="h-full flex flex-col">
+  <div class="min-h-full bg-slate-50 flex flex-col">
     <!-- 面包屑 -->
-    <nav class="px-4 py-2 text-sm text-gray-500">
+    <nav class="px-6 py-3 text-sm text-slate-500">
       <span>首页</span>
       <i class="fa fa-angle-right mx-2"></i>
       <span>系统管理</span>
       <i class="fa fa-angle-right mx-2"></i>
-      <span class="text-gray-900">字典管理</span>
+      <span class="text-slate-900 font-medium">字典管理</span>
     </nav>
 
-    <!-- 搜索栏 -->
-    <SearchBar
-      v-model="searchName"
-      placeholder="请输入数据项名称"
-      @search="handleSearch"
-      @add="showAddDialog"
-    />
+    <!-- 工具栏 -->
+    <div class="px-6">
+      <div class="flex items-center justify-between p-4 bg-white rounded-lg shadow-sm border border-slate-200">
+        <div class="flex items-center gap-4">
+          <Button type="primary" @click="showAddDialog">
+            <i class="fa fa-plus mr-2"></i>新增字典
+          </Button>
+          <!-- 搜索框 -->
+          <div class="flex items-center gap-2">
+            <input 
+              v-model="searchName"
+              type="text"
+              placeholder="请输入字典名称"
+              class="px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all w-48"
+              @keyup.enter="handleSearch"
+            />
+            <Button @click="handleSearch">
+              <i class="fa fa-search mr-1"></i>搜索
+            </Button>
+          </div>
+        </div>
+        <Button @click="handleSearch">
+          <i class="fa fa-refresh mr-2"></i>刷新
+        </Button>
+      </div>
+    </div>
 
-    <!-- 表格区域 - 传统表格轻量优化 -->
-    <div class="flex-1 overflow-auto px-4 custom-scrollbar mt-4">
-      <table class="w-full border-collapse">
-        <!-- 表头：柔和灰色背景 -->
-        <thead class="bg-slate-100 sticky top-0">
-          <tr>
-            <th class="border border-gray-200 px-4 py-2.5 text-center text-sm font-semibold text-gray-700 w-20">序号</th>
-            <th class="border border-gray-200 px-4 py-2.5 text-center text-sm font-semibold text-gray-700">数据项名称</th>
-            <th class="border border-gray-200 px-4 py-2.5 text-center text-sm font-semibold text-gray-700">描述</th>
-            <th class="border border-gray-200 px-4 py-2.5 text-center text-sm font-semibold text-gray-700">标签</th>
-            <th class="border border-gray-200 px-4 py-2.5 text-center text-sm font-semibold text-gray-700">值</th>
-            <th class="border border-gray-200 px-4 py-2.5 text-center text-sm font-semibold text-gray-700 w-20">排序</th>
-            <th class="border border-gray-200 px-4 py-2.5 text-center text-sm font-semibold text-gray-700 w-64">操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          <template v-for="(item, index) in dictList" :key="`parent-${item.id}`">
-            <!-- 字典主行：淡蓝悬浮高亮 -->
-            <tr class="bg-white hover:bg-blue-50 transition-colors">
-              <td class="border border-gray-200 px-4 py-2.5 text-center text-gray-600">{{ getRowIndex(index) }}</td>
-              <td class="border border-gray-200 px-4 py-2.5">
-                <div class="flex items-center gap-2">
+    <!-- 表格区域 -->
+    <div class="flex-1 overflow-auto px-6 py-4 custom-scrollbar">
+      <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
+        <table class="w-full border-collapse">
+          <thead class="bg-slate-50/80 sticky top-0">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200">字典名称</th>
+              <th class="px-4 py-3 text-center text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200 w-48">描述</th>
+              <th class="px-4 py-3 text-center text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200 w-24">详情数</th>
+              <th class="px-4 py-3 text-center text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200 w-64">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr 
+              v-for="row in displayDictList" 
+              :key="row.rowKey" 
+              class="hover:bg-slate-50 transition-colors duration-150"
+            >
+              <!-- 字典/详情名称 -->
+              <td class="px-4 py-3 border-b border-slate-100">
+                <div class="flex items-center" :style="{ paddingLeft: row.level * 20 + 'px' }">
+                  <!-- 展开/折叠按钮（仅字典行且有详情时显示） -->
                   <button
-                    v-if="item.dictDetails?.length"
-                    class="w-5 h-5 flex items-center justify-center text-gray-400 hover:text-blue-600 transition-colors"
-                    @click="toggleExpand(item.id)"
+                    v-if="row.isDict && row.hasChildren"
+                    class="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-blue-600 transition-colors mr-2"
+                    @click="toggleExpand(row.id)"
                   >
-                    <i :class="expandedRows.has(item.id) ? 'far fa-minus-square' : 'far fa-plus-square'"></i>
+                    <i :class="row.isExpanded ? 'fa fa-chevron-down' : 'fa fa-chevron-right'" class="text-xs"></i>
                   </button>
-                  <span v-else class="w-5"></span>
-                  <span class="font-medium text-gray-800">{{ item.name }}</span>
+                  <span v-else class="w-6 mr-2"></span>
+                  <!-- 详情行图标 -->
+                  <i v-if="!row.isDict" class="fa fa-tag text-xs text-slate-400 mr-2"></i>
+                  <span :class="row.isDict ? 'text-slate-800 font-medium' : 'text-slate-600'">
+                    {{ row.isDict ? row.name : row.label }}
+                  </span>
                 </div>
               </td>
-              <td class="border border-gray-200 px-4 py-2.5 text-gray-600">{{ item.description }}</td>
-              <td class="border border-gray-200 px-4 py-2.5 text-gray-400">-</td>
-              <td class="border border-gray-200 px-4 py-2.5 text-gray-400">-</td>
-              <td class="border border-gray-200 px-4 py-2.5 text-center text-gray-400">-</td>
-              <td class="border border-gray-200 px-4 py-2.5 text-center">
+              <!-- 描述/值 -->
+              <td class="px-4 py-3 text-center text-sm border-b border-slate-100">
+                <span v-if="row.isDict" class="text-slate-500">{{ row.description || '-' }}</span>
+                <span v-else class="px-2 py-0.5 bg-slate-100 rounded text-xs font-mono text-slate-600">{{ row.value }}</span>
+              </td>
+              <!-- 详情数/排序 -->
+              <td class="px-4 py-3 text-center text-slate-600 border-b border-slate-100">
+                <span v-if="row.isDict && row.detailCount" class="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded-full">
+                  {{ row.detailCount }} 项
+                </span>
+                <span v-else-if="!row.isDict">{{ row.dictSort }}</span>
+                <span v-else>-</span>
+              </td>
+              <!-- 操作 -->
+              <td class="px-4 py-3 text-center border-b border-slate-100">
                 <div class="flex items-center justify-center gap-2">
-                  <Button size="sm" @click="showEditDialog(item)">编辑</Button>
-                  <Button type="primary" size="sm" @click="showAddDetailDialog(item.id)">新增</Button>
-                  <Button type="danger" size="sm" @click="handleDelete(item.id)">删除</Button>
+                  <!-- 字典行操作 -->
+                  <template v-if="row.isDict">
+                    <Button type="primary" size="sm" @click="showAddDetailDialog(row.id)">新增</Button>
+                    <Button size="sm" @click="showEditDialog(row)">编辑</Button>
+                    <Button type="danger" size="sm" @click="handleDelete(row.id)">删除</Button>
+                  </template>
+                  <!-- 详情行操作 -->
+                  <template v-else>
+                    <Button size="sm" @click="showEditDetailDialog(row)">编辑</Button>
+                    <Button type="danger" size="sm" @click="handleDeleteDetail(row.id)">删除</Button>
+                  </template>
                 </div>
               </td>
             </tr>
-            <!-- 字典详情子行：左侧蓝色指示线 -->
-            <template v-if="expandedRows.has(item.id)">
-              <tr v-for="detail in item.dictDetails" :key="`child-${detail.id}`" class="bg-gray-50 hover:bg-gray-100 transition-colors">
-                <td class="border border-gray-200 px-4 py-2 text-center"></td>
-                <td class="border border-gray-200 px-4 py-2 border-l-2 border-l-blue-400 pl-10 text-gray-500">
-                  <i class="fa fa-level-up fa-rotate-90 text-xs text-gray-300 mr-2"></i>
-                </td>
-                <td class="border border-gray-200 px-4 py-2"></td>
-                <td class="border border-gray-200 px-4 py-2 text-gray-700">{{ detail.label }}</td>
-                <td class="border border-gray-200 px-4 py-2 text-gray-700">{{ detail.value }}</td>
-                <td class="border border-gray-200 px-4 py-2 text-center text-gray-600">{{ detail.dictSort }}</td>
-                <td class="border border-gray-200 px-4 py-2 text-center">
-                  <div class="flex items-center justify-center gap-2">
-                    <Button size="sm" @click="showEditDetailDialog(detail)">编辑</Button>
-                    <Button type="danger" size="sm" @click="handleDeleteDetail(detail.id)">删除</Button>
-                  </div>
-                </td>
-              </tr>
-            </template>
-          </template>
-          <!-- 空数据提示 -->
-          <tr v-if="!loading && dictList.length === 0">
-            <td colspan="7" class="border border-gray-200 px-4 py-8 text-center text-gray-400">暂无数据</td>
-          </tr>
-        </tbody>
-      </table>
+            <!-- 空数据提示 -->
+            <tr v-if="!loading && displayDictList.length === 0">
+              <td colspan="4" class="px-4 py-12 text-center">
+                <i class="fa fa-inbox text-4xl text-slate-300 mb-3"></i>
+                <p class="text-slate-400">暂无数据</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-
-    <!-- 分页 -->
-    <Pagination
-      v-model:currentPage="currentPage"
-      v-model:pageSize="pageSize"
-      :total="total"
-      @change="handlePageChange"
-    />
 
     <!-- 新增/编辑字典弹窗 -->
     <Modal v-model="dictDialogVisible" :title="isEditDict ? '编辑字典' : '新增字典'">
@@ -152,28 +169,26 @@
 
 <script setup>
 /**
- * 字典管理页面
- * 功能：字典及字典详情的CRUD管理
+ * 字典管理页面 - 表格式布局
+ * 设计风格：Dimensional Layering + Minimalism（与 MenuManage 统一）
+ * 色彩方案：SaaS标准 (Primary: #2563EB, Background: #F8FAFC)
  * 遵循原则：KISS - 简洁实现，SOLID - 职责分离
  */
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { getDictList, saveDict, updateDict, deleteDict, saveDictDetail, updateDictDetail, deleteDictDetail } from '@/api/dict'
 import { useDictStore } from '@/stores/dict'
 // 基础组件
-import SearchBar from '@/components/basic/SearchBar.vue'
 import Button from '@/components/basic/Button.vue'
 import Modal from '@/components/basic/Modal.vue'
 import Input from '@/components/basic/Input.vue'
-import Pagination from '@/components/basic/Pagination.vue'
 
 // ==================== 列表状态 ====================
 const dictList = ref([])
 const loading = ref(false)
-const total = ref(0)
-const currentPage = ref(1)
-const pageSize = ref(20)
+const expandedIds = ref([])
 const searchName = ref('')
-const expandedRows = ref(new Set())
+// 分页参数（后端必传，设置大值一次性获取全部）
+const pageSize = ref(9999)
 
 // ==================== 弹窗状态 ====================
 const dictDialogVisible = ref(false)
@@ -186,55 +201,86 @@ const detailForm = ref({ dictId: null, label: '', value: '', dictSort: 0 })
 // ==================== Store ====================
 const dictStore = useDictStore()
 
-// ==================== 方法 ====================
+// ==================== 计算属性 ====================
 
 /**
- * 获取行序号
+ * 扁平化显示的字典列表（响应式计算属性）
+ * 将字典和详情扁平化为单一列表，便于表格渲染
  */
-const getRowIndex = (index) => {
-  return (currentPage.value - 1) * pageSize.value + index + 1
-}
+const displayDictList = computed(() => {
+  const result = []
+  
+  dictList.value.forEach(dict => {
+    const hasChildren = dict.dictDetails && dict.dictDetails.length > 0
+    const isExpanded = expandedIds.value.includes(dict.id)
+    
+    // 添加字典行
+    result.push({
+      rowKey: `dict-${dict.id}`,
+      id: dict.id,
+      name: dict.name,
+      description: dict.description,
+      isDict: true,
+      level: 0,
+      hasChildren,
+      isExpanded,
+      detailCount: dict.dictDetails?.length || 0
+    })
+    
+    // 如果展开，添加详情行
+    if (hasChildren && isExpanded) {
+      dict.dictDetails.forEach(detail => {
+        result.push({
+          rowKey: `detail-${detail.id}`,
+          id: detail.id,
+          label: detail.label,
+          value: detail.value,
+          dictSort: detail.dictSort,
+          dictId: dict.id,
+          isDict: false,
+          level: 1
+        })
+      })
+    }
+  })
+  
+  return result
+})
+
+// ==================== 方法 ====================
 
 /**
  * 切换展开/折叠
  */
 const toggleExpand = (id) => {
-  if (expandedRows.value.has(id)) {
-    expandedRows.value.delete(id)
+  const index = expandedIds.value.indexOf(id)
+  if (index > -1) {
+    expandedIds.value.splice(index, 1)
   } else {
-    expandedRows.value.add(id)
+    expandedIds.value.push(id)
   }
 }
 
 /**
- * 查询字典列表
+ * 查询字典列表（一次性加载全部数据）
+ * 后端要求currentPage必传，设置pageSize=9999获取全部
  */
 const handleSearch = async () => {
   loading.value = true
   try {
     const res = await getDictList({
       blurry: searchName.value,
-      currentPage: currentPage.value,
+      currentPage: 1,
       pageSize: pageSize.value
     })
     if (res.data?.code === 200) {
-      dictList.value = res.data.data?.content || []
-      total.value = res.data.data?.totalElements || 0
+      dictList.value = res.data.data?.content || res.data.data || []
     }
   } catch (error) {
     console.error('查询字典列表失败:', error)
   } finally {
     loading.value = false
   }
-}
-
-/**
- * 分页变化处理
- */
-const handlePageChange = ({ page, pageSize: newSize }) => {
-  currentPage.value = page
-  pageSize.value = newSize
-  handleSearch()
 }
 
 /**
@@ -248,7 +294,6 @@ const showAddDialog = () => {
 
 /**
  * 显示编辑字典弹窗
- * 直接使用列表数据，避免API请求延迟
  */
 const showEditDialog = (item) => {
   isEditDict.value = true
@@ -269,8 +314,7 @@ const submitDict = async () => {
     const res = await fn(dictForm.value)
     if (res.data?.code === 200) {
       dictDialogVisible.value = false
-      handleSearch()
-      // 清除相关缓存
+      handleSearch() // 重新加载列表
       dictStore.clearCache(dictForm.value.name)
     } else {
       alert(res.data?.message || '操作失败')
@@ -288,7 +332,7 @@ const handleDelete = async (id) => {
   try {
     const res = await deleteDict(id)
     if (res.data?.code === 200) {
-      handleSearch()
+      handleSearch() // 重新加载列表
     } else {
       alert(res.data?.message || '删除失败')
     }
@@ -308,7 +352,6 @@ const showAddDetailDialog = (dictId) => {
 
 /**
  * 显示编辑字典详情弹窗
- * 直接使用列表数据，避免API请求延迟
  */
 const showEditDetailDialog = (item) => {
   isEditDetail.value = true
@@ -333,7 +376,7 @@ const submitDetail = async () => {
     const res = await fn(detailForm.value)
     if (res.data?.code === 200) {
       detailDialogVisible.value = false
-      handleSearch()
+      handleSearch() // 重新加载列表
     } else {
       alert(res.data?.message || '操作失败')
     }
@@ -350,7 +393,7 @@ const handleDeleteDetail = async (id) => {
   try {
     const res = await deleteDictDetail(id)
     if (res.data?.code === 200) {
-      handleSearch()
+      handleSearch() // 重新加载列表
     } else {
       alert(res.data?.message || '删除失败')
     }
@@ -365,17 +408,16 @@ onMounted(() => {
 })
 </script>
 
-
 <style scoped>
-/* 滚动条样式 - 统一风格 */
+/* 滚动条样式 */
 .custom-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 6px;
+  height: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -383,11 +425,11 @@ onMounted(() => {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
+  background-color: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(0, 0, 0, 0.35);
+  background-color: rgba(0, 0, 0, 0.25);
 }
 </style>
