@@ -10,7 +10,7 @@
               v-for="column in columns"
               :key="column.key"
               :style="{ width: column.width }"
-              class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
               {{ column.title }}
             </th>
@@ -47,7 +47,7 @@
             <td
               v-for="column in columns"
               :key="column.key"
-              class="px-4 py-3 text-sm text-gray-900"
+              class="px-4 py-3 text-sm text-gray-900 text-center"
             >
               <slot :name="column.key" :row="row" :index="rowIndex">
                 {{ row[column.key] }}

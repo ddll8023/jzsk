@@ -15,3 +15,6 @@ export * from './dict'
 
 // 水雨情相关接口
 export * from './water'
+
+// 视频监控相关接口
+export * from './video'

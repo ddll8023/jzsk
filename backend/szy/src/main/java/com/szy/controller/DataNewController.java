@@ -290,14 +290,20 @@ public List<Map<String, Object>> getTimeAndTemperature(
             startTime == null ? "null" : startTime,
             endTime == null ? "null" : endTime);
     
-        // 1. 先查Redis
-        String json = stringRedisTemplate.opsForValue().get(redisKey);
-        if (json != null && !json.isEmpty()) {
-            try {
-                return objectMapper.readValue(json, new com.fasterxml.jackson.core.type.TypeReference<List<Map<String, Object>>>() {});
-            } catch (Exception e) {
-                stringRedisTemplate.delete(redisKey);
+        // 1. 先查Redis（Redis不可用时降级直接查数据库）
+        boolean redisAvailable = true;
+        try {
+            String json = stringRedisTemplate.opsForValue().get(redisKey);
+            if (json != null && !json.isEmpty()) {
+                try {
+                    return objectMapper.readValue(json, new com.fasterxml.jackson.core.type.TypeReference<List<Map<String, Object>>>() {});
+                } catch (Exception e) {
+                    stringRedisTemplate.delete(redisKey);
+                }
             }
+        } catch (Exception e) {
+            // Redis连接失败，标记不可用，继续查数据库
+            redisAvailable = false;
         }
     
         // 2. Redis没有，查数据库
@@ -345,9 +351,9 @@ public List<Map<String, Object>> getTimeAndTemperature(
             }
             result.add(map);
         }
-        // 3. 写入Redis缓存（只缓存有数据的情况）
+        // 3. 写入Redis缓存（只缓存有数据的情况，且Redis可用时）
         try {
-            if (!result.isEmpty()) {
+            if (!result.isEmpty() && redisAvailable) {
                 stringRedisTemplate.opsForValue().set(redisKey, objectMapper.writeValueAsString(result), 10, java.util.concurrent.TimeUnit.MINUTES);
             }
         } catch (Exception e) {

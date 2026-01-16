@@ -360,18 +360,22 @@ export default {
             return `${time}<br/>流量: ${val}`;
           }
         },
-        grid: { left: 40, right: 30, top: 40, bottom: 40 },
+        grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
         xAxis: {
           type: 'category',
+          show: true,
           data: timeAxis,
-          axisLabel: { rotate: 0, fontSize: 12 }
+          axisLabel: { rotate: 0, fontSize: 12, color: '#333' }, // 显式设置颜色，ECharts 4.x 兼容
+          axisLine: { show: true, lineStyle: { color: '#333' } }
         },
         yAxis: {
           type: 'value',
+          show: true,
           name: '流量(L/s)',
-          nameTextStyle: { fontSize: 14 },
-          axisLabel: { fontSize: 12 },
-          min: 0,
+          nameTextStyle: { fontSize: 14, color: '#333' },
+          axisLabel: { fontSize: 12, color: '#333' }, // 显式设置颜色，ECharts 4.x 兼容
+          axisLine: { show: true, lineStyle: { color: '#333' } },
+          min: 0
         },
         series: [{
           name: '流量',

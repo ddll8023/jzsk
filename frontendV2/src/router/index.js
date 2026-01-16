@@ -48,6 +48,38 @@ const routes = [
         name: 'RainfallQuery',
         component: () => import('@/views/hydrology/RainfallQuery.vue'),
         meta: { title: '降雨查询' }
+      },
+      {
+        path: 'hydrology/waterstorage',
+        name: 'WaterStorage',
+        component: () => import('@/views/hydrology/WaterStorage.vue'),
+        meta: { title: '水库水位查询' }
+      },
+      // 视频监控
+      {
+        path: 'video/monitor',
+        name: 'VideoMonitor',
+        component: () => import('@/views/video/VideoMonitor.vue'),
+        meta: { title: '视频实时监测' }
+      },
+      // 大坝安全监测
+      {
+        path: 'dam/seepage',
+        name: 'DamSeepage',
+        component: () => import('@/views/dam/Seepage.vue'),
+        meta: { title: '渗流压力监测' }
+      },
+      {
+        path: 'dam/seepage-flow',
+        name: 'SeepageFlowMonitor',
+        component: () => import('@/views/dam/SeepageFlowMonitor.vue'),
+        meta: { title: '渗流量监测分析' }
+      },
+      {
+        path: 'dam/surface-displacement',
+        name: 'SurfaceDisplacement',
+        component: () => import('@/views/dam/SurfaceDisplacement.vue'),
+        meta: { title: '地表位移监测' }
       }
       // 其他子路由按需添加
     ]

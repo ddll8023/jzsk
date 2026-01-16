@@ -30,7 +30,7 @@ export const staticMenuData = [
     subsystemid: 0,
     children: [
       { id: generateId(), name: '降雨查询', code: 'water_rain_rainfall', path: 'hydrology/rainfall', ordernum: 1, status: '启用', subsystemid: 101, children: [] },
-      { id: generateId(), name: '水库水位查询', code: 'water_rain_reservoir', path: '/water-rain/reservoir', ordernum: 2, status: '启用', subsystemid: 101, children: [] }
+      { id: generateId(), name: '水库水位查询', code: 'water_rain_reservoir', path: 'hydrology/waterstorage', ordernum: 2, status: '启用', subsystemid: 101, children: [] }
     ]
   },
   {
@@ -42,7 +42,9 @@ export const staticMenuData = [
     ordernum: 3,
     status: '启用',
     subsystemid: 0,
-    children: []
+    children: [
+      { id: generateId(), name: '视频实时监测', code: 'video_monitor', path: '/home/video/monitor', ordernum: 1, status: '启用', subsystemid: 103, children: [] }
+    ]
   },
   {
     id: generateId(),
@@ -54,9 +56,9 @@ export const staticMenuData = [
     status: '启用',
     subsystemid: 0,
     children: [
-      { id: generateId(), name: '渗流压力监测分析', code: 'dam_seepage_pressure', path: '/dam-safety/seepage-pressure', ordernum: 1, status: '启用', subsystemid: 104, children: [] },
-      { id: generateId(), name: '渗流量监测分析', code: 'dam_seepage_flow', path: '/dam-safety/seepage-flow', ordernum: 2, status: '启用', subsystemid: 104, children: [] },
-      { id: generateId(), name: '地表位移', code: 'dam_displacement', path: '/dam-safety/displacement', ordernum: 3, status: '启用', subsystemid: 104, children: [] }
+      { id: generateId(), name: '渗流压力监测分析', code: 'dam_seepage_pressure', path: '/home/dam/seepage', ordernum: 1, status: '启用', subsystemid: 104, children: [] },
+      { id: generateId(), name: '渗流量监测分析', code: 'dam_seepage_flow', path: '/home/dam/seepage-flow', ordernum: 2, status: '启用', subsystemid: 104, children: [] },
+      { id: generateId(), name: '地表位移', code: 'dam_displacement', path: '/home/dam/surface-displacement', ordernum: 3, status: '启用', subsystemid: 104, children: [] }
     ]
   },
   {

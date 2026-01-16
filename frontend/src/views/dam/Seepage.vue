@@ -574,10 +574,17 @@ export default {
       }
     },
     initChart() {
+      // 销毁旧实例
       if (this.chart) {
         this.chart.dispose();
+        this.chart = null;
       }
       const chartDom = document.getElementById('chart');
+      // DOM 不存在时延迟重试，确保首次访问时图表正确初始化
+      if (!chartDom) {
+        setTimeout(() => this.initChart(), 50);
+        return;
+      }
       this.chart = echarts.init(chartDom);
       this.updateChart();
     },
@@ -642,8 +649,53 @@ export default {
       if (!this.query.pointId || !this.chartData.length) {
         this.chart.setOption({
           title: { text: '请选择具体站点显示图表', left: 'center' },
+          grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+          },
           xAxis: { type: 'time' },
-          yAxis: { type: 'value' },
+          yAxis: { 
+            type: 'value',
+            name: '数值',
+            nameLocation: 'end',
+            nameGap: 15,
+            nameTextStyle: {
+              color: '#1E293B',
+              fontSize: 13,
+              fontWeight: 500
+            },
+            min: 0,
+            max: 100,
+            axisLine: {
+              show: true,
+              lineStyle: {
+                color: '#CBD5E1',
+                width: 1
+              }
+            },
+            axisTick: {
+              show: true,
+              length: 4,
+              lineStyle: {
+                color: '#CBD5E1'
+              }
+            },
+            axisLabel: {
+              margin: 10,
+              color: '#475569',
+              fontSize: 12
+            },
+            splitLine: {
+              show: true,
+              lineStyle: {
+                type: 'dashed',
+                color: '#E2E8F0',
+                opacity: 0.8
+              }
+            }
+          },
           series: [{ type: 'line', data: [] }]
         });
         return;
@@ -653,8 +705,38 @@ export default {
       const data = this.chartData.map(item => [this.parseBackendTime(item.time), Number(item.value)]).filter(p => !isNaN(p[0]) && !isNaN(p[1]));
       const values = data.map(item => item[1]).filter(v => !isNaN(v));
       if (!values.length) {
+        // 数据解析后为空，使用完整的 Y 轴配置
         this.chart.setOption({
-          yAxis: { min: 0, max: 100, interval: 20, name: config.yAxisName },
+          grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+          },
+          yAxis: { 
+            min: 0, 
+            max: 100, 
+            interval: 20, 
+            name: config.yAxisName,
+            axisLine: {
+              show: true,
+              lineStyle: { color: '#CBD5E1', width: 1 }
+            },
+            axisTick: {
+              show: true,
+              length: 4,
+              lineStyle: { color: '#CBD5E1' }
+            },
+            axisLabel: {
+              margin: 10,
+              color: '#475569',
+              fontSize: 12
+            },
+            splitLine: {
+              show: true,
+              lineStyle: { type: 'dashed', color: '#E2E8F0', opacity: 0.8 }
+            }
+          },
           series: [{ type: 'line', data: [] }]
         });
         return;
@@ -742,24 +824,51 @@ export default {
         yAxis: {
           type: 'value',
           name: config.yAxisName,
+          nameLocation: 'end',
+          nameGap: 15,
+          nameTextStyle: {
+            color: '#1E293B',
+            fontSize: 13,
+            fontWeight: 500,
+            padding: [0, 0, 0, 40]
+          },
           min: yMin,
           max: yMax,
           interval: interval,
           splitNumber: 10,
           minInterval: 0.01,
+          axisLine: {
+            show: true,
+            lineStyle: {
+              color: '#CBD5E1',
+              width: 1
+            }
+          },
+          axisTick: {
+            show: true,
+            length: 4,
+            lineStyle: {
+              color: '#CBD5E1'
+            }
+          },
           axisLabel: {
+            margin: 10,
+            color: '#475569',
+            fontSize: 12,
             formatter: function(value) {
               if (interval >= 1) {
-                return value.toFixed(0); // 显示整数
+                return value.toFixed(0);
               } else {
-                return value.toFixed(2); // 显示两位小数
+                return value.toFixed(2);
               }
             }
           },
           splitLine: {
             show: true,
             lineStyle: {
-              type: 'dashed'
+              type: 'dashed',
+              color: '#E2E8F0',
+              opacity: 0.8
             }
           }
         },
@@ -1713,11 +1822,13 @@ export default {
     if (q.pointId) {
       this.query.pointId = q.pointId;
     }
-    this.setQuickDateRange(this.query.dateRangeType);
-    this.fetchPoints().then(() => {
-      this.fetchData();
-      this.$nextTick(() => {
-        this.initChart();
+    // 先初始化图表，再加载数据，避免 updateChart 时 chart 实例为 null
+    this.$nextTick(() => {
+      this.initChart();
+      // 图表初始化后再设置时间范围并加载数据
+      this.setQuickDateRange(this.query.dateRangeType);
+      this.fetchPoints().then(() => {
+        this.fetchData();
       });
     });
     if (this.mainTab === 'phreatic') {
