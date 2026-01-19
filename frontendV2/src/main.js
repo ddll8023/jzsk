@@ -26,6 +26,9 @@ import './assets/css/main.css'
 // 7. FontAwesome 图标
 import '@fortawesome/fontawesome-free/css/all.min.css'
 
+// 8. OpenLayers 样式
+import 'ol/ol.css'
+
 /**
  * 智能配置 API 地址
  * 根据访问环境自动选择最佳 API 地址
@@ -55,21 +58,39 @@ const initApiConfig = async () => {
  * 异步初始化 API 配置后挂载应用
  */
 const bootstrap = async () => {
-  // 初始化 API 配置
-  await initApiConfig()
-  
-  // 创建 Vue 应用
-  const app = createApp(App)
-  
-  // 注册 Pinia
-  const pinia = createPinia()
-  app.use(pinia)
-  
-  // 注册路由
-  app.use(router)
-  
-  // 挂载应用
-  app.mount('#app')
+  try {
+    // 初始化 API 配置（关键：必须等待完成）
+    await initApiConfig()
+    console.log('✅ API配置初始化完成，开始挂载应用')
+    
+    // 创建 Vue 应用
+    const app = createApp(App)
+    
+    // 注册 Pinia
+    const pinia = createPinia()
+    app.use(pinia)
+    
+    // 注册路由
+    app.use(router)
+    
+    // 挂载应用
+    app.mount('#app')
+    console.log('✅ 应用挂载完成')
+  } catch (error) {
+    console.error('❌ 应用启动失败:', error)
+    // 显示错误提示
+    document.body.innerHTML = `
+      <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif;">
+        <div style="text-align: center;">
+          <h2 style="color: #e53e3e;">应用启动失败</h2>
+          <p style="color: #718096;">请检查网络连接或联系管理员</p>
+          <button onclick="location.reload()" style="margin-top: 20px; padding: 10px 20px; background: #3182ce; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            重新加载
+          </button>
+        </div>
+      </div>
+    `
+  }
 }
 
 // 启动应用

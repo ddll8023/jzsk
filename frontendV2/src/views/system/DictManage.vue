@@ -49,7 +49,17 @@
             </tr>
           </thead>
           <tbody>
+            <!-- 加载状态 -->
+            <tr v-if="loading">
+              <td colspan="4" class="px-4 py-8 text-center">
+                <i class="fa fa-spinner fa-spin text-primary-600 text-xl" aria-hidden="true"></i>
+                <p class="mt-2 text-slate-500">加载中...</p>
+              </td>
+            </tr>
+            
+            <!-- 数据行 -->
             <tr 
+              v-else
               v-for="row in displayDictList" 
               :key="row.rowKey" 
               class="hover:bg-slate-50 transition-colors duration-150"
@@ -103,10 +113,11 @@
                 </div>
               </td>
             </tr>
+            
             <!-- 空数据提示 -->
             <tr v-if="!loading && displayDictList.length === 0">
               <td colspan="4" class="px-4 py-12 text-center">
-                <i class="fa fa-inbox text-4xl text-slate-300 mb-3"></i>
+                <i class="fa fa-inbox text-4xl text-slate-300 mb-3" aria-hidden="true"></i>
                 <p class="text-slate-400">暂无数据</p>
               </td>
             </tr>

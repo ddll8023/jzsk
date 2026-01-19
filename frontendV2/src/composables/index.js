@@ -17,3 +17,11 @@ export {
   generateTimeAxis,
   mapDataToTimeAxis
 } from './useWater'
+export { usePrewarning } from './usePrewarning'
+export { useIndicator } from './useIndicator'
+export { useDutySchedule } from './useDutySchedule'
+export { useDutyLog } from './useDutyLog'
+
+// 工程巡检相关Composables
+export { useInspection } from './useInspection'
+export { useMaintenance } from './useMaintenance'

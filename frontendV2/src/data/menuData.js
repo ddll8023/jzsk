@@ -12,7 +12,7 @@ export const staticMenuData = [
     id: generateId(),
     name: '一张图',
     code: 'map',
-    path: '',
+    path: '/home/onemap',
     icon: 'fa fa-map',
     ordernum: 1,
     status: '启用',
@@ -71,8 +71,8 @@ export const staticMenuData = [
     status: '启用',
     subsystemid: 0,
     children: [
-      { id: generateId(), name: '闸门实时状态查询', code: 'gate_realtime', path: '/gate/realtime', ordernum: 1, status: '启用', subsystemid: 108, children: [] },
-      { id: generateId(), name: '闸门报表', code: 'gate_report', path: '/gate/report', ordernum: 2, status: '启用', subsystemid: 108, children: [] }
+      { id: generateId(), name: '闸门实时状态查询', code: 'gate_realtime', path: '/home/gate/status', ordernum: 1, status: '启用', subsystemid: 108, children: [] },
+      { id: generateId(), name: '闸门报表', code: 'gate_report', path: '/home/gate/report', ordernum: 2, status: '启用', subsystemid: 108, children: [] }
     ]
   },
   {
@@ -85,8 +85,8 @@ export const staticMenuData = [
     status: '启用',
     subsystemid: 0,
     children: [
-      { id: generateId(), name: '预警信息处理', code: 'warning_process', path: '/warning/process', ordernum: 1, status: '启用', subsystemid: 111, children: [] },
-      { id: generateId(), name: '预警指标设定', code: 'warning_config', path: '/warning/config', ordernum: 2, status: '启用', subsystemid: 111, children: [] }
+      { id: generateId(), name: '预警信息处理', code: 'warning_process', path: '/home/warning/information', ordernum: 1, status: '启用', subsystemid: 111, children: [] },
+      { id: generateId(), name: '预警指标设定', code: 'warning_config', path: '/home/warning/indicator', ordernum: 2, status: '启用', subsystemid: 111, children: [] }
     ]
   },
   {
@@ -99,8 +99,8 @@ export const staticMenuData = [
     status: '启用',
     subsystemid: 0,
     children: [
-      { id: generateId(), name: '值班安排', code: 'report_duty', path: '/report/duty', ordernum: 1, status: '启用', subsystemid: 114, children: [] },
-      { id: generateId(), name: '值班日志', code: 'report_log', path: '/report/log', ordernum: 2, status: '启用', subsystemid: 114, children: [] }
+      { id: generateId(), name: '值班安排', code: 'report_duty', path: '/home/report/duty-schedule', ordernum: 1, status: '启用', subsystemid: 114, children: [] },
+      { id: generateId(), name: '值班日志', code: 'report_log', path: '/home/report/duty-log', ordernum: 2, status: '启用', subsystemid: 114, children: [] }
     ]
   },
   {
@@ -113,8 +113,8 @@ export const staticMenuData = [
     status: '启用',
     subsystemid: 0,
     children: [
-      { id: generateId(), name: '巡检记录', code: 'inspection_patrol', path: '/inspection/patrol', ordernum: 1, status: '启用', subsystemid: 117, children: [] },
-      { id: generateId(), name: '维护记录', code: 'inspection_maintain', path: '/inspection/maintain', ordernum: 2, status: '启用', subsystemid: 117, children: [] }
+      { id: generateId(), name: '巡检记录', code: 'inspection_patrol', path: '/home/inspection/polling', ordernum: 1, status: '启用', subsystemid: 117, children: [] },
+      { id: generateId(), name: '维护记录', code: 'inspection_maintain', path: '/home/inspection/maintenance', ordernum: 2, status: '启用', subsystemid: 117, children: [] }
     ]
   },
   {
@@ -127,11 +127,11 @@ export const staticMenuData = [
     status: '启用',
     subsystemid: 0,
     children: [
-      { id: generateId(), name: '监测站点', code: 'basic_station', path: '/basic-info/station', ordernum: 1, status: '启用', subsystemid: 120, children: [] },
-      { id: generateId(), name: '测项信息', code: 'basic_measure', path: '/basic-info/measure', ordernum: 2, status: '启用', subsystemid: 120, children: [] },
-      { id: generateId(), name: '洪水防御预案', code: 'basic_flood_plan', path: '/basic-info/flood-plan', ordernum: 3, status: '启用', subsystemid: 120, children: [] },
-      { id: generateId(), name: '预警设施', code: 'basic_warning_facility', path: '/basic-info/warning-facility', ordernum: 4, status: '启用', subsystemid: 120, children: [] },
-      { id: generateId(), name: '库区基本情况', code: 'basic_reservoir', path: '/basic-info/reservoir', ordernum: 5, status: '启用', subsystemid: 120, children: [] }
+      { id: generateId(), name: '监测站点', code: 'basic_station', path: '/home/engineering/monitor-site', ordernum: 1, status: '启用', subsystemid: 120, children: [] },
+      { id: generateId(), name: '测项信息', code: 'basic_measure', path: '/home/engineering/monitor-item', ordernum: 2, status: '启用', subsystemid: 120, children: [] },
+      { id: generateId(), name: '洪水防御预案', code: 'basic_flood_plan', path: '/home/basic-info/flood-plan', ordernum: 3, status: '启用', subsystemid: 120, children: [] },
+      { id: generateId(), name: '预警设施', code: 'basic_warning_facility', path: '/home/basic-info/warning-facility', ordernum: 4, status: '启用', subsystemid: 120, children: [] },
+      { id: generateId(), name: '库区基本情况', code: 'basic_reservoir', path: '/home/basic-info/reservoir', ordernum: 5, status: '启用', subsystemid: 120, children: [] }
     ]
   },
   {
@@ -144,7 +144,7 @@ export const staticMenuData = [
     status: '启用',
     subsystemid: 0,
     children: [
-      { id: generateId(), name: '巡检app安装', code: 'download_app', path: '/download/app', ordernum: 1, status: '启用', subsystemid: 126, children: [] }
+      { id: generateId(), name: '巡检app安装', code: 'download_app', path: '/home/app-download', ordernum: 1, status: '启用', subsystemid: 126, children: [] }
     ]
   },
   {
@@ -157,11 +157,11 @@ export const staticMenuData = [
     status: '启用',
     subsystemid: 0,
     children: [
-      { id: generateId(), name: '角色管理', code: 'system_role', path: '/home/role', ordernum: 1, status: '启用', subsystemid: 128, children: [] },
-      { id: generateId(), name: '机构信息', code: 'system_org', path: '/home/org', ordernum: 2, status: '启用', subsystemid: 128, children: [] },
-      { id: generateId(), name: '用户管理', code: 'system_user', path: '/home/user', ordernum: 3, status: '启用', subsystemid: 128, children: [] },
-      { id: generateId(), name: '人员信息', code: 'system_person', path: '/home/person', ordernum: 4, status: '启用', subsystemid: 128, children: [] },
-      { id: generateId(), name: '部门管理', code: 'system_dept', path: '/hoem/dept', ordernum: 5, status: '启用', subsystemid: 128, children: [] },
+      { id: generateId(), name: '角色管理', code: 'system_role', path: '/home/rolemanage', ordernum: 1, status: '启用', subsystemid: 128, children: [] },
+      { id: generateId(), name: '机构信息', code: 'system_org', path: '/home/orgmanage', ordernum: 2, status: '启用', subsystemid: 128, children: [] },
+      { id: generateId(), name: '用户管理', code: 'system_user', path: '/home/usermanage', ordernum: 3, status: '启用', subsystemid: 128, children: [] },
+      { id: generateId(), name: '人员管理', code: 'system_person', path: '/home/personmanage', ordernum: 4, status: '启用', subsystemid: 128, children: [] },
+      { id: generateId(), name: '部门管理', code: 'system_dept', path: '/home/deptmanage', ordernum: 5, status: '启用', subsystemid: 128, children: [] },
       { id: generateId(), name: '字典管理', code: 'system_dict', path: '/home/dictmanage', ordernum: 6, status: '启用', subsystemid: 128, children: [] },
       { id: generateId(), name: '菜单管理', code: 'system_menu', path: '/home/menumanage', ordernum: 7, status: '启用', subsystemid: 128, children: [] }
     ]

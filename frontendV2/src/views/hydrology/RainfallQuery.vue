@@ -328,6 +328,21 @@ const renderChart = () => {
     chartInstance = echarts.init(chartRef.value)
   }
 
+  // 显示加载动画
+  if (loading.value) {
+    chartInstance.showLoading({
+      text: '加载中...',
+      color: '#3b82f6',
+      textColor: '#3b82f6',
+      maskColor: 'rgba(255, 255, 255, 0.9)',
+      zlevel: 0
+    })
+    return
+  }
+
+  // 隐藏加载动画
+  chartInstance.hideLoading()
+
   const data = filteredData.value
   if (!data.length) {
     chartInstance.clear()
@@ -462,6 +477,11 @@ onBeforeUnmount(() => {
     chartInstance.dispose()
     chartInstance = null
   }
+})
+
+// 监听 loading 状态变化
+watch(loading, () => {
+  renderChart()
 })
 
 // 监听图表类型变化

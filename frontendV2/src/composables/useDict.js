@@ -1,9 +1,9 @@
 /**
  * 字典 Composable
  * 功能：提供组件级别的字典数据访问
- * 遵循原则：KISS - 简洁易用的API
+ * 遵循原则：KISS - 简洁易用的API，直接返回数据
+ * 修改记录：简化getDictOptions返回值，从对象改为直接返回数组（符合YAGNI原则）
  */
-import { ref, computed, onMounted } from 'vue'
 import { useDictStore } from '@/stores/dict'
 
 /**
@@ -14,35 +14,20 @@ export function useDict() {
   const dictStore = useDictStore()
 
   /**
-   * 获取字典选项（响应式）
+   * 获取字典选项（简化版 - 直接返回数组）
    * @param {string} name - 字典名称
    * @param {string} type - 类型：'lvs'(扁平) | 'kinds'(树形)
-   * @returns {Object} { options, loading, refresh }
+   * @returns {Promise<Array>} 字典选项数组 [{ label, value }]
+   * 
+   * 设计原则：KISS - 简化API，直接返回数据而非包装对象
+   * 理由：当前业务场景未使用loading/refresh，遵循YAGNI原则
    */
-  const getDictOptions = (name, type = 'lvs') => {
-    const options = ref([])
-    const loading = ref(false)
-
-    // 加载字典数据
-    const load = async (forceRefresh = false) => {
-      loading.value = true
-      try {
-        options.value = await dictStore.fetchDict(name, forceRefresh, type)
-      } finally {
-        loading.value = false
-      }
-    }
-
-    // 刷新方法
-    const refresh = () => load(true)
-
-    // 初始加载
-    load()
-
-    return {
-      options,
-      loading,
-      refresh
+  const getDictOptions = async (name, type = 'lvs') => {
+    try {
+      return await dictStore.fetchDict(name, false, type)
+    } catch (error) {
+      console.error(`获取字典[${name}]失败:`, error)
+      return []
     }
   }
 

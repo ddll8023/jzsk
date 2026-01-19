@@ -4,6 +4,7 @@
  */
 import { ref, computed, reactive } from 'vue'
 import { getDisplacementHistory } from '@/api/dam'
+import { useToast } from '@/composables/useToast'
 
 /**
  * 站点配置（固定8个站点）
@@ -146,6 +147,8 @@ export function useSurfaceDisplacement() {
     if (!query.dateRange?.length) return
 
     loading.value = true
+    const { showToast } = useToast()
+    
     try {
       const params = {
         startTime: query.dateRange[0],
@@ -199,6 +202,12 @@ export function useSurfaceDisplacement() {
       calcStatsTable()
     } catch (err) {
       console.error('[fetchData] 获取位移数据失败:', err)
+      
+      // 400错误：监测设备已掉线，连接失败
+      if (err.response?.status === 400) {
+        showToast('监测设备已掉线，连接失败', 'error')
+      }
+      
       tableData.value = []
       chartData.value = []
       latestData.value = null

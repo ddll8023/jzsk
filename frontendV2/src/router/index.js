@@ -42,6 +42,36 @@ const routes = [
         component: () => import('@/views/system/MenuManage.vue'),
         meta: { title: '菜单管理' }
       },
+      {
+        path: 'usermanage',
+        name: 'UserManage',
+        component: () => import('@/views/system/UserManage.vue'),
+        meta: { title: '用户管理' }
+      },
+      {
+        path: 'personmanage',
+        name: 'PersonManage',
+        component: () => import('@/views/system/PersonManage.vue'),
+        meta: { title: '人员管理' }
+      },
+      {
+        path: 'deptmanage',
+        name: 'DeptManage',
+        component: () => import('@/views/system/DeptManage.vue'),
+        meta: { title: '部门管理' }
+      },
+      {
+        path: 'orgmanage',
+        name: 'OrgManage',
+        component: () => import('@/views/system/OrgManage.vue'),
+        meta: { title: '机构信息' }
+      },
+      {
+        path: 'rolemanage',
+        name: 'RoleManage',
+        component: () => import('@/views/system/RoleManage.vue'),
+        meta: { title: '角色管理' }
+      },
       // 水雨情管理
       {
         path: 'hydrology/rainfall',
@@ -80,6 +110,96 @@ const routes = [
         name: 'SurfaceDisplacement',
         component: () => import('@/views/dam/SurfaceDisplacement.vue'),
         meta: { title: '地表位移监测' }
+      },
+      // 闸门监控管理
+      {
+        path: 'gate/status',
+        name: 'GateStatus',
+        component: () => import('@/views/gate/GateStatus.vue'),
+        meta: { title: '闸门实时状态' }
+      },
+      {
+        path: 'gate/report',
+        name: 'GateReport',
+        component: () => import('@/views/gate/GateReport.vue'),
+        meta: { title: '闸门报表' }
+      },
+      // 预警管理
+      {
+        path: 'warning/information',
+        name: 'PrewarningInformation',
+        component: () => import('@/views/warning/PrewarningInformation.vue'),
+        meta: { title: '预警信息处理' }
+      },
+      {
+        path: 'warning/indicator',
+        name: 'PrewarningIndicatorSetting',
+        component: () => import('@/views/warning/PrewarningIndicatorSetting.vue'),
+        meta: { title: '预警指标设定' }
+      },
+      // 综合报表
+      {
+        path: 'report/duty-schedule',
+        name: 'DutySchedule',
+        component: () => import('@/views/report/DutySchedule.vue'),
+        meta: { title: '值班安排' }
+      },
+      {
+        path: 'report/duty-log',
+        name: 'DutyLog',
+        component: () => import('@/views/report/DutyLog.vue'),
+        meta: { title: '值班日志' }
+      },
+      // 工程巡检
+      {
+        path: 'inspection/polling',
+        name: 'PollingRecord',
+        component: () => import('@/views/inspection/PollingRecord.vue'),
+        meta: { title: '巡检记录' }
+      },
+      {
+        path: 'inspection/maintenance',
+        name: 'MaintenanceRecord',
+        component: () => import('@/views/inspection/MaintenanceRecord.vue'),
+        meta: { title: '维护记录' }
+      },
+      // 基础工情查询
+      {
+        path: 'engineering/monitor-site',
+        name: 'MonitorSite',
+        component: () => import('@/views/engineering/MonitorSite.vue'),
+        meta: { title: '监测站点管理' }
+      },
+      {
+        path: 'engineering/monitor-item',
+        name: 'MonitorItem',
+        component: () => import('@/views/engineering/MonitorItem.vue'),
+        meta: { title: '测项信息管理' }
+      },
+      {
+        path: 'basic-info/flood-plan',
+        name: 'FloodPlan',
+        component: () => import('@/views/basic-info/FloodPlan.vue'),
+        meta: { title: '洪水防御预案' }
+      },
+      {
+        path: 'basic-info/warning-facility',
+        name: 'WarningFacility',
+        component: () => import('@/views/basic-info/WarningFacility.vue'),
+        meta: { title: '预警设施' }
+      },
+      {
+        path: 'basic-info/reservoir',
+        name: 'Reservoir',
+        component: () => import('@/views/basic-info/Reservoir.vue'),
+        meta: { title: '库区基本情况' }
+      },
+      // 巡检APP下载
+      {
+        path: 'app-download',
+        name: 'AppDownload',
+        component: () => import('@/views/AppDownload.vue'),
+        meta: { title: '巡检APP下载' }
       }
       // 其他子路由按需添加
     ]

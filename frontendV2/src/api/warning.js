@@ -1,0 +1,139 @@
+/**
+ * 预警管理 API
+ * 功能：预警信息、预警指标相关接口
+ * 遵循原则：KISS - 简洁实现
+ */
+import request from '../utils/request'
+
+// ==================== 预警信息接口 ====================
+
+/**
+ * 获取预警信息列表
+ * @param {Object} params - 查询参数
+ * @param {number} params.currentPage - 当前页码
+ * @param {number} params.pageSize - 每页条数
+ * @param {string} params.position - 预警地点
+ * @param {string} params.status - 预警状态
+ * @param {string} params.level - 预警等级
+ * @param {string} params.type - 预警类型
+ * @param {string} params.startTime - 开始时间
+ * @param {string} params.endTime - 结束时间
+ * @returns {Promise}
+ */
+export function getWarningList(params) {
+  return request.get('/warning-information/list', { params })
+}
+
+/**
+ * 获取预警信息详情
+ * @param {number|string} id - 预警ID
+ * @returns {Promise}
+ */
+export function getWarningInfo(id) {
+  return request.get(`/warning-information/info/${id}`)
+}
+
+/**
+ * 更新预警信息（解除预警）
+ * @param {Object} data - 预警数据
+ * @returns {Promise}
+ */
+export function updateWarning(data) {
+  return request.post('/warning-information/update', data)
+}
+
+/**
+ * 删除预警信息
+ * @param {number|string} id - 预警ID
+ * @returns {Promise}
+ */
+export function deleteWarning(id) {
+  return request.post(`/warning-information/delete/${id}`)
+}
+
+/**
+ * 根据地点搜索预警信息
+ * @param {Object} params - 查询参数
+ * @returns {Promise}
+ */
+export function searchWarningByPosition(params) {
+  return request.get('/warning-information/position', { params })
+}
+
+// ==================== 预警指标接口 ====================
+
+/**
+ * 获取预警指标列表
+ * @param {Object} params - 查询参数
+ * @param {number} params.currentPage - 当前页码
+ * @param {number} params.pageSize - 每页条数
+ * @param {string} params.type - 监测项类型
+ * @returns {Promise}
+ */
+export function getIndicatorList(params) {
+  return request.get('/warning-indicator-setting/search-list', { params })
+}
+
+/**
+ * 根据测点名称搜索指标
+ * @param {Object} params - 查询参数
+ * @returns {Promise}
+ */
+export function searchIndicatorByPosition(params) {
+  return request.get('/warning-indicator-setting/search-position', { params })
+}
+
+/**
+ * 获取监测项类型列表
+ * @returns {Promise}
+ */
+export function getIndicatorTypes() {
+  return request.get('/warning-indicator-setting/types')
+}
+
+/**
+ * 获取指标详情
+ * @param {number|string} id - 指标ID
+ * @returns {Promise}
+ */
+export function getIndicatorInfo(id) {
+  return request.get(`/warning-indicator-setting/info/${id}`)
+}
+
+/**
+ * 新增预警指标
+ * @param {Object} data - 指标数据
+ * @returns {Promise}
+ */
+export function saveIndicator(data) {
+  return request.post('/warning-indicator-setting/save', data)
+}
+
+/**
+ * 更新预警指标
+ * @param {Object} data - 指标数据
+ * @returns {Promise}
+ */
+export function updateIndicator(data) {
+  return request.post('/warning-indicator-setting/update', data)
+}
+
+/**
+ * 删除预警指标
+ * @param {number|string} id - 指标ID
+ * @returns {Promise}
+ */
+export function deleteIndicator(id) {
+  return request.post(`/warning-indicator-setting/delete/${id}`)
+}
+
+// ==================== 字典接口 ====================
+
+/**
+ * 获取字典数据
+ * @param {string} name - 字典名称（预警状态/预警等级/预警类型/预警地点/监测项）
+ * @returns {Promise}
+ */
+export function getDictKinds(name) {
+  return request.get('/dict/kinds', { params: { name } })
+}

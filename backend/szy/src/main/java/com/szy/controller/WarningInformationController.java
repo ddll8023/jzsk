@@ -69,6 +69,7 @@ public class WarningInformationController extends BaseController {
 
     /**
      * 根据预警状态、等级和事件来查询预警列表
+     * 注意：此接口已在SecurityConfig白名单中，允许匿名访问
      *
      * @param status      预警状态
      * @param currentPage 当前页
@@ -79,7 +80,6 @@ public class WarningInformationController extends BaseController {
      * @param end         预警结束时间
      * @return 成功信息
      */
-    @PreAuthorize("hasAuthority('yjgl_yjxx')")
     @GetMapping("/list")
     public Result listByStatusLevelDate(
             @RequestParam("currentPage") Integer currentPage,

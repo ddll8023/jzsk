@@ -2,7 +2,7 @@
   <nav class="flex flex-col h-full bg-gradient-to-b from-[#2e323a] to-[#1a1c20] select-none text-slate-300">
     <!-- Logo 区域 -->
     <div class="flex items-center h-16 px-4 bg-white/5 border-b border-white/5 mb-4 shrink-0 transition-all duration-300 overflow-hidden">
-      <img src="@/assets/img/sea2.jpg" class="w-8 h-8 rounded-lg shadow-lg ring-1 ring-white/10" alt="Logo" />
+      <img src="../../../assets/img/网站左上角图标.jpg" class="w-8 h-8 rounded-lg shadow-lg ring-1 ring-white/10" alt="Logo" />
       <span v-if="!collapsed" class="ml-3 text-lg font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 truncate">智慧荆竹水库</span>
     </div>
 
@@ -14,8 +14,8 @@
             <div
               class="group flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-all duration-300"
               :class="[
-                isChildActive(menu.children) 
-                  ? 'text-white bg-slate-700/50 shadow-inner ring-1 ring-white/5' 
+                isChildActive(menu.children)
+                  ? 'text-white bg-slate-700/50 shadow-inner ring-1 ring-white/5'
                   : 'text-slate-300 hover:bg-white/5 hover:text-white'
               ]"
               @click="toggleExpand(menu.id || menu.path)"
@@ -28,16 +28,16 @@
                 </div>
                 <span v-if="!collapsed" class="ml-3 text-sm font-medium truncate">{{ menu.name }}</span>
               </div>
-              <i 
-                v-if="!collapsed" 
+              <i
+                v-if="!collapsed"
                 class="fa fa-chevron-right text-xs transition-transform duration-300 text-slate-500"
                 :class="{ 'rotate-90': isExpanded(menu) }"
                 aria-hidden="true"
               ></i>
             </div>
-            
+
             <!-- 子菜单列表 -->
-            <div 
+            <div
               v-show="!collapsed && isExpanded(menu)"
               class="mt-1 ml-1 pl-3 border-l border-white/10 space-y-1 overflow-hidden transition-all duration-300"
             >

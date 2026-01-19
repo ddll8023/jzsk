@@ -18,7 +18,7 @@ export default {
     },
     server: {
         host: '0.0.0.0', // 允许所有IP访问
-        port: 8084,
+        port: 8084, // 修改端口为8084
         cors: true, // 允许跨域
         proxy: {
             // 代理内网API请求

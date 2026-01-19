@@ -1,7 +1,7 @@
 /*
  Navicat Premium Dump SQL
 
- Source Server         : db
+ Source Server         : 1
  Source Server Type    : MySQL
  Source Server Version : 80042 (8.0.42)
  Source Host           : localhost:3306
@@ -11,7 +11,7 @@
  Target Server Version : 80042 (8.0.42)
  File Encoding         : 65001
 
- Date: 15/01/2026 11:47:42
+ Date: 18/01/2026 17:53:59
 */
 
 SET NAMES utf8mb4;
@@ -43,6 +43,66 @@ INSERT INTO `administration_division` VALUES (15, '鄂北水资源供水工程',
 INSERT INTO `administration_division` VALUES (19, '鄂北水资源供水工程', '河西镇', '132000', '希望村', '135000', 100, 1523, '2024-01-23 22:18:05', '2024-06-15 16:34:31');
 
 -- ----------------------------
+-- Table structure for annual_water_situation
+-- ----------------------------
+DROP TABLE IF EXISTS `annual_water_situation`;
+CREATE TABLE `annual_water_situation`  (
+  `record_id` int NOT NULL AUTO_INCREMENT,
+  `station_id` int NOT NULL,
+  `year` year NOT NULL,
+  `water_level` float NULL DEFAULT NULL,
+  `flow_rate` float NULL DEFAULT NULL,
+  `max_water_level` float NULL DEFAULT NULL,
+  `min_water_level` float NULL DEFAULT NULL,
+  `max_flow_rate` float NULL DEFAULT NULL,
+  `min_flow_rate` float NULL DEFAULT NULL,
+  `remarks` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL,
+  PRIMARY KEY (`record_id`) USING BTREE,
+  INDEX `station_id`(`station_id` ASC) USING BTREE,
+  CONSTRAINT `annual_water_situation_ibfk_1` FOREIGN KEY (`station_id`) REFERENCES `water_monitoring_stations` (`station_id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of annual_water_situation
+-- ----------------------------
+INSERT INTO `annual_water_situation` VALUES (1, 1, 2023, 10.5, 50.2, 11, 10, 55, 45, '正常年份，无异常事件');
+INSERT INTO `annual_water_situation` VALUES (2, 1, 2024, 10.7, 52, 11.5, 10.2, 58, 48, '降雨较多，水位上升');
+INSERT INTO `annual_water_situation` VALUES (3, 2, 2023, 11, 48.5, 11.5, 10.5, 52, 44, '干旱年份，水位较低');
+INSERT INTO `annual_water_situation` VALUES (4, 2, 2024, 11.2, 50, 11.7, 10.7, 53, 46, '正常年份，水位适中');
+INSERT INTO `annual_water_situation` VALUES (5, 3, 2023, 9.8, 45, 10.3, 9.5, 50, 40, '干旱年份，需注意水库蓄水');
+INSERT INTO `annual_water_situation` VALUES (6, 3, 2024, 10, 47, 10.5, 9.8, 52, 42, '水位恢复，水库蓄水充足');
+
+-- ----------------------------
+-- Table structure for daily_rainfall
+-- ----------------------------
+DROP TABLE IF EXISTS `daily_rainfall`;
+CREATE TABLE `daily_rainfall`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `station_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '测站名称',
+  `period_8_11` decimal(5, 2) NULL DEFAULT NULL COMMENT '8-11时降雨量(mm)',
+  `period_11_14` decimal(5, 2) NULL DEFAULT NULL COMMENT '11-14时降雨量(mm)',
+  `period_14_17` decimal(5, 2) NULL DEFAULT NULL COMMENT '14-17时降雨量(mm)',
+  `period_17_20` decimal(5, 2) NULL DEFAULT NULL COMMENT '17-20时降雨量(mm)',
+  `period_20_23` decimal(5, 2) NULL DEFAULT NULL COMMENT '20-23时降雨量(mm)',
+  `period_23_2` decimal(5, 2) NULL DEFAULT NULL COMMENT '23-2时降雨量(mm)',
+  `period_2_5` decimal(5, 2) NULL DEFAULT NULL COMMENT '2-5时降雨量(mm)',
+  `period_5_8` decimal(5, 2) NULL DEFAULT NULL COMMENT '5-8时降雨量(mm)',
+  `rainfall_date` date NULL DEFAULT NULL COMMENT '降雨日期',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '逐日降雨查询表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of daily_rainfall
+-- ----------------------------
+INSERT INTO `daily_rainfall` VALUES (1, '测试站1', 0.00, 2.00, NULL, NULL, NULL, NULL, NULL, NULL, '2025-05-20');
+INSERT INTO `daily_rainfall` VALUES (2, '测试站2', 10.00, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-05-20');
+INSERT INTO `daily_rainfall` VALUES (3, '测试站3', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2025-05-20');
+INSERT INTO `daily_rainfall` VALUES (4, '测试站4', 11.00, NULL, NULL, 2.00, NULL, NULL, NULL, NULL, '2025-05-20');
+INSERT INTO `daily_rainfall` VALUES (5, '测试站1', NULL, NULL, 3.00, NULL, NULL, 6.00, NULL, NULL, '2025-05-21');
+INSERT INTO `daily_rainfall` VALUES (6, '测试站1', NULL, 5.00, NULL, NULL, NULL, NULL, 8.00, NULL, '2025-05-22');
+INSERT INTO `daily_rainfall` VALUES (7, '测试站2', NULL, NULL, NULL, 4.00, 5.00, 6.00, NULL, NULL, '2025-05-22');
+
+-- ----------------------------
 -- Table structure for dict
 -- ----------------------------
 DROP TABLE IF EXISTS `dict`;
@@ -62,7 +122,7 @@ INSERT INTO `dict` VALUES (6, '摄像头类型', '实时监测_设备配置_摄�
 INSERT INTO `dict` VALUES (11, '摄像头地点', '实时监测_设备配置_摄像头地点', '2024-09-10 21:41:29', '2025-01-15 19:00:20');
 INSERT INTO `dict` VALUES (13, '工程站点', '一张图_工程站点', '2024-09-11 10:10:39', '2024-09-11 19:01:24');
 INSERT INTO `dict` VALUES (14, '水位监测点', '实时监测_水位监测_监测站点', '2024-09-11 10:47:29', '2024-12-23 16:09:04');
-INSERT INTO `dict` VALUES (15, '流量监测点', '实时监测_流量监测_监测站点', '2024-09-11 10:48:20', '2024-12-23 16:09:06');
+INSERT INTO `dict` VALUES (15, '雨量监测点', '实时监测_雨量监测_监测站点', '2024-09-11 10:48:20', '2025-06-18 16:18:39');
 INSERT INTO `dict` VALUES (17, '巡检站点', '工程巡检_巡检记录_巡检站点', '2024-09-11 11:03:46', '2024-09-11 19:02:25');
 INSERT INTO `dict` VALUES (18, '巡检类型', '工程巡检_巡检记录_巡检类型', '2024-09-10 15:28:18', '2024-09-11 19:02:45');
 INSERT INTO `dict` VALUES (19, '预警等级', '预警管理_预警信息_预警等级', '2024-09-09 09:51:50', '2024-09-11 19:13:43');
@@ -76,14 +136,10 @@ INSERT INTO `dict` VALUES (26, '性别', '管理信息服务_管理人员信息_
 INSERT INTO `dict` VALUES (28, '管道类型', '工程信息服务_管道_管道类型', '2024-09-26 20:55:02', '2024-09-26 20:55:02');
 INSERT INTO `dict` VALUES (30, '负责人', '工程巡检_巡检信息_负责人', '2024-11-18 19:12:24', '2024-11-18 19:12:24');
 INSERT INTO `dict` VALUES (31, '异常情况', '工程巡检_巡检信息_异常情况', '2024-11-18 20:57:29', '2024-11-18 20:57:29');
-INSERT INTO `dict` VALUES (32, '水质监测点', '实时监视_水质监测_监测站点', '2024-12-11 20:46:32', '2024-12-11 20:46:32');
-INSERT INTO `dict` VALUES (37, '图片监测点', '实时监测_图片监测_图片监测点', '2024-12-22 15:58:16', '2025-01-15 18:58:50');
 INSERT INTO `dict` VALUES (38, '预警地点', '一张图_预警地点', '2024-12-23 14:44:12', '2024-12-23 14:44:12');
 INSERT INTO `dict` VALUES (39, '摄像头次地点', '实时监测_设备配置_次地点', '2025-01-15 18:23:43', '2025-01-15 18:23:43');
 INSERT INTO `dict` VALUES (40, '视频监测点', '实时监测_视频监测_视频监测点', '2025-01-15 19:01:38', '2025-01-15 19:01:38');
-INSERT INTO `dict` VALUES (41, '水厂', '水厂', '2025-01-15 19:03:29', '2025-01-15 19:03:29');
 INSERT INTO `dict` VALUES (42, '管理站', '管理站', '2025-01-15 19:05:24', '2025-01-15 19:05:24');
-INSERT INTO `dict` VALUES (43, '竖井泵站', '竖井泵站', '2025-01-15 19:07:14', '2025-01-15 19:07:14');
 INSERT INTO `dict` VALUES (44, '处理类型', '工程巡检_巡检记录_巡检类型', '2025-02-22 15:27:52', '2025-02-22 15:27:52');
 
 -- ----------------------------
@@ -117,17 +173,16 @@ INSERT INTO `dict_detail` VALUES (28, 11, '加压泵站2', '加压泵站2', 2, '
 INSERT INTO `dict_detail` VALUES (29, 13, '两河口水库', '两河口水库', 1, '2024-09-11 10:12:07', '2024-09-11 10:12:07');
 INSERT INTO `dict_detail` VALUES (30, 13, '水厂', '水厂', 2, '2024-09-11 10:12:18', '2024-12-11 15:58:53');
 INSERT INTO `dict_detail` VALUES (31, 13, '加压泵站1', '加压泵站1', 8, '2024-09-11 10:12:54', '2024-12-23 15:28:04');
-INSERT INTO `dict_detail` VALUES (33, 13, '浮船', '浮船', 13, '2024-09-11 10:13:21', '2024-12-23 15:28:27');
 INSERT INTO `dict_detail` VALUES (35, 14, '两河口水库', '两河口水库', 1, '2024-09-11 10:47:43', '2024-09-11 10:47:43');
 INSERT INTO `dict_detail` VALUES (37, 15, '流量站1', '00000001', 1, '2024-09-11 10:48:51', '2024-12-20 16:03:38');
 INSERT INTO `dict_detail` VALUES (38, 15, '流量站2', '00000002', 2, '2024-09-11 10:49:06', '2024-12-20 16:03:43');
-INSERT INTO `dict_detail` VALUES (41, 17, '水厂', '水厂', 1, '2024-09-11 11:05:26', '2024-12-11 21:32:08');
-INSERT INTO `dict_detail` VALUES (42, 17, '浮船', '浮船', 2, '2024-09-11 11:05:35', '2024-12-11 21:32:02');
-INSERT INTO `dict_detail` VALUES (43, 17, '加压泵站1', '加压泵站1', 3, '2024-09-11 11:05:50', '2024-09-11 11:05:50');
-INSERT INTO `dict_detail` VALUES (44, 17, '加压泵站2', '加压泵站2', 4, '2024-09-11 11:06:01', '2024-09-11 11:06:01');
-INSERT INTO `dict_detail` VALUES (45, 17, '加压泵站3', '加压泵站3', 5, '2024-09-11 11:06:12', '2024-09-11 11:06:20');
-INSERT INTO `dict_detail` VALUES (46, 17, '加压泵站4', '加压泵站4', 6, '2024-09-11 11:06:34', '2024-09-11 11:06:34');
-INSERT INTO `dict_detail` VALUES (47, 17, '加压泵站5', '加压泵站5', 7, '2024-09-11 11:06:46', '2024-09-11 11:06:46');
+INSERT INTO `dict_detail` VALUES (41, 17, '测站1', '测站1', 1, '2024-09-11 11:05:26', '2024-12-11 21:32:08');
+INSERT INTO `dict_detail` VALUES (42, 17, '测站2', '测站2', 2, '2024-09-11 11:05:35', '2024-12-11 21:32:02');
+INSERT INTO `dict_detail` VALUES (43, 17, '测站3', '测站3', 3, '2024-09-11 11:05:50', '2024-09-11 11:05:50');
+INSERT INTO `dict_detail` VALUES (44, 17, '测站4', '测站4', 4, '2024-09-11 11:06:01', '2024-09-11 11:06:01');
+INSERT INTO `dict_detail` VALUES (45, 17, '测站5', '测站5', 5, '2024-09-11 11:06:12', '2024-09-11 11:06:20');
+INSERT INTO `dict_detail` VALUES (46, 17, '测站6', '测站6', 6, '2024-09-11 11:06:34', '2024-09-11 11:06:34');
+INSERT INTO `dict_detail` VALUES (47, 17, '测站7', '测站7', 7, '2024-09-11 11:06:46', '2024-09-11 11:06:46');
 INSERT INTO `dict_detail` VALUES (48, 20, '水位', '水位', 1, '2024-09-11 19:04:21', '2024-09-11 19:04:21');
 INSERT INTO `dict_detail` VALUES (49, 20, '流量', '流量', 2, '2024-09-11 19:04:32', '2024-09-11 19:04:32');
 INSERT INTO `dict_detail` VALUES (50, 20, '水质', '水质', 3, '2024-09-11 19:04:38', '2024-09-11 19:04:38');
@@ -165,11 +220,9 @@ INSERT INTO `dict_detail` VALUES (96, 31, '无异常', '无异常', 2, '2024-11-
 INSERT INTO `dict_detail` VALUES (97, 13, '加压泵站2', '加压泵站2', 9, '2024-12-11 15:57:02', '2024-12-23 15:28:07');
 INSERT INTO `dict_detail` VALUES (98, 13, '加压泵站3', '加压泵站3', 10, '2024-12-11 15:57:30', '2024-12-23 15:28:17');
 INSERT INTO `dict_detail` VALUES (99, 13, '加压泵站4', '加压泵站4', 11, '2024-12-11 15:57:57', '2024-12-23 15:28:19');
-INSERT INTO `dict_detail` VALUES (100, 13, '加压泵站5', '加压泵站5', 12, '2024-12-11 15:58:29', '2024-12-23 15:28:23');
 INSERT INTO `dict_detail` VALUES (101, 15, '流量站3', '00000003', 3, '2024-12-11 20:40:15', '2024-12-20 16:03:48');
 INSERT INTO `dict_detail` VALUES (102, 15, '流量站4', '00000004', 4, '2024-12-11 20:40:26', '2024-12-20 16:03:55');
 INSERT INTO `dict_detail` VALUES (103, 15, '流量站5', '00000005', 5, '2024-12-11 20:40:50', '2024-12-20 16:04:02');
-INSERT INTO `dict_detail` VALUES (120, 32, '水厂', '水厂', 1, '2024-12-11 20:46:55', '2024-12-11 20:46:55');
 INSERT INTO `dict_detail` VALUES (137, 23, '流量监测点5', '流量监测点5', 5, '2024-12-17 10:54:22', '2024-12-17 10:54:22');
 INSERT INTO `dict_detail` VALUES (138, 23, '加压视频1', '加压视频1', 6, '2024-12-17 10:54:52', '2024-12-17 10:54:52');
 INSERT INTO `dict_detail` VALUES (139, 23, '加压视频2', '加压视频2', 7, '2024-12-17 10:55:22', '2024-12-17 10:55:22');
@@ -189,16 +242,6 @@ INSERT INTO `dict_detail` VALUES (152, 11, '流量站2', '流量站2', 7, '2024-
 INSERT INTO `dict_detail` VALUES (153, 11, '流量站3', '流量站3', 8, '2024-12-20 14:52:31', '2024-12-20 14:52:31');
 INSERT INTO `dict_detail` VALUES (154, 11, '流量站4', '流量站4', 9, '2024-12-20 14:52:56', '2024-12-20 14:52:56');
 INSERT INTO `dict_detail` VALUES (155, 11, '流量站5', '流量站5', 10, '2024-12-20 14:53:17', '2024-12-20 14:53:17');
-INSERT INTO `dict_detail` VALUES (164, 37, '加压泵站1', '24043419', 1, '2024-12-22 15:58:55', '2024-12-22 15:58:55');
-INSERT INTO `dict_detail` VALUES (165, 37, '加压泵站2', '24043422', 2, '2024-12-22 15:59:07', '2024-12-22 15:59:07');
-INSERT INTO `dict_detail` VALUES (166, 37, '加压泵站3', '24043426', 3, '2024-12-22 15:59:19', '2024-12-22 15:59:19');
-INSERT INTO `dict_detail` VALUES (167, 37, '加压泵站4', '24043424', 4, '2024-12-22 15:59:30', '2024-12-22 16:00:35');
-INSERT INTO `dict_detail` VALUES (168, 37, '加压泵站5', '24043418', 5, '2024-12-22 15:59:47', '2024-12-22 15:59:47');
-INSERT INTO `dict_detail` VALUES (169, 37, '流量站1', '00000001', 6, '2024-12-22 16:00:02', '2024-12-22 16:00:02');
-INSERT INTO `dict_detail` VALUES (170, 37, '流量站2', '00000002', 7, '2024-12-22 16:00:16', '2024-12-22 16:00:16');
-INSERT INTO `dict_detail` VALUES (171, 37, '流量站3', '00000003', 8, '2024-12-22 16:00:57', '2024-12-22 16:00:57');
-INSERT INTO `dict_detail` VALUES (172, 37, '流量站4', '00000004', 9, '2024-12-22 16:01:07', '2024-12-22 16:01:07');
-INSERT INTO `dict_detail` VALUES (173, 37, '流量站5', '00000005', 10, '2024-12-22 16:01:19', '2024-12-22 16:01:19');
 INSERT INTO `dict_detail` VALUES (174, 38, '两河口水库', '两河口水库', 1, '2024-12-23 14:44:41', '2024-12-23 14:44:41');
 INSERT INTO `dict_detail` VALUES (175, 38, '水厂', '水厂', 2, '2024-12-23 14:44:49', '2024-12-23 14:44:49');
 INSERT INTO `dict_detail` VALUES (176, 38, '流量站1', '流量站1', 3, '2024-12-23 14:44:58', '2024-12-23 14:44:58');
@@ -227,23 +270,84 @@ INSERT INTO `dict_detail` VALUES (199, 39, '室外', '室外', 15, '2025-01-15 1
 INSERT INTO `dict_detail` VALUES (200, 40, '水厂', '水厂', 1, '2025-01-15 19:02:38', '2025-01-15 19:02:38');
 INSERT INTO `dict_detail` VALUES (201, 40, '管理站', '管理站', 2, '2025-01-15 19:02:48', '2025-01-15 19:02:48');
 INSERT INTO `dict_detail` VALUES (202, 40, '竖井泵站', '竖井泵站', 3, '2025-01-15 19:03:04', '2025-01-15 19:03:04');
-INSERT INTO `dict_detail` VALUES (203, 41, '泵房', '泵房', 1, '2025-01-15 19:04:09', '2025-01-15 19:04:09');
-INSERT INTO `dict_detail` VALUES (204, 41, '电气副厂房', '电气副厂房', 2, '2025-01-15 19:04:25', '2025-01-15 19:04:25');
-INSERT INTO `dict_detail` VALUES (205, 41, '水厂室内重要部位', '水厂室内重要部位', 3, '2025-01-15 19:04:46', '2025-01-15 19:05:34');
-INSERT INTO `dict_detail` VALUES (206, 41, '取水口', '取水口', 4, '2025-01-15 19:05:00', '2025-01-15 19:05:00');
-INSERT INTO `dict_detail` VALUES (207, 41, '厂区', '厂区', 5, '2025-01-15 19:05:08', '2025-01-15 19:05:08');
 INSERT INTO `dict_detail` VALUES (208, 42, '机房', '机房', 1, '2025-01-15 19:05:46', '2025-01-15 19:05:46');
 INSERT INTO `dict_detail` VALUES (209, 42, '中控室', '中控室', 2, '2025-01-15 19:05:57', '2025-01-15 19:05:57');
 INSERT INTO `dict_detail` VALUES (210, 42, '管理站室内重要部位', '管理站室内重要部位', 3, '2025-01-15 19:06:19', '2025-01-15 19:06:19');
 INSERT INTO `dict_detail` VALUES (211, 42, '室外', '室外', 4, '2025-01-15 19:06:39', '2025-01-15 19:06:39');
-INSERT INTO `dict_detail` VALUES (212, 43, '竖井泵站主机间', '竖井泵站主机间', 1, '2025-01-15 19:07:37', '2025-01-15 19:07:37');
-INSERT INTO `dict_detail` VALUES (213, 43, '竖井泵站电气副厂房', '竖井泵站电气副厂房', 2, '2025-01-15 19:08:04', '2025-01-15 19:08:04');
-INSERT INTO `dict_detail` VALUES (214, 43, '竖井泵站闸室', '竖井泵站闸室', 3, '2025-01-15 19:08:22', '2025-01-15 19:08:22');
-INSERT INTO `dict_detail` VALUES (215, 43, '竖井泵站水泵层', '竖井泵站水泵层', 4, '2025-01-15 19:08:39', '2025-01-15 19:08:39');
-INSERT INTO `dict_detail` VALUES (216, 43, '竖井泵站室外', '竖井泵站室外', 5, '2025-01-15 19:08:50', '2025-01-15 19:08:50');
-INSERT INTO `dict_detail` VALUES (217, 43, '管道末端出水口', '管道末端出水口', 6, '2025-01-15 19:09:07', '2025-01-15 19:09:07');
 INSERT INTO `dict_detail` VALUES (218, 44, '未处理', '未处理', 1, '2025-02-22 15:28:01', '2025-02-22 15:28:01');
 INSERT INTO `dict_detail` VALUES (219, 44, '已处理', '已处理', 2, '2025-02-22 15:28:07', '2025-02-22 15:28:07');
+
+-- ----------------------------
+-- Table structure for duty_log
+-- ----------------------------
+DROP TABLE IF EXISTS `duty_log`;
+CREATE TABLE `duty_log`  (
+  `值班日志ID` int NOT NULL AUTO_INCREMENT COMMENT '值班日志的唯一标识',
+  `值班日期` date NOT NULL COMMENT '值班的具体日期',
+  `天气` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '当天的天气情况',
+  `雨量` decimal(5, 2) NULL DEFAULT NULL COMMENT '当天的雨量，单位毫米',
+  `带班领导` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '带班领导的姓名或标识',
+  `白班值班人员` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '白班值班人员的姓名或标识',
+  `晚班值班人员` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '晚班值班人员的姓名或标识',
+  `日志内容` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL COMMENT '值班日志的具体内容',
+  `日志填写时间` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '日志填写的时间',
+  `日志状态` enum('已填写','未填写') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT '未填写' COMMENT '日志的填写状态',
+  PRIMARY KEY (`值班日志ID`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用于记录值班日志的表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of duty_log
+-- ----------------------------
+INSERT INTO `duty_log` VALUES (1, '2025-06-01', '晴', 0.00, '李四', '张三', '王五', '一切正常，无异常情况。', '2025-05-25 15:55:39', '已填写');
+INSERT INTO `duty_log` VALUES (2, '2025-06-02', '多云', 2.50, '周七', '李四', '赵六', '下午3点有短暂降雨，雨量2.5mm，其他正常。', '2025-05-25 15:55:39', '已填写');
+INSERT INTO `duty_log` VALUES (3, '2025-06-03', '小雨', 5.00, '吴八', '孙九', '郑十', '全天小雨，雨量5.0mm，水库水位正常。', '2025-05-25 15:55:39', '已填写');
+INSERT INTO `duty_log` VALUES (4, '2025-06-04', '阴', 0.00, '钱七', '周八', '吴九', '天气阴沉，无降雨，设备运行正常。', '2025-05-25 15:55:39', '已填写');
+
+-- ----------------------------
+-- Table structure for duty_schedule
+-- ----------------------------
+DROP TABLE IF EXISTS `duty_schedule`;
+CREATE TABLE `duty_schedule`  (
+  `值班安排ID` int NOT NULL AUTO_INCREMENT COMMENT '值班安排的唯一标识',
+  `值班人员` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '值班人员的姓名或标识',
+  `带班领导` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '带班领导的姓名或标识',
+  `值班时间` datetime NOT NULL COMMENT '值班的具体时间',
+  `值班岗位` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '值班人员所在的岗位',
+  `创建时间` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '值班安排的创建时间',
+  PRIMARY KEY (`值班安排ID`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '用于记录值班安排的表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of duty_schedule
+-- ----------------------------
+INSERT INTO `duty_schedule` VALUES (1, '张三', '李四', '2025-06-07 08:12:15', '监控室', '2025-05-25 15:55:20');
+INSERT INTO `duty_schedule` VALUES (2, '王五', '赵六', '2025-06-01 20:00:00', '大坝巡检', '2025-05-25 15:55:20');
+INSERT INTO `duty_schedule` VALUES (3, '李四', '周七', '2025-06-02 08:00:00', '水情室', '2025-05-25 15:55:20');
+INSERT INTO `duty_schedule` VALUES (4, '赵六', '吴八', '2025-06-14 11:32:48', '闸门室', '2025-05-25 15:55:20');
+
+-- ----------------------------
+-- Table structure for evacuation_sites
+-- ----------------------------
+DROP TABLE IF EXISTS `evacuation_sites`;
+CREATE TABLE `evacuation_sites`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `site_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `capacity` int NOT NULL,
+  `transfer_route` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `responsible_person` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `contact_phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `route_description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of evacuation_sites
+-- ----------------------------
+INSERT INTO `evacuation_sites` VALUES (1, '荆竹小学', 500, '荆竹村-小学', '张三', '12345678901', '从荆竹村直接前往小学', '2025-06-19 14:53:08', '2025-06-19 14:53:08');
+INSERT INTO `evacuation_sites` VALUES (2, '李家村委员会', 300, '李家村-村委会', '李四', '12345678902', '从李家村前往村委会，路径清晰', '2025-06-19 14:53:08', '2025-06-19 14:53:08');
+INSERT INTO `evacuation_sites` VALUES (3, '南河活动中心', 200, '南河村-活动中心', '王五', '12345678903', '沿南河村主路前往活动中心', '2025-06-19 14:53:08', '2025-06-19 14:53:08');
 
 -- ----------------------------
 -- Table structure for events
@@ -284,12 +388,40 @@ CREATE TABLE `floating_boat`  (
   `create_time` datetime NOT NULL COMMENT '创建时间',
   `update_time` datetime NOT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of floating_boat
 -- ----------------------------
 INSERT INTO `floating_boat` VALUES (1, '浮船', 113.5002150, 31.8835970, 200, 300, '运行中', '2024-08-15 10:54:36', '2024-12-14 10:21:42');
+
+-- ----------------------------
+-- Table structure for flood_control_equipment
+-- ----------------------------
+DROP TABLE IF EXISTS `flood_control_equipment`;
+CREATE TABLE `flood_control_equipment`  (
+  `equipment_id` int NOT NULL AUTO_INCREMENT COMMENT '设备唯一标识',
+  `equipment_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '设备名称',
+  `equipment_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '设备类型',
+  `installation_date` date NULL DEFAULT NULL COMMENT '安装日期',
+  `maintenance_date` date NULL DEFAULT NULL COMMENT '上次维护日期',
+  `next_maintenance_date` date NULL DEFAULT NULL COMMENT '下次维护日期',
+  `status` enum('正常','维修中','故障','报废') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT '正常' COMMENT '设备状态',
+  `location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '设备位置',
+  `operator` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '操作员',
+  `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+  `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '记录更新时间',
+  PRIMARY KEY (`equipment_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '防汛设备管理表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of flood_control_equipment
+-- ----------------------------
+INSERT INTO `flood_control_equipment` VALUES (1, '水泵A', '排水泵', '2022-03-15', '2024-06-01', '2024-12-01', '正常', '水库东侧', '张三', '2025-05-25 16:33:29', '2025-05-25 16:33:29');
+INSERT INTO `flood_control_equipment` VALUES (2, '发电机B', '应急发电', '2021-05-20', '2024-05-15', '2024-11-15', '正常', '管理房', '李四', '2025-05-25 16:33:29', '2025-05-25 16:33:29');
+INSERT INTO `flood_control_equipment` VALUES (3, '监测仪C', '水位监测', '2023-01-10', '2024-04-05', '2024-10-05', '维修中', '水库中央', '王五', '2025-05-25 16:33:29', '2025-05-25 16:33:29');
+INSERT INTO `flood_control_equipment` VALUES (4, '闸门控制D', '闸门操作', '2020-08-01', '2024-03-01', '2024-09-01', '故障', '水库闸口', '赵六', '2025-05-25 16:33:29', '2025-05-25 16:33:29');
+INSERT INTO `flood_control_equipment` VALUES (5, '备用电源E', '电源保障', '2022-11-11', '2024-07-11', '2025-01-11', '正常', '备用机房', '孙七', '2025-05-25 16:33:29', '2025-05-25 16:33:29');
 
 -- ----------------------------
 -- Table structure for flow
@@ -307,7 +439,7 @@ CREATE TABLE `flow`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `mpcd_tm`(`MP_CD` ASC, `TM` ASC) USING BTREE COMMENT '监测时间和站点编码唯一索引'
-) ENGINE = InnoDB AUTO_INCREMENT = 13289 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 35269 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of flow
@@ -689,8 +821,8 @@ INSERT INTO `flow` VALUES (784, '00000004', '2024-12-16 17:00:00', -0.064, NULL,
 INSERT INTO `flow` VALUES (790, '00000002', '2024-12-16 17:05:00', 0.000, NULL, NULL, NULL, '2024-12-16 17:06:43', '2024-12-16 17:06:43');
 INSERT INTO `flow` VALUES (791, '00000003', '2024-12-16 17:05:00', 0.000, NULL, NULL, NULL, '2024-12-16 17:06:43', '2024-12-16 17:06:43');
 INSERT INTO `flow` VALUES (792, '00000004', '2024-12-16 17:05:00', -0.064, NULL, NULL, NULL, '2024-12-16 17:06:43', '2024-12-16 17:06:43');
-INSERT INTO `flow` VALUES (798, '00000002', '2024-12-16 17:10:00', 0.000, 83.0, NULL, NULL, '2024-12-16 17:11:43', '2026-01-14 17:56:09');
-INSERT INTO `flow` VALUES (799, '00000003', '2024-12-16 17:10:00', 0.000, 123891.0, NULL, NULL, '2024-12-16 17:11:43', '2026-01-14 17:56:09');
+INSERT INTO `flow` VALUES (798, '00000002', '2024-12-16 17:10:00', 0.000, 83.0, NULL, NULL, '2024-12-16 17:11:43', '2026-01-18 17:49:43');
+INSERT INTO `flow` VALUES (799, '00000003', '2024-12-16 17:10:00', 0.000, 123891.0, NULL, NULL, '2024-12-16 17:11:43', '2026-01-18 17:49:43');
 INSERT INTO `flow` VALUES (800, '00000004', '2024-12-16 17:10:00', -0.065, NULL, NULL, NULL, '2024-12-16 17:11:43', '2024-12-16 17:11:43');
 INSERT INTO `flow` VALUES (806, '00000002', '2024-12-16 17:15:00', 0.000, NULL, NULL, NULL, '2024-12-16 17:18:53', '2024-12-16 17:18:53');
 INSERT INTO `flow` VALUES (807, '00000003', '2024-12-16 17:15:00', 0.000, NULL, NULL, NULL, '2024-12-16 17:18:53', '2024-12-16 17:18:53');
@@ -3414,9 +3546,131 @@ INSERT INTO `flow` VALUES (5900, '00000001', '2024-12-20 17:15:00', -0.065, NULL
 INSERT INTO `flow` VALUES (5904, '00000001', '2024-12-20 18:15:00', -0.065, NULL, NULL, NULL, '2024-12-21 12:24:43', '2024-12-21 12:24:43');
 INSERT INTO `flow` VALUES (5908, '00000001', '2024-12-20 19:15:00', -0.065, NULL, NULL, NULL, '2024-12-21 12:24:53', '2024-12-21 12:24:53');
 INSERT INTO `flow` VALUES (5920, '00000001', '2024-12-20 20:15:00', -0.065, NULL, NULL, NULL, '2024-12-21 12:36:09', '2024-12-21 12:36:09');
-INSERT INTO `flow` VALUES (5928, '00000001', '2024-12-20 21:15:00', 0.000, 0.0, NULL, NULL, '2024-12-21 12:38:40', '2026-01-14 17:56:09');
+INSERT INTO `flow` VALUES (5928, '00000001', '2024-12-20 21:15:00', 0.000, 0.0, NULL, NULL, '2024-12-21 12:38:40', '2026-01-18 17:49:43');
 INSERT INTO `flow` VALUES (13260, '00000004', '2025-02-27 18:35:00', 0.000, 115779.0, NULL, NULL, '2025-02-28 09:58:43', '2025-02-28 09:58:43');
-INSERT INTO `flow` VALUES (13272, '00000004', '2025-02-28 18:35:00', 0.000, 115779.0, NULL, NULL, '2025-02-28 10:13:43', '2026-01-14 17:56:10');
+INSERT INTO `flow` VALUES (13272, '00000004', '2025-02-28 18:35:00', 0.000, 115779.0, NULL, NULL, '2025-02-28 10:13:43', '2026-01-18 17:49:44');
+
+-- ----------------------------
+-- Table structure for gate_alert
+-- ----------------------------
+DROP TABLE IF EXISTS `gate_alert`;
+CREATE TABLE `gate_alert`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `gate_id` int NOT NULL COMMENT '闸门ID',
+  `alert_time` datetime NOT NULL COMMENT '报警时间',
+  `alert_reason` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '报警原因',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '闸门报警记录表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of gate_alert
+-- ----------------------------
+INSERT INTO `gate_alert` VALUES (1, 1, '2025-05-16 14:31:04', '流量过大');
+INSERT INTO `gate_alert` VALUES (2, 2, '2025-05-17 14:31:20', '闸门故障');
+
+-- ----------------------------
+-- Table structure for gate_control
+-- ----------------------------
+DROP TABLE IF EXISTS `gate_control`;
+CREATE TABLE `gate_control`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `gate_id` int NOT NULL COMMENT '闸门ID',
+  `target_position` decimal(5, 2) NOT NULL COMMENT '目标开度',
+  `operation_time` datetime NOT NULL COMMENT '操作时间',
+  `status` enum('success','failure') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '操作状态',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '闸门控制记录表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of gate_control
+-- ----------------------------
+INSERT INTO `gate_control` VALUES (5, 1, 60.00, '2025-05-15 10:00:00', 'success');
+INSERT INTO `gate_control` VALUES (6, 2, 10.00, '2025-05-15 11:00:00', 'failure');
+
+-- ----------------------------
+-- Table structure for gate_info
+-- ----------------------------
+DROP TABLE IF EXISTS `gate_info`;
+CREATE TABLE `gate_info`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '闸门名称',
+  `location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '位置',
+  `status` enum('open','close','error') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '状态',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '闸门基本信息表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of gate_info
+-- ----------------------------
+INSERT INTO `gate_info` VALUES (1, '闸门1', '位置1', 'open');
+INSERT INTO `gate_info` VALUES (2, '闸门2', '位置2', 'close');
+INSERT INTO `gate_info` VALUES (3, '闸门3', '位置3', 'open');
+INSERT INTO `gate_info` VALUES (4, '闸门4', '位置4', 'close');
+
+-- ----------------------------
+-- Table structure for gate_operation
+-- ----------------------------
+DROP TABLE IF EXISTS `gate_operation`;
+CREATE TABLE `gate_operation`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `gate_id` int NOT NULL COMMENT '闸门ID',
+  `operation_time` datetime NOT NULL COMMENT '操作时间',
+  `operation_type` enum('open','close') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '操作类型',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '闸门操作记录表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of gate_operation
+-- ----------------------------
+INSERT INTO `gate_operation` VALUES (1, 1, '2025-05-16 14:31:56', 'open');
+INSERT INTO `gate_operation` VALUES (2, 2, '2025-05-16 14:32:09', 'close');
+
+-- ----------------------------
+-- Table structure for gate_report
+-- ----------------------------
+DROP TABLE IF EXISTS `gate_report`;
+CREATE TABLE `gate_report`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `gate_id` int NOT NULL COMMENT '闸门ID',
+  `report_date` date NOT NULL COMMENT '报表日期',
+  `upstream_level` decimal(5, 2) NOT NULL COMMENT '闸前水位',
+  `downstream_level` decimal(5, 2) NOT NULL COMMENT '闸后水位',
+  `flow_rate` decimal(10, 2) NOT NULL COMMENT '流量',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '闸门报表表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of gate_report
+-- ----------------------------
+INSERT INTO `gate_report` VALUES (1, 1, '2025-05-15', 10.50, 5.50, 150.00, '2025-05-16 14:28:33');
+INSERT INTO `gate_report` VALUES (2, 2, '2025-05-15', 5.00, 0.00, 0.00, '2025-05-16 14:28:33');
+INSERT INTO `gate_report` VALUES (3, 3, '2025-05-02', 111.00, 22.00, 13.00, '2025-05-16 16:23:19');
+INSERT INTO `gate_report` VALUES (4, 1, '2025-05-01', 11.00, 22.00, 33.00, '2025-05-16 16:26:03');
+
+-- ----------------------------
+-- Table structure for gate_status
+-- ----------------------------
+DROP TABLE IF EXISTS `gate_status`;
+CREATE TABLE `gate_status`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `gate_id` int NOT NULL COMMENT '闸门ID',
+  `position` decimal(5, 2) NOT NULL COMMENT '闸门开度',
+  `upstream_level` decimal(5, 2) NOT NULL COMMENT '闸前水位',
+  `downstream_level` decimal(5, 2) NOT NULL COMMENT '闸后水位',
+  `flow_rate` decimal(10, 2) NOT NULL COMMENT '流量',
+  `machine_status` enum('running','stopped','error') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '启闭机状态',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '记录创建时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '闸门状态表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of gate_status
+-- ----------------------------
+INSERT INTO `gate_status` VALUES (1, 1, 50.00, 10.00, 5.00, 100.00, 'running', '2025-05-16 14:25:21');
+INSERT INTO `gate_status` VALUES (2, 2, 0.00, 5.00, 0.00, 0.00, 'stopped', '2025-05-16 14:25:21');
+INSERT INTO `gate_status` VALUES (3, 3, 50.00, 10.00, 5.00, 100.00, 'running', '2025-05-16 14:26:25');
+INSERT INTO `gate_status` VALUES (4, 4, 100.00, 5.00, 0.00, 0.00, 'stopped', '2025-05-16 14:26:25');
 
 -- ----------------------------
 -- Table structure for ground_source_water
@@ -3468,6 +3722,29 @@ CREATE TABLE `herb`  (
 -- ----------------------------
 INSERT INTO `herb` VALUES (1, '氮气', '干燥', '2024-08-13', '6个月', NULL, '2024-08-13 16:07:16', '2024-08-13 16:07:21');
 INSERT INTO `herb` VALUES (3, '氮气', '干燥', '2020-09-10', '12个月', '备注', '2024-08-13 23:02:29', '2024-08-13 23:02:29');
+
+-- ----------------------------
+-- Table structure for horizontal_displacement
+-- ----------------------------
+DROP TABLE IF EXISTS `horizontal_displacement`;
+CREATE TABLE `horizontal_displacement`  (
+  `record_id` int NOT NULL AUTO_INCREMENT,
+  `project_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `monitoring_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `x_axis_displacement` float NOT NULL,
+  `record_time` datetime NOT NULL,
+  `upload_time` datetime NOT NULL,
+  PRIMARY KEY (`record_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of horizontal_displacement
+-- ----------------------------
+INSERT INTO `horizontal_displacement` VALUES (1, '大坝1', '水平位移', -0.7, '2025-05-18 09:38:43', '2025-05-18 09:38:45');
+INSERT INTO `horizontal_displacement` VALUES (2, '大坝1', '水平位移', -0.8, '2025-05-18 11:33:44', '2025-05-18 11:33:46');
+INSERT INTO `horizontal_displacement` VALUES (3, '大坝1', '水平位移', 1.3, '2025-05-19 11:34:04', '2025-05-19 11:34:07');
+INSERT INTO `horizontal_displacement` VALUES (4, '大坝2', '水平位移', 2.3, '2025-05-18 14:53:35', '2025-05-18 14:53:36');
+INSERT INTO `horizontal_displacement` VALUES (5, '大坝2', '水平位移', 3.3, '2025-05-18 14:53:52', '2025-05-18 14:53:54');
 
 -- ----------------------------
 -- Table structure for icons
@@ -3606,31 +3883,47 @@ CREATE TABLE `inspection_records`  (
   `update_time` datetime NULL DEFAULT NULL,
   `point` point NULL COMMENT '地图位置',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 175 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 223 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of inspection_records
 -- ----------------------------
-INSERT INTO `inspection_records` VALUES (111, '加压泵站1', 113.3524270, 31.5628960, '日常巡检', '有异常', '设备有损坏11111111111111111111111111111111111111111', NULL, 'cb9e22cd129842b7a34cc3a4845f5390.png', '张三', '2024-07-29 21:57:20', '2024-07-29 21:57:23', '2024-08-05 13:59:07', ST_GeomFromText('POINT(113.352427 31.562896)'));
-INSERT INTO `inspection_records` VALUES (114, '加压泵站2', 131.3562000, 31.5625000, '日常巡检', '有异常', '设备有损坏', NULL, 'c632c76eb1124f83b56de75712aeedd4.png', '张三', '2024-07-30 15:39:43', '2024-07-30 15:39:44', '2024-07-30 16:02:31', ST_GeomFromText('POINT(131.3562 31.5625)'));
-INSERT INTO `inspection_records` VALUES (123, '加压泵站4', 114.6171040, 30.4575440, '日常巡检', '有异常', '设备有损坏', NULL, 'e86ae00e6eb640fa8c9f2f9e56e1def3.png;0c65bd6baa244fc7b14cbc5d8982d284.png', '张三', '2024-08-05 14:00:22', '2024-08-05 14:01:09', '2024-08-05 14:01:09', ST_GeomFromText('POINT(114.617104 30.457544)'));
-INSERT INTO `inspection_records` VALUES (146, '水厂', 114.4328100, 30.5122810, '日常巡检', '无异常', '', NULL, '61ae0dbe3b2f4a8b9bb815cb516816a9.png;1a99ffac36c64ee982c8578e0b486fed.png', '张三', '2024-11-18 14:47:38', '2024-11-18 14:47:38', '2024-12-11 21:32:36', ST_GeomFromText('POINT(114.43281 30.512281)'));
-INSERT INTO `inspection_records` VALUES (147, '浮船', 114.6189150, 30.4582800, '定期巡检', '有异常', '浮船的监控设备有些损坏，需要及时处理，如果不及时处理，可能会有进一步的损失,如果有一些问题的话，那么我们应该做一些进一步的修正', NULL, 'ce846e6cc1a34ad486b6b350ddb68ed1.png;2a5c9a048c914699a41e911137c0349c.png', '张三', '2024-11-18 15:42:35', '2024-11-18 15:42:35', '2024-12-12 09:16:39', ST_GeomFromText('POINT(114.618915 30.45828)'));
-INSERT INTO `inspection_records` VALUES (149, '浮船', 113.4965410, 31.8839410, '日常巡检', '无异常', '', NULL, '0be8e3874e594e52b0af74db8ba31d72.png', '张三', '2024-11-19 19:16:15', '2024-11-19 19:16:15', '2024-12-11 21:32:43', ST_GeomFromText('POINT(113.496541 31.883941)'));
-INSERT INTO `inspection_records` VALUES (150, '水厂', 113.4965410, 31.8839410, '日常巡检', '无异常', '', NULL, '09b6a628170546338d337e0737ef0d6a.png', '张三', '2024-11-19 19:18:07', '2024-11-19 19:18:07', '2024-12-11 21:32:32', ST_GeomFromText('POINT(113.496541 31.883941)'));
-INSERT INTO `inspection_records` VALUES (151, '水厂', 113.4965410, 31.8839410, '日常巡检', '有异常', '11111', NULL, '309dc9f960b440c1a60101c795e53641.png', '张三', '2024-11-19 19:38:06', '2024-11-19 19:38:06', '2024-12-11 21:32:29', ST_GeomFromText('POINT(113.496541 31.883941)'));
-INSERT INTO `inspection_records` VALUES (155, '加压泵站1', 116.4103440, 39.9162960, '定期巡检', '有异常', '加压泵站1的摄像头有些损坏', NULL, '', '张三', '2024-11-20 16:25:07', '2024-11-20 16:25:07', '2024-11-20 16:25:07', ST_GeomFromText('POINT(116.410344 39.916296)'));
-INSERT INTO `inspection_records` VALUES (157, '水厂', 114.6186446, 30.4599701, '定期巡检', '有异常', '无', '已处理', '1840d0080ee245d3936460d844d2cd1f.jpg', '张三', '2024-11-20 16:36:23', '2024-11-20 16:36:23', '2025-02-22 16:12:49', ST_GeomFromText('POINT(114.6186446 30.4599701)'));
-INSERT INTO `inspection_records` VALUES (165, '水厂', 113.4965410, 31.8839410, '日常巡检', '无异常', '', '已处理', 'd459a395ae1d496fae5a75cd78ee1b27.png', '张三', '2025-02-22 15:36:29', '2025-02-22 15:36:29', '2025-02-22 16:38:50', ST_GeomFromText('POINT(113.496541 31.883941)'));
-INSERT INTO `inspection_records` VALUES (166, '水厂', 113.4965410, 31.8839410, '定期巡检', '有异常', '11111', '已处理', '532e2d76e85242588be4f0a7b4a8ba47.png', '张三', '2025-02-22 15:39:27', '2025-02-22 15:39:27', '2025-02-22 16:38:47', ST_GeomFromText('POINT(113.496541 31.883941)'));
-INSERT INTO `inspection_records` VALUES (167, '浮船', 113.4965410, 31.8839410, '日常巡检', '无异常', '', '已处理', '532e2d76e85242588be4f0a7b4a8ba47.png', '张三', '2025-02-22 15:40:08', '2025-02-22 15:40:08', '2025-02-22 16:10:09', ST_GeomFromText('POINT(113.496541 31.883941)'));
-INSERT INTO `inspection_records` VALUES (168, '加压泵站1', 113.4965410, 31.8839410, '日常巡检', '有异常', '2222', '已处理', 'b84aa265630c409582910bca35468c19.png', '张三', '2025-02-22 16:15:23', '2025-02-22 16:15:23', '2025-02-22 16:23:03', ST_GeomFromText('POINT(113.496541 31.883941)'));
-INSERT INTO `inspection_records` VALUES (169, '浮船', 114.6187420, 30.4601730, '定期巡检', '有异常', '22222', '已处理', 'c4ed636b8aa04488ad606dd98046a13b.png', '张三', '2025-02-23 12:25:47', '2025-02-23 12:25:47', '2025-02-23 12:26:01', ST_GeomFromText('POINT(114.618742 30.460173)'));
-INSERT INTO `inspection_records` VALUES (170, '加压泵站1', 114.6187420, 30.4601730, '日常巡检', '有异常', '加压泵站有异常', '已处理', '14e7af5041774b8cb4d4668cf202db1e.webp;d160d397c4ad46ac95271f2ad25aef7b.webp', '张三', '2025-02-23 12:26:58', '2025-02-23 12:26:58', '2025-02-23 12:31:10', ST_GeomFromText('POINT(114.618742 30.460173)'));
-INSERT INTO `inspection_records` VALUES (171, '水厂', 114.6187420, 30.4601730, '日常巡检', '无异常', '', '已处理', '', '张三', '2025-02-23 12:28:12', '2025-02-23 12:28:12', '2025-02-23 12:31:03', ST_GeomFromText('POINT(114.618742 30.460173)'));
-INSERT INTO `inspection_records` VALUES (172, '水厂', 114.6187420, 30.4601730, '日常巡检', '无异常', '一切正常', '已处理', '', '张三', '2025-02-23 12:29:47', '2025-02-23 12:29:47', '2025-02-23 12:29:47', ST_GeomFromText('POINT(114.618742 30.460173)'));
-INSERT INTO `inspection_records` VALUES (173, '水厂', 114.6187420, 30.4601730, '日常巡检', '无异常', '一切正常', '已处理', '550437efd7ff495297250a0658acd82d.webp', '张三', '2025-02-23 12:32:23', '2025-02-23 12:32:23', '2025-02-23 12:32:23', ST_GeomFromText('POINT(114.618742 30.460173)'));
-INSERT INTO `inspection_records` VALUES (174, '浮船', 114.6187450, 30.4601730, '定期巡检', '有异常', '22222', '已处理', '15bcee5c8d4a491d8fcc1c017b19e737.webp', '张三', '2025-02-23 12:32:57', '2025-02-23 12:32:57', '2025-02-23 12:33:05', ST_GeomFromText('POINT(114.618745 30.460173)'));
+INSERT INTO `inspection_records` VALUES (179, '测站3', 114.6186324, 30.4627869, '定期巡检', '有异常', '1111111111111111111', '已处理', NULL, '张三', '2025-06-13 01:38:50', '2025-06-13 01:38:50', '2025-06-17 21:55:40', ST_GeomFromText('POINT(114.6186324 30.4627869)'));
+INSERT INTO `inspection_records` VALUES (180, '测站1', 114.6186650, 30.4602310, '日常巡检', '无异常', '一切正常', '已处理', NULL, '张三', '2025-06-15 01:33:02', '2025-06-15 01:33:02', '2025-06-15 01:33:02', ST_GeomFromText('POINT(114.618665 30.460231)'));
+INSERT INTO `inspection_records` VALUES (181, '测站3', 114.6186990, 30.4599120, '日常巡检', '无异常', '一切正常', '已处理', NULL, '张三', '2025-06-15 01:49:25', '2025-06-15 01:49:25', '2025-06-15 01:49:25', ST_GeomFromText('POINT(114.618699 30.459912)'));
+INSERT INTO `inspection_records` VALUES (182, '测站1', 114.5018990, 30.4921910, '日常巡检', '无异常', '一切正常', '已处理', NULL, '张三', '2025-06-19 16:16:54', '2025-06-19 16:16:54', '2025-06-19 16:16:54', ST_GeomFromText('POINT(114.501899 30.492191)'));
+INSERT INTO `inspection_records` VALUES (183, '测站1', 0.0000000, 0.0000000, '日常巡检', '无异常', '一切正常', '已处理', NULL, '张三', '2025-06-20 18:21:49', '2025-06-20 18:21:49', '2025-06-20 18:21:49', ST_GeomFromText('POINT(0 0)'));
+INSERT INTO `inspection_records` VALUES (184, '测站2', 0.0000000, 0.0000000, '日常巡检', '有异常', '太阳能电池被树叶遮挡', '已处理', NULL, '张三', '2025-06-21 21:55:56', '2025-06-21 21:55:56', '2025-06-21 22:04:58', ST_GeomFromText('POINT(0 0)'));
+INSERT INTO `inspection_records` VALUES (185, '测站4', 0.0000000, 0.0000000, '定期巡检', '无异常', '一切正常', '已处理', NULL, '测试2', '2025-06-21 21:57:47', '2025-06-21 21:57:47', '2025-06-21 21:57:47', ST_GeomFromText('POINT(0 0)'));
+INSERT INTO `inspection_records` VALUES (188, '测站1', 114.6189820, 30.4621290, '日常巡检', '无异常', '一切正常', '已处理', NULL, '张三', '2025-06-22 01:20:56', '2025-06-22 01:20:56', '2025-06-22 01:20:56', ST_GeomFromText('POINT(114.618982 30.462129)'));
+INSERT INTO `inspection_records` VALUES (189, '测站7', 0.0000000, 0.0000000, '日常巡检', '无异常', '一切正常', '已处理', NULL, '测试2', '2025-06-23 19:54:01', '2025-06-23 19:54:01', '2025-06-23 19:54:01', ST_GeomFromText('POINT(0 0)'));
+INSERT INTO `inspection_records` VALUES (190, '测站3', 0.0000000, 0.0000000, '定期巡检', '有异常', '设备掉电', '已处理', NULL, '测试1', '2025-06-23 20:02:36', '2025-06-23 20:02:36', '2025-06-23 20:03:28', ST_GeomFromText('POINT(0 0)'));
+INSERT INTO `inspection_records` VALUES (191, '测站6', 113.4965410, 31.8839410, '日常巡检', '有异常', '通信电缆断路', '已处理', NULL, '测试1', '2025-06-23 20:06:48', '2025-06-23 20:06:48', '2025-06-24 10:45:51', ST_GeomFromText('POINT(113.496541 31.883941)'));
+INSERT INTO `inspection_records` VALUES (192, '测站1', 0.0000000, 0.0000000, '日常巡检', '无异常', '一切正常', '已处理', NULL, '测试2', '2025-06-24 15:38:01', '2025-06-24 15:38:01', '2025-06-24 15:38:01', ST_GeomFromText('POINT(0 0)'));
+INSERT INTO `inspection_records` VALUES (194, '测站2', 0.0000000, 0.0000000, '日常巡检', '有异常', '设备损坏', '未处理', NULL, '测试1', '2025-06-25 19:45:49', '2025-06-25 19:45:49', '2025-06-25 19:45:49', ST_GeomFromText('POINT(0 0)'));
+INSERT INTO `inspection_records` VALUES (195, '测站1', 114.6187260, 30.4600620, '日常巡检', '无异常', '一切正常', '已处理', NULL, '张三', '2025-06-25 20:44:36', '2025-06-25 20:44:36', '2025-06-25 20:44:36', ST_GeomFromText('POINT(114.618726 30.460062)'));
+INSERT INTO `inspection_records` VALUES (196, '测站1', 116.4062428, 39.9014035, '日常巡检', '无异常', '一切正常', '已处理', NULL, '张三', '2025-06-25 21:17:15', '2025-06-25 21:17:15', '2025-06-25 21:17:15', ST_GeomFromText('POINT(116.4062428 39.9014035)'));
+INSERT INTO `inspection_records` VALUES (197, '测站1', 116.4062428, 39.9014035, '日常巡检', '无异常', '一切正常', '已处理', NULL, '张三', '2025-06-25 21:18:46', '2025-06-25 21:18:46', '2025-06-25 21:18:46', ST_GeomFromText('POINT(116.4062428 39.9014035)'));
+INSERT INTO `inspection_records` VALUES (200, '测站1', 114.6187260, 30.4600620, '日常巡检', '无异常', '一切正常', '已处理', NULL, '张三', '2025-06-25 22:06:01', '2025-06-25 22:06:01', '2025-06-25 22:06:01', ST_GeomFromText('POINT(114.618726 30.460062)'));
+INSERT INTO `inspection_records` VALUES (201, '测站1', 114.6187120, 30.4599500, '日常巡检', '无异常', '一切正常', '已处理', NULL, '张三', '2025-06-25 22:06:49', '2025-06-25 22:06:49', '2025-06-25 22:06:49', ST_GeomFromText('POINT(114.618712 30.45995)'));
+INSERT INTO `inspection_records` VALUES (202, '测站1', 114.6187260, 30.4600620, '日常巡检', '无异常', '一切正常', '已处理', NULL, '张三', '2025-06-25 22:10:30', '2025-06-25 22:10:30', '2025-06-25 22:10:30', ST_GeomFromText('POINT(114.618726 30.460062)'));
+INSERT INTO `inspection_records` VALUES (204, '测站1', 116.4062428, 39.9014035, '日常巡检', '无异常', '一切正常', '已处理', NULL, '张三', '2025-06-25 22:19:28', '2025-06-25 22:19:28', '2025-06-25 22:19:28', ST_GeomFromText('POINT(116.4062428 39.9014035)'));
+INSERT INTO `inspection_records` VALUES (205, '测站1', 116.4062428, 39.9014035, '日常巡检', '无异常', '一切正常', '已处理', NULL, '张三', '2025-06-25 22:35:38', '2025-06-25 22:35:38', '2025-06-25 22:35:38', ST_GeomFromText('POINT(116.4062428 39.9014035)'));
+INSERT INTO `inspection_records` VALUES (206, '测站1', 116.4062428, 39.9014035, '日常巡检', '无异常', '一切正常', '已处理', NULL, '张三', '2025-06-25 22:39:40', '2025-06-25 22:39:40', '2025-06-25 22:39:40', ST_GeomFromText('POINT(116.4062428 39.9014035)'));
+INSERT INTO `inspection_records` VALUES (207, '测站1', 116.4062428, 39.9014035, '日常巡检', '无异常', '一切正常', '已处理', NULL, '张三', '2025-06-25 23:01:53', '2025-06-25 23:01:53', '2025-06-25 23:01:53', ST_GeomFromText('POINT(116.4062428 39.9014035)'));
+INSERT INTO `inspection_records` VALUES (208, '测站1', 116.4062428, 39.9014035, '日常巡检', '无异常', '一切正常', '已处理', NULL, '张三', '2025-06-25 23:23:59', '2025-06-25 23:23:59', '2025-06-25 23:23:59', ST_GeomFromText('POINT(116.4062428 39.9014035)'));
+INSERT INTO `inspection_records` VALUES (209, '测站1', 116.4062428, 39.9014035, '日常巡检', '无异常', '一切正常', '已处理', NULL, '张三', '2025-06-25 23:25:01', '2025-06-25 23:25:01', '2025-06-25 23:25:01', ST_GeomFromText('POINT(116.4062428 39.9014035)'));
+INSERT INTO `inspection_records` VALUES (210, '测站1', 116.4062428, 39.9014035, '日常巡检', '无异常', '一切正常', '已处理', NULL, '张三', '2025-06-25 23:27:04', '2025-06-25 23:27:04', '2025-06-25 23:27:04', ST_GeomFromText('POINT(116.4062428 39.9014035)'));
+INSERT INTO `inspection_records` VALUES (211, '测站1', 116.4062428, 39.9014035, '日常巡检', '无异常', '一切正常', '已处理', NULL, '张三', '2025-06-26 00:14:25', '2025-06-26 00:14:25', '2025-06-26 00:14:25', ST_GeomFromText('POINT(116.4062428 39.9014035)'));
+INSERT INTO `inspection_records` VALUES (213, '测站3', 0.0000000, 0.0000000, '定期巡检', '有异常', '网络问题', '已处理', NULL, '张三', '2025-06-26 06:48:41', '2025-06-26 06:48:41', '2025-06-26 15:08:32', ST_GeomFromText('POINT(0 0)'));
+INSERT INTO `inspection_records` VALUES (214, '测站2', 0.0000000, 0.0000000, '日常巡检', '无异常', '一切正常', '已处理', NULL, '张三', '2025-06-26 06:54:21', '2025-06-26 06:54:21', '2025-06-26 06:54:21', ST_GeomFromText('POINT(0 0)'));
+INSERT INTO `inspection_records` VALUES (216, '测站1', 114.5019040, 30.4922130, '日常巡检', '无异常', '一切正常', '已处理', '0c02d0c7d6d44a2ca4c6eb9fd85a859c.jpg', '张三', '2025-06-26 09:41:41', '2025-06-26 09:41:41', '2025-06-26 09:41:41', ST_GeomFromText('POINT(114.501904 30.492213)'));
+INSERT INTO `inspection_records` VALUES (217, '测站7', 114.5018650, 30.4922080, '日常巡检', '无异常', '一切正常', '已处理', '6865fe60fad3401ea2faf28bf0c26213.jpg', '张三', '2025-06-26 10:10:26', '2025-06-26 10:10:26', '2025-06-26 10:10:26', ST_GeomFromText('POINT(114.501865 30.492208)'));
+INSERT INTO `inspection_records` VALUES (218, '测站1', 114.5018540, 30.4922030, '日常巡检', '无异常', '一切正常', '已处理', '52ed4a676d4347e6a49124bd86bd2352.jpg', '张三', '2025-06-26 11:29:54', '2025-06-26 11:29:54', '2025-06-26 11:29:54', ST_GeomFromText('POINT(114.501854 30.492203)'));
+INSERT INTO `inspection_records` VALUES (219, '测站1', 114.6186870, 30.4599130, '日常巡检', '无异常', '一切正常', '已处理', '516ab07a5483479091e7afce004d529d.jpg', '张三', '2025-06-26 16:28:11', '2025-06-26 16:28:11', '2025-06-26 16:28:11', ST_GeomFromText('POINT(114.618687 30.459913)'));
+INSERT INTO `inspection_records` VALUES (220, '测站4', 114.5019020, 30.4922060, '日常巡检', '无异常', '一切正常', '已处理', 'f482e328425b41b1b6876452cd3094df.jpg', '张三', '2025-06-27 11:09:48', '2025-06-27 11:09:48', '2025-06-27 11:09:48', ST_GeomFromText('POINT(114.501902 30.492206)'));
+INSERT INTO `inspection_records` VALUES (221, '测站1', 115.6991400, 30.1289630, '日常巡检', '有异常', '111', '已处理', 'b2776f09d1e2401eaad9581737f28134.jpg', '张三', '2025-07-03 10:50:28', '2025-07-03 10:50:28', '2025-07-03 10:50:51', ST_GeomFromText('POINT(115.69914 30.128963)'));
+INSERT INTO `inspection_records` VALUES (222, '测站5', 114.5020160, 30.4921340, '日常巡检', '有异常', '11111', '已处理', '579c9d69a57f4ca5983b994e92dbcfad.jpg', '张三', '2025-09-25 12:17:40', '2025-09-25 12:17:40', '2025-09-25 14:34:07', ST_GeomFromText('POINT(114.502016 30.492134)'));
 
 -- ----------------------------
 -- Table structure for line
@@ -3645,7 +3938,7 @@ CREATE TABLE `line`  (
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 31 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 30 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of line
@@ -3690,12 +3983,13 @@ CREATE TABLE `maintence_record`  (
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of maintence_record
 -- ----------------------------
-INSERT INTO `maintence_record` VALUES (1, '鄂北水资源供水工程', '123545689', '对水厂的水质监测传感器进行维护', '李四', '13545687895', '2024-06-05 05:07:59', NULL, '2024-06-20 21:17:52', '2024-07-10 22:05:18');
+INSERT INTO `maintence_record` VALUES (1, '荆竹水库水位监测子系统', '123545689', '对水位监测传感器进行维护', '李四', '13545687895', '2025-06-05 05:07:59', '2025-06-06 00:00:00', '2024-06-20 21:17:52', '2025-06-23 15:12:11');
+INSERT INTO `maintence_record` VALUES (2, '荆竹水库雨量监测子系统', '123545680', '对采集设备复位和校准', '李四', '13901234567', '2025-06-07 08:00:00', '2025-06-08 00:00:00', '2025-06-23 15:11:52', '2025-06-23 15:13:43');
 
 -- ----------------------------
 -- Table structure for measuring_item
@@ -3709,15 +4003,16 @@ CREATE TABLE `measuring_item`  (
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of measuring_item
 -- ----------------------------
 INSERT INTO `measuring_item` VALUES (2, '4', '水位', 'm', '2024-06-30 20:22:47', '2024-07-02 23:12:11');
-INSERT INTO `measuring_item` VALUES (5, '6', '电导率', 'PTH', '2024-06-30 20:35:53', '2024-07-02 23:17:31');
-INSERT INTO `measuring_item` VALUES (6, '3', '流量', 'm³/s', '2024-12-14 11:31:40', '2024-12-14 11:31:40');
-INSERT INTO `measuring_item` VALUES (7, '5', '水质', '', '2024-12-14 11:31:50', '2024-12-14 11:31:50');
+INSERT INTO `measuring_item` VALUES (6, '3', '雨量', 'mm', '2024-12-14 11:31:40', '2025-06-18 16:00:02');
+INSERT INTO `measuring_item` VALUES (7, '5', '渗流量', '', '2024-12-14 11:31:50', '2025-06-18 16:00:32');
+INSERT INTO `measuring_item` VALUES (8, '6', '变形位移', 'mm', '2025-05-20 16:31:59', '2025-06-18 16:00:54');
+INSERT INTO `measuring_item` VALUES (9, '7', '视频监测', '', '2025-06-18 16:27:07', '2025-06-18 16:27:07');
 
 -- ----------------------------
 -- Table structure for measuring_station
@@ -3739,22 +4034,46 @@ CREATE TABLE `measuring_station`  (
   `update_time` datetime NULL DEFAULT NULL,
   `point` point NULL COMMENT '地图位置',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 33 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 42 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of measuring_station
 -- ----------------------------
-INSERT INTO `measuring_station` VALUES (20, '00000001', '流量站1', '', '', 'Q', '', '2024-04-17', 113.4920780, 31.8824470, '', '2024-12-14 11:35:08', '2024-12-17 12:58:56', ST_GeomFromText('POINT(113.492078 31.882447)'));
-INSERT INTO `measuring_station` VALUES (21, '00000002', '流量站2', '', '', 'Q', '', '2024-04-01', 113.4952540, 31.8809160, '', '2024-12-14 14:43:12', '2024-12-17 13:00:11', ST_GeomFromText('POINT(113.495254 31.880916)'));
-INSERT INTO `measuring_station` VALUES (22, '00000003', '流量站3', '', '', 'Q', '', '2024-04-01', 113.4862180, 31.8848640, '', '2024-12-14 14:44:55', '2024-12-16 17:11:19', ST_GeomFromText('POINT(113.486218 31.884864)'));
-INSERT INTO `measuring_station` VALUES (24, '00000004', '流量站4', '', '', 'Q', '', '2024-04-17', 113.5260400, 31.8567670, '', '2024-12-16 14:14:26', '2024-12-16 17:29:54', ST_GeomFromText('POINT(113.52604 31.856767)'));
-INSERT INTO `measuring_station` VALUES (25, '00000005', '流量站5', '', '', 'Q', '', '2024-04-17', 113.4593800, 31.8079120, '', '2024-12-16 14:16:27', '2024-12-16 17:31:41', ST_GeomFromText('POINT(113.45938 31.807912)'));
-INSERT INTO `measuring_station` VALUES (26, '24043419', '加压视频1', '', '', 'V', '', '2024-04-01', 113.4863060, 31.8836310, '', '2024-12-16 14:18:05', '2024-12-17 12:58:46', ST_GeomFromText('POINT(113.486306 31.883631)'));
-INSERT INTO `measuring_station` VALUES (27, '24043424', '加压视频4', '', '', 'V', '', '2024-04-01', 113.5399610, 31.9083340, '', '2024-12-17 08:55:27', '2024-12-17 12:58:20', ST_GeomFromText('POINT(113.512786 31.860796)'));
-INSERT INTO `measuring_station` VALUES (28, '24043418', '加压视频5', NULL, NULL, 'V', NULL, '2024-04-17', 113.5278910, 31.8543280, NULL, '2024-12-17 10:21:08', '2024-12-17 10:21:13', ST_GeomFromText('POINT(113.509961 31.908834)'));
-INSERT INTO `measuring_station` VALUES (29, '24043422', '加压视频2', '', '', 'V', '', '2024-04-01', 113.5127860, 31.8607960, '', '2024-12-17 12:35:42', '2024-12-17 12:55:29', ST_GeomFromText('POINT(113.56249 31.52648)'));
-INSERT INTO `measuring_station` VALUES (30, '24043426', '加压视频3', '', '', 'V', '', '2024-04-01', 113.5225550, 31.8540360, '', '2024-12-17 12:36:51', '2024-12-17 12:36:51', ST_GeomFromText('POINT(113.5267 31.5624)'));
-INSERT INTO `measuring_station` VALUES (31, '24063432', '水库水位计', '', '', 'W', '', '2024-04-01', 113.4975840, 31.8838420, '', '2024-12-17 12:55:03', '2024-12-17 12:55:03', ST_GeomFromText('POINT(113.497584 31.883842)'));
+INSERT INTO `measuring_station` VALUES (20, '4211820043', '坝前水位雨量站(新站)', '', '', 'Q', '', '2025-06-01', 113.4920780, 31.8824470, '', '2024-12-14 11:35:08', '2025-09-25 12:54:35', ST_GeomFromText('POINT(113.492078 31.882447)'));
+INSERT INTO `measuring_station` VALUES (26, '24043419', '大坝视频球机1', '', '', 'V', '', '2025-05-01', 113.4863060, 31.8836310, '', '2024-12-16 14:18:05', '2025-06-18 16:22:49', ST_GeomFromText('POINT(113.486306 31.883631)'));
+INSERT INTO `measuring_station` VALUES (27, '24043424', '大坝视频球机2', '', '', 'V', '', '2025-05-01', 113.5399610, 31.9083340, '', '2024-12-17 08:55:27', '2025-06-18 16:23:19', ST_GeomFromText('POINT(113.539961 31.908334)'));
+INSERT INTO `measuring_station` VALUES (28, '24043418', '大坝视频球机3', NULL, NULL, 'V', NULL, '2025-05-01', 113.5278910, 31.8543280, NULL, '2024-12-17 10:21:08', '2025-06-18 16:23:45', ST_GeomFromText('POINT(113.527891 31.854328)'));
+INSERT INTO `measuring_station` VALUES (32, '33210', 'LJ1-1', '', '', 'L', '', '2025-06-01', 113.4920780, 31.8824470, '', '2025-06-27 09:43:45', '2025-06-27 09:45:36', ST_GeomFromText('POINT(113.492078 31.882447)'));
+INSERT INTO `measuring_station` VALUES (33, '33214', 'LJ1-2', '', '', 'L', '', '2025-06-01', 113.4952540, 31.8809160, '', '2025-06-27 09:44:08', '2025-06-27 09:45:39', ST_GeomFromText('POINT(113.495254 31.880916)'));
+INSERT INTO `measuring_station` VALUES (34, '33216', 'LJ1-3', '', '', 'L', '', '2025-06-01', 113.4862180, 31.8848640, '', '2025-06-27 09:44:30', '2025-06-27 09:45:41', ST_GeomFromText('POINT(113.486218 31.884864)'));
+INSERT INTO `measuring_station` VALUES (35, '33212', 'LJ1-4', '', '', 'L', '', '2025-06-01', 113.5260400, 31.8567670, '', '2025-06-27 09:44:53', '2025-06-27 09:45:45', ST_GeomFromText('POINT(113.52604 31.856767)'));
+INSERT INTO `measuring_station` VALUES (36, '33215', 'LT2-1', '', '', 'L', '', '2025-06-01', 113.4593800, 31.8079120, '', '2025-06-27 09:45:21', '2025-06-27 09:45:50', ST_GeomFromText('POINT(113.45938 31.807912)'));
+INSERT INTO `measuring_station` VALUES (37, '33211', 'LT2-2', '', '', 'L', '', '2025-06-01', 113.4863060, 31.8836310, '', '2025-06-27 09:46:15', '2025-06-27 09:46:15', ST_GeomFromText('POINT(113.486306 31.883631)'));
+INSERT INTO `measuring_station` VALUES (38, '33217', 'LT2-3', '', '', 'L', '', '2025-06-01', 113.5399610, 31.9083340, '', '2025-06-27 09:46:38', '2025-06-27 09:46:38', ST_GeomFromText('POINT(113.539961 31.908334)'));
+INSERT INTO `measuring_station` VALUES (39, '33213', 'LT2-4', '', '', 'L', '', NULL, 113.5278910, 31.8543280, '', '2025-06-27 09:47:03', '2025-06-27 09:47:03', ST_GeomFromText('POINT(113.527891 31.854328)'));
+INSERT INTO `measuring_station` VALUES (40, '33201', '管理处内基准点', '', '', 'L', '', '2025-06-01', 113.5127860, 31.8607960, '', '2025-06-27 09:47:27', '2025-06-27 09:47:27', ST_GeomFromText('POINT(113.512786 31.860796)'));
+INSERT INTO `measuring_station` VALUES (41, '33200', '管理处外基准点', '', '', 'L', '', '2025-06-01', 113.5225550, 31.8540360, '', '2025-06-27 09:47:53', '2025-06-27 09:47:53', ST_GeomFromText('POINT(113.522555 31.854036)'));
+
+-- ----------------------------
+-- Table structure for monitoring_stations
+-- ----------------------------
+DROP TABLE IF EXISTS `monitoring_stations`;
+CREATE TABLE `monitoring_stations`  (
+  `station_id` int NOT NULL AUTO_INCREMENT,
+  `station_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `station_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `location` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `installation_date` date NULL DEFAULT NULL,
+  `station_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `responsible_person` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  PRIMARY KEY (`station_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of monitoring_stations
+-- ----------------------------
+INSERT INTO `monitoring_stations` VALUES (1, 'SF001', '大坝渗流监测站1号', '110.123456，22.345678', '2025-05-18', '渗流监测站', '张三');
+INSERT INTO `monitoring_stations` VALUES (2, 'DS002', '大坝位移监测站2号', '110.234567,22.456789', '2025-05-18', '位移监测站', '李四');
 
 -- ----------------------------
 -- Table structure for pump
@@ -3808,16 +4127,40 @@ CREATE TABLE `pump_station`  (
   `create_time` datetime NULL DEFAULT NULL COMMENT '创建时间',
   `update_time` datetime NULL DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 299 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 298 CHARACTER SET = utf8mb3 COLLATE = utf8mb3_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of pump_station
 -- ----------------------------
-INSERT INTO `pump_station` VALUES (293, '鄂北水资源供水工程', '加压泵站', '24043419', '加压泵站1', '打开', 113.4863060, 31.8836310, '湖北省随州市曾都区万店镇', '1用1备', 2, 100, 100, 100, '2023-11-01', '2024-12-11 15:42:44', '2025-01-20 19:02:30');
+INSERT INTO `pump_station` VALUES (293, '鄂北水资源供水工程', '加压泵站', '24043419', '加压泵站1122333', '打开', 113.4863060, 31.8836310, '湖北省随州市曾都区万店镇', '1用1备', 2, 100, 100, 100, '2023-11-01', '2024-12-11 15:42:44', '2025-05-14 23:18:34');
 INSERT INTO `pump_station` VALUES (294, '鄂北水资源供水工程', '加压泵站', '24043422', '加压泵站2', '打开', 113.5127860, 31.8607960, '湖北省随州市曾都区万店镇', '1用1备', 2, 200, 200, 200, '2023-12-01', '2024-12-11 15:44:01', '2025-01-20 19:02:30');
 INSERT INTO `pump_station` VALUES (295, '鄂北水资源供水工程', '加压泵站', '24043426', '加压泵站3', '关闭', 113.5226850, 31.8539060, '湖北省随州市曾都区万店镇', '1用1备', 2, 300, 300, 300, '2023-12-01', '2024-12-11 15:45:01', '2025-01-20 19:02:30');
-INSERT INTO `pump_station` VALUES (296, '鄂北水资源供水工程', '加压泵站', '24043424', '加压泵站4', '关闭', 113.5399610, 31.9083340, '湖北省随州市曾都区万店镇', '1用1备', 2, 400, 400, 400, '2023-12-01', '2024-12-11 15:46:23', '2025-01-20 19:02:30');
+INSERT INTO `pump_station` VALUES (296, '鄂北水资源供水工程', '加压泵站', '24043424', '加压泵站45', '关闭', 113.5399610, 31.9083340, '湖北省随州市曾都区万店镇', '1用1备', 2, 400, 400, 400, '2023-12-01', '2024-12-11 15:46:23', '2025-05-15 15:21:00');
 INSERT INTO `pump_station` VALUES (297, '鄂北水资源供水工程', '加压泵站', '24043418', '加压泵站5', '关闭', 113.5278910, 31.8543280, '湖北省随州市曾都区万店镇', '1用1备', 2, 500, 500, 500, '2023-12-01', '2024-12-11 15:47:43', '2025-01-20 19:02:30');
+
+-- ----------------------------
+-- Table structure for rainfall_stations
+-- ----------------------------
+DROP TABLE IF EXISTS `rainfall_stations`;
+CREATE TABLE `rainfall_stations`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `station_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '测站名称',
+  `report_time` datetime NOT NULL COMMENT '最近来报时间',
+  `water_level` float NOT NULL COMMENT '坝上水位(m)',
+  `flood_level` float NULL DEFAULT NULL COMMENT '汛限水位(m)',
+  `water_storage` float NULL DEFAULT NULL COMMENT '蓄水量(万m³)',
+  `water_situation` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '水势',
+  `inflow` float NULL DEFAULT NULL COMMENT '入库流量(m³/s)',
+  `outflow` float NULL DEFAULT NULL COMMENT '出库流量(m³/s)',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '雨量监测站数据表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of rainfall_stations
+-- ----------------------------
+INSERT INTO `rainfall_stations` VALUES (1, '荆竹主坝雨量站', '2025-05-13 11:00:00', 53.9211, 11, 111, '↑', 111, 1122220);
+INSERT INTO `rainfall_stations` VALUES (2, '荆竹副坝雨量站', '2025-05-18 11:00:00', 10.5, 12.3, 1000, '平稳', 20.1, 19.8);
+INSERT INTO `rainfall_stations` VALUES (3, '荆竹测试站', '2025-05-14 23:08:04', 23.44, 13, 123, '平稳', 23, 123);
 
 -- ----------------------------
 -- Table structure for reservoir
@@ -3853,7 +4196,118 @@ CREATE TABLE `reservoir`  (
 -- ----------------------------
 -- Records of reservoir
 -- ----------------------------
-INSERT INTO `reservoir` VALUES (22, '鄂北水资源供水工程', '24063432', '两河口水库', 113.4975840, 31.8838420, 'XX位置', 'SKXXXXX', 'XX位置', 'Ⅴ', '小(1)型', 50, 60, 50, 40, 52, 15, '2022-03-01', 'XX管理单位', 'XX位置', '2024-06-10 14:40:51', '2024-12-14 10:21:15', ST_GeomFromText('POINT(113.497584 31.883842)'));
+INSERT INTO `reservoir` VALUES (22, '智慧荆竹水库管理工程', '24063432', '荆竹水库', 113.4975840, 31.8838420, 'XX位置', 'SKXXXXX', 'XX位置', 'Ⅴ', '小(1)型', 50, 60, 50, 40, 52, 15, '1968-03-01', 'XX管理单位', 'XX位置', '2024-06-10 14:40:51', '2025-06-13 23:06:09', ST_GeomFromText('POINT(113.497584 31.883842)'));
+
+-- ----------------------------
+-- Table structure for river_station
+-- ----------------------------
+DROP TABLE IF EXISTS `river_station`;
+CREATE TABLE `river_station`  (
+  `station_id` int NOT NULL AUTO_INCREMENT,
+  `station_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `station_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `location` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `record_time` datetime NOT NULL,
+  `water_level` float NULL DEFAULT NULL,
+  `flow_rate` float NULL DEFAULT NULL,
+  `water_situation` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  PRIMARY KEY (`station_id`) USING BTREE,
+  INDEX `idx_record_time`(`record_time` ASC) USING BTREE,
+  INDEX `idx_water_level`(`water_level` ASC) USING BTREE,
+  INDEX `idx_flow_rate`(`flow_rate` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of river_station
+-- ----------------------------
+INSERT INTO `river_station` VALUES (1, 'RS001', '河道站1', '经度: 110.123456, 纬度: 22.345678', '2024-06-01 08:00:00', 10.5, 50.2, '正常');
+INSERT INTO `river_station` VALUES (2, 'RS001', '河道站1', '经度: 110.123456, 纬度: 22.345678', '2024-06-01 12:00:00', 10.7, 55, '警戒');
+INSERT INTO `river_station` VALUES (3, 'RS002', '河道站2', '经度: 110.234567, 纬度: 22.456789', '2024-06-01 08:00:00', 11, 48.5, '正常');
+INSERT INTO `river_station` VALUES (4, 'RS002', '河道站2', '经度: 110.234567, 纬度: 22.456789', '2024-06-01 12:00:00', 11.2, 52, '正常');
+INSERT INTO `river_station` VALUES (5, 'RS003', '河道站3', '经度: 110.345678, 纬度: 22.567890', '2024-06-01 08:00:00', 9.8, 45, '警戒');
+INSERT INTO `river_station` VALUES (6, 'RS003', '河道站3', '经度: 110.345678, 纬度: 22.567890', '2024-06-01 12:00:00', 10, 47, '危险');
+INSERT INTO `river_station` VALUES (7, 'RS001', '河道站1', '经度: 110.123456, 纬度: 22.345678', '2024-06-01 00:00:00', 11.1, 49, '正常');
+
+-- ----------------------------
+-- Table structure for seepage_data
+-- ----------------------------
+DROP TABLE IF EXISTS `seepage_data`;
+CREATE TABLE `seepage_data`  (
+  `record_id` int NOT NULL AUTO_INCREMENT,
+  `station_id` int NOT NULL,
+  `record_time` datetime NOT NULL,
+  `seepage_flow` float NOT NULL,
+  `remarks` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL,
+  PRIMARY KEY (`record_id`) USING BTREE,
+  INDEX `idx_station_time`(`station_id` ASC, `record_time` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of seepage_data
+-- ----------------------------
+INSERT INTO `seepage_data` VALUES (1, 1, '2025-05-18 10:03:29', 10, '无特殊情况');
+INSERT INTO `seepage_data` VALUES (2, 1, '2025-05-18 11:05:42', 12, '无特殊情况');
+INSERT INTO `seepage_data` VALUES (3, 1, '2025-05-18 12:05:53', 8, '无特殊情况');
+INSERT INTO `seepage_data` VALUES (4, 2, '2025-05-18 11:06:05', 11, '无特殊情况');
+INSERT INTO `seepage_data` VALUES (5, 2, '2025-05-19 12:06:13', 22, '无特殊情况');
+INSERT INTO `seepage_data` VALUES (6, 3, '2025-05-23 15:07:18', 17, '无特殊情况');
+INSERT INTO `seepage_data` VALUES (7, 3, '2025-05-23 16:07:36', 14, '无特殊情况');
+INSERT INTO `seepage_data` VALUES (8, 3, '2025-05-23 17:07:53', 12, '无特殊情况');
+
+-- ----------------------------
+-- Table structure for seepage_water_level
+-- ----------------------------
+DROP TABLE IF EXISTS `seepage_water_level`;
+CREATE TABLE `seepage_water_level`  (
+  `record_id` int NOT NULL AUTO_INCREMENT,
+  `station_id` int NOT NULL,
+  `record_time` datetime NOT NULL,
+  `seepage_flow` float NOT NULL,
+  `water_level` float NOT NULL,
+  `remarks` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL,
+  PRIMARY KEY (`record_id`) USING BTREE,
+  INDEX `idx_station_time`(`station_id` ASC, `record_time` ASC) USING BTREE,
+  INDEX `idx_water_level`(`water_level` ASC) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of seepage_water_level
+-- ----------------------------
+INSERT INTO `seepage_water_level` VALUES (1, 1, '2025-05-18 10:13:43', 0.15, 10.5, '正常监测数据');
+INSERT INTO `seepage_water_level` VALUES (2, 1, '2025-05-18 10:13:59', 0.18, 10.7, '降雨后数据');
+INSERT INTO `seepage_water_level` VALUES (3, 2, '2025-05-22 11:27:15', 0.22, 12.3, '正常数据');
+
+-- ----------------------------
+-- Table structure for st_pextremum_b
+-- ----------------------------
+DROP TABLE IF EXISTS `st_pextremum_b`;
+CREATE TABLE `st_pextremum_b`  (
+  `STCD` varchar(8) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '监测站代码',
+  `maxDrp1h` decimal(8, 1) NULL DEFAULT NULL COMMENT '1小时最大雨量',
+  `maxDrp3h` decimal(8, 1) NULL DEFAULT NULL COMMENT '3小时最大雨量',
+  `maxDrp6h` decimal(8, 1) NULL DEFAULT NULL COMMENT '6小时最大雨量',
+  `maxDrp12h` decimal(8, 1) NULL DEFAULT NULL COMMENT '12小时最大雨量',
+  `maxDrp24h` decimal(8, 1) NULL DEFAULT NULL COMMENT '24小时最大雨量',
+  `Tm1h` datetime NULL DEFAULT NULL COMMENT '1小时最大雨量发生时间',
+  `Tm3h` datetime NULL DEFAULT NULL COMMENT '3小时最大雨量发生时间',
+  `Tm6h` datetime NULL DEFAULT NULL COMMENT '6小时最大雨量发生时间',
+  `Tm12h` datetime NULL DEFAULT NULL COMMENT '12小时最大雨量发生时间',
+  `Tm24h` datetime NULL DEFAULT NULL COMMENT '24小时最大雨量发生时间',
+  `Remark` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (`STCD`) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = 'rain std criterion' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of st_pextremum_b
+-- ----------------------------
+INSERT INTO `st_pextremum_b` VALUES ('2404340', 1.0, 1.0, 1.0, 1.0, 1.0, '2025-05-15 09:38:40', '2025-05-15 09:38:45', '2025-05-15 09:38:47', '2025-05-15 09:38:50', '2025-05-15 09:38:53', '11');
+INSERT INTO `st_pextremum_b` VALUES ('2404341', 100.0, 150.0, 200.0, 250.0, 300.0, '2024-05-18 12:00:00', '2024-05-18 15:00:00', '2024-05-18 18:00:00', '2024-05-19 00:00:00', '2024-05-19 12:00:00', '示例数据');
+INSERT INTO `st_pextremum_b` VALUES ('2404342', 80.0, 130.0, 180.0, 230.0, 280.0, '2024-05-19 12:00:00', '2024-05-19 15:00:00', '2024-05-19 18:00:00', '2024-05-20 00:00:00', '2024-05-20 12:00:00', '示例数据');
+INSERT INTO `st_pextremum_b` VALUES ('2404343', 90.0, 140.0, 190.0, 240.0, 290.0, '2024-05-20 12:00:00', '2024-05-20 15:00:00', '2024-05-20 18:00:00', '2024-05-21 00:00:00', '2024-05-21 12:00:00', '示例数据');
+INSERT INTO `st_pextremum_b` VALUES ('2404344', 34.0, 57.5, 70.0, 76.0, 22.0, '2025-04-11 22:00:00', '2024-04-28 08:00:00', '2024-07-02 04:00:00', '2025-05-22 11:05:58', '2025-05-28 00:00:00', NULL);
+INSERT INTO `st_pextremum_b` VALUES ('2404345', 59.5, 121.5, 163.5, 190.0, 12.0, '2017-08-14 12:00:00', '2020-07-08 04:00:00', '2020-07-08 07:00:00', '2025-05-25 09:59:29', '2025-05-25 09:59:35', NULL);
+INSERT INTO `st_pextremum_b` VALUES ('2404346', 5.0, 5.0, 5.0, 5.0, 4.0, '2021-04-28 10:00:00', '2021-04-28 10:00:00', '2021-04-28 10:00:00', '2021-04-28 10:00:00', '2025-05-25 09:59:37', NULL);
+INSERT INTO `st_pextremum_b` VALUES ('2404347', 48.0, 103.5, 107.0, 150.0, 56.0, '2020-07-02 16:00:00', '2024-06-23 07:00:00', '2016-06-28 08:00:00', '2016-06-28 13:00:00', '2025-05-25 09:59:39', NULL);
 
 -- ----------------------------
 -- Table structure for surface_water_sources
@@ -3929,6 +4383,56 @@ INSERT INTO `town` VALUES (21, '泉水寺东湾村', 113.5152590, 31.8631850, 15
 INSERT INTO `town` VALUES (22, '红石岗村', 113.4854140, 31.8661920, 1000, '图2支管15', '2024-09-27 20:13:02', '2024-09-27 20:13:05');
 
 -- ----------------------------
+-- Table structure for vertical_displacement
+-- ----------------------------
+DROP TABLE IF EXISTS `vertical_displacement`;
+CREATE TABLE `vertical_displacement`  (
+  `record_id` int NOT NULL AUTO_INCREMENT,
+  `project_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `monitoring_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `y_axis_displacement` float NOT NULL,
+  `record_time` datetime NOT NULL,
+  `upload_time` datetime NOT NULL,
+  PRIMARY KEY (`record_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of vertical_displacement
+-- ----------------------------
+INSERT INTO `vertical_displacement` VALUES (1, '大坝2', '垂直位移', 2.1, '2025-05-18 09:39:15', '2025-05-18 09:39:17');
+INSERT INTO `vertical_displacement` VALUES (2, '大坝2', '垂直位移', 2.6, '2025-05-18 14:59:17', '2025-05-18 14:59:18');
+INSERT INTO `vertical_displacement` VALUES (3, '大坝2', '垂直位移', 1.6, '2025-05-18 14:59:56', '2025-05-18 14:59:58');
+INSERT INTO `vertical_displacement` VALUES (4, '大坝3', '垂直位移', 3.2, '2025-05-18 15:00:31', '2025-05-18 15:00:32');
+INSERT INTO `vertical_displacement` VALUES (5, '大坝3', '垂直位移', 4.4, '2025-05-18 15:00:54', '2025-05-18 15:00:55');
+
+-- ----------------------------
+-- Table structure for warning_facilities
+-- ----------------------------
+DROP TABLE IF EXISTS `warning_facilities`;
+CREATE TABLE `warning_facilities`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `facility_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `location` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `manager` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
+  `last_update` timestamp NULL DEFAULT NULL,
+  `record_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of warning_facilities
+-- ----------------------------
+INSERT INTO `warning_facilities` VALUES (1, '雨量计', '系统报警', '大坝北侧', '正常', '张三', '2025-06-19 14:54:13', '2025-06-19 14:54:13');
+INSERT INTO `warning_facilities` VALUES (2, '广播', '应急广播', '闸门北侧', '正常', '李四', '2025-07-02 18:41:03', '2025-06-19 14:54:13');
+INSERT INTO `warning_facilities` VALUES (3, '监控摄像头1', '视频监控', '溢洪道', '故障', '王五', '2025-07-02 18:41:05', '2025-06-19 14:54:13');
+INSERT INTO `warning_facilities` VALUES (4, '水位计', '系统报警', '大坝北侧', '正常', '张三', '2025-07-02 18:41:07', '2025-07-01 16:20:31');
+INSERT INTO `warning_facilities` VALUES (5, '变形监测仪仪', '系统报警', '大坝南北坡', '正常', '张三', '2025-07-02 18:41:08', '2025-07-01 16:21:21');
+INSERT INTO `warning_facilities` VALUES (6, '渗流监测计', '系统报警', '大坝断面', '正常', '张三', '2025-07-02 18:41:10', '2025-07-01 16:22:18');
+INSERT INTO `warning_facilities` VALUES (7, '闸门1', '系统报警', '输水口', '正常', '张三', '2025-07-02 18:41:11', '2025-07-01 16:23:36');
+
+-- ----------------------------
 -- Table structure for water_distributor
 -- ----------------------------
 DROP TABLE IF EXISTS `water_distributor`;
@@ -3972,7 +4476,7 @@ CREATE TABLE `water_level`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `water_level_uindex`(`monitor_time` ASC) USING BTREE COMMENT '监测时间的唯一索引'
-) ENGINE = InnoDB AUTO_INCREMENT = 4788 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 8450 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of water_level
@@ -4632,7 +5136,28 @@ INSERT INTO `water_level` VALUES (2936, '两河口水库', '24063432', 0.600, '2
 INSERT INTO `water_level` VALUES (2937, '两河口水库', '24063432', 0.598, '2024-12-19 21:10:00', '2024-12-19 21:16:51', '2024-12-19 21:16:51');
 INSERT INTO `water_level` VALUES (2938, '两河口水库', '24063432', 0.598, '2024-12-19 21:15:00', '2024-12-19 21:21:51', '2024-12-19 21:21:51');
 INSERT INTO `water_level` VALUES (2939, '两河口水库', '24063432', 0.600, '2024-12-19 21:20:00', '2024-12-19 21:26:51', '2024-12-19 21:26:51');
-INSERT INTO `water_level` VALUES (2950, '荆竹水库', '24063432', 500.000, '2024-12-20 16:21:18', '2024-12-21 12:53:40', '2026-01-14 17:56:09');
+INSERT INTO `water_level` VALUES (2950, '荆竹水库', '24063432', 500.000, '2024-12-20 16:21:18', '2024-12-21 12:53:40', '2026-01-18 17:49:43');
+
+-- ----------------------------
+-- Table structure for water_monitoring_stations
+-- ----------------------------
+DROP TABLE IF EXISTS `water_monitoring_stations`;
+CREATE TABLE `water_monitoring_stations`  (
+  `station_id` int NOT NULL AUTO_INCREMENT,
+  `station_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `station_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `location` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL,
+  `station_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  PRIMARY KEY (`station_id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of water_monitoring_stations
+-- ----------------------------
+INSERT INTO `water_monitoring_stations` VALUES (1, 'RS123', '落马桥水位雨量站', '经度: 110.123456, 纬度: 22.345678', 'Rainfall');
+INSERT INTO `water_monitoring_stations` VALUES (2, 'RS001', '河道站1', '经度: 110.123456, 纬度: 22.3456', 'River');
+INSERT INTO `water_monitoring_stations` VALUES (3, 'RS002', '河道站2', '经度: 110.234567, 纬度: 22.4567', 'River');
+INSERT INTO `water_monitoring_stations` VALUES (4, 'RS003', '河道站3', '经度: 110.345678, 纬度: 22.5678', 'River');
 
 -- ----------------------------
 -- Table structure for water_quality
@@ -4655,7 +5180,7 @@ CREATE TABLE `water_quality`  (
   `update_time` datetime NULL DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `water_quality_uindex`(`monitor_time` ASC) USING BTREE COMMENT '监测时间唯一索引'
-) ENGINE = InnoDB AUTO_INCREMENT = 10857 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 59797 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of water_quality
@@ -7452,6 +7977,46 @@ INSERT INTO `water_quality` VALUES (6556, '水厂', '24083436', 7.88, 1.10, 0.15
 INSERT INTO `water_quality` VALUES (6557, '水厂', '24083436', 7.90, 1.01, 0.15, 0.20, 3.40, 13.79, 0.30, 10.30, '2024-12-19 21:21:01', '2024-12-19 21:21:51', '2024-12-19 21:21:51');
 INSERT INTO `water_quality` VALUES (6558, '水厂', '24083436', 7.90, 0.93, 0.15, 0.20, 3.60, 13.80, 0.30, 10.30, '2024-12-19 21:26:01', '2024-12-19 21:26:51', '2024-12-19 21:26:51');
 INSERT INTO `water_quality` VALUES (7310, '水厂', '24083436', 7.90, 120.00, 0.11, 0.20, 4.50, 12.19, 0.30, 16.00, '2024-12-23 09:42:01', '2024-12-21 17:19:38', '2024-12-21 17:19:38');
+
+-- ----------------------------
+-- Table structure for water_storage
+-- ----------------------------
+DROP TABLE IF EXISTS `water_storage`;
+CREATE TABLE `water_storage`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `station_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '测站名称',
+  `record_time` datetime NOT NULL COMMENT '记录时间',
+  `lunar_date` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL COMMENT '农历日期',
+  `water_level` decimal(10, 2) NOT NULL COMMENT '坝上水位(m)',
+  `outflow_volume` decimal(10, 2) NULL DEFAULT NULL COMMENT '出库流量(m³/s)',
+  `storage_volume` decimal(10, 2) NULL DEFAULT NULL COMMENT '蓄水量(万m³)',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 28 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '水库水量表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of water_storage
+-- ----------------------------
+INSERT INTO `water_storage` VALUES (7, '荆竹水位雨量站', '2025-05-15 21:00:00', '四月十八', 53.76, 0.80, 18.00);
+INSERT INTO `water_storage` VALUES (8, '荆竹水位雨量站', '2025-05-15 20:20:00', '四月十八', 53.75, 0.90, 20.00);
+INSERT INTO `water_storage` VALUES (9, '荆竹水位雨量站', '2025-05-15 20:00:00', '四月十八', 53.74, 1.10, 17.00);
+INSERT INTO `water_storage` VALUES (10, '荆竹水位雨量站', '2025-05-15 19:00:00', '四月十八', 53.75, 1.50, 14.00);
+INSERT INTO `water_storage` VALUES (11, '荆竹水位雨量站', '2025-05-15 18:55:00', '四月十八', 53.75, 0.88, 22.00);
+INSERT INTO `water_storage` VALUES (12, '荆竹水位雨量站', '2025-05-15 18:10:00', '四月十八', 53.77, 0.50, 11.00);
+INSERT INTO `water_storage` VALUES (13, '红石雨量站(狮...)', '2025-05-15 08:00:00', '四月十八', 52.30, 0.80, 10.50);
+INSERT INTO `water_storage` VALUES (14, '黄黄K761(气象)', '2025-05-15 09:00:00', '四月十八', 51.50, 0.70, 9.00);
+INSERT INTO `water_storage` VALUES (15, '桂华水位站(卫星)', '2025-05-15 10:00:00', '四月十八', 55.00, 0.90, 11.00);
+INSERT INTO `water_storage` VALUES (16, '赤东湖水位站(卫星)', '2025-05-15 11:00:00', '四月十九', 54.20, 1.10, 12.50);
+INSERT INTO `water_storage` VALUES (17, '黄梅坳(水文)', '2025-05-15 12:00:00', '四月十九', 56.10, 1.20, 14.00);
+INSERT INTO `water_storage` VALUES (18, '田桥(水文)', '2025-05-15 13:00:00', '四月十七', 57.40, 0.60, 8.50);
+INSERT INTO `water_storage` VALUES (19, '响水岩雨量站(卫星)', '2025-05-15 14:00:00', '四月十八', 58.50, 1.00, 15.00);
+INSERT INTO `water_storage` VALUES (20, '李山雨量站(大冶)', '2025-05-15 15:00:00', '四月十九', 59.00, 1.30, 16.50);
+INSERT INTO `water_storage` VALUES (21, '王坪雨量站(慢岭)', '2025-05-15 16:00:00', '四月二十', 60.00, 1.50, 18.00);
+INSERT INTO `water_storage` VALUES (22, '宋冲(水文)', '2025-05-15 17:00:00', '四月二十', 62.00, 1.80, 20.00);
+INSERT INTO `water_storage` VALUES (23, '陈旺雨量站(横石)', '2025-05-15 18:00:00', '四月二十', 63.50, 2.00, 22.00);
+INSERT INTO `water_storage` VALUES (24, '莲花雨量站202(卫星)', '2025-05-15 19:00:00', '四月二十', 65.00, 2.20, 24.00);
+INSERT INTO `water_storage` VALUES (25, '张榜雨量站202(卫星)', '2025-05-15 20:00:00', '四月二十', 66.50, 2.50, 25.50);
+INSERT INTO `water_storage` VALUES (26, '鹅公包雨量站(卫星)', '2025-05-15 21:00:00', '四月二十一', 68.00, 2.80, 27.00);
+INSERT INTO `water_storage` VALUES (27, '黑沟冲(水文)', '2025-05-15 22:00:00', '四月二十一', 69.50, 3.00, 28.50);
 
 -- ----------------------------
 -- Table structure for water_supply_project

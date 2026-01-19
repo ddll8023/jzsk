@@ -11,7 +11,9 @@ import { getUserInfo as getUserInfoApi } from '@/api/auth'
 export const useAuthStore = defineStore('auth', () => {
   // 状态
   const token = ref(sessionStorage.getItem('token') || null)
-  const userInfo = ref(null)
+  // 从 sessionStorage 恢复用户信息
+  const storedUserInfo = sessionStorage.getItem('userInfo')
+  const userInfo = ref(storedUserInfo ? JSON.parse(storedUserInfo) : null)
 
   // 计算属性
   const isLoggedIn = computed(() => !!token.value)
@@ -32,6 +34,12 @@ export const useAuthStore = defineStore('auth', () => {
    */
   const setUserInfo = (info) => {
     userInfo.value = info
+    // 持久化到 sessionStorage
+    if (info) {
+      sessionStorage.setItem('userInfo', JSON.stringify(info))
+    } else {
+      sessionStorage.removeItem('userInfo')
+    }
   }
 
   /**
@@ -42,7 +50,8 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const { data: res } = await getUserInfoApi()
       if (res.code === 200) {
-        userInfo.value = res.data
+        // 使用 setUserInfo 确保持久化
+        setUserInfo(res.data)
         return res.data
       }
       console.error('获取用户信息失败:', res.message)
@@ -61,6 +70,7 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = null
     userInfo.value = null
     sessionStorage.removeItem('token')
+    sessionStorage.removeItem('userInfo')
   }
 
   return {
