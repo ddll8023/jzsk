@@ -42,12 +42,20 @@
 
           <!-- 下拉菜单内容 -->
           <div class="absolute right-0 top-full mt-1 w-32 bg-white rounded-md shadow-lg border border-gray-100 py-1 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 z-50">
-            <button 
+            <button
               @click="openUserInfoModal"
               class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors"
             >
               <i class="fa fa-user-circle-o mr-2" aria-hidden="true"></i>
               个人信息
+            </button>
+            <div class="h-[1px] bg-gray-100 my-1"></div>
+            <button
+              @click="openPasswordModal"
+              class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-primary-600 transition-colors"
+            >
+              <i class="fa fa-key mr-2" aria-hidden="true"></i>
+              修改密码
             </button>
             <div class="h-[1px] bg-gray-100 my-1"></div>
             <button
@@ -61,14 +69,14 @@
         </div>
 
         <!-- 个人信息弹窗 (内联) -->
-        <Modal 
-          v-model="showUserInfo" 
+        <Modal
+          v-model="showUserInfo"
           title="个人信息"
         >
           <div v-if="userInfo" class="grid grid-cols-2 gap-x-8 gap-y-6 p-2">
             <!-- 普通字段 -->
-            <div 
-              v-for="field in userInfoFields" 
+            <div
+              v-for="field in userInfoFields"
               :key="field.key"
               :class="['flex flex-col gap-1', field.fullWidth && 'col-span-2']"
             >
@@ -83,6 +91,45 @@
           <template #footer>
             <div class="flex justify-end">
               <Button @click="showUserInfo = false">关闭</Button>
+            </div>
+          </template>
+        </Modal>
+
+        <!-- 修改密码弹窗 -->
+        <Modal
+          v-model="showPasswordModal"
+          title="修改密码"
+        >
+          <div class="space-y-4">
+            <Input
+              v-model="passwordForm.oldPassword"
+              type="password"
+              label="旧密码"
+              placeholder="请输入旧密码"
+              :error="passwordErrors.oldPassword"
+            />
+            <Input
+              v-model="passwordForm.newPassword"
+              type="password"
+              label="新密码"
+              placeholder="请输入新密码（至少6位）"
+              :error="passwordErrors.newPassword"
+            />
+            <Input
+              v-model="passwordForm.confirmPassword"
+              type="password"
+              label="确认新密码"
+              placeholder="请再次输入新密码"
+              :error="passwordErrors.confirmPassword"
+            />
+          </div>
+          <!-- 底部按钮 -->
+          <template #footer>
+            <div class="flex justify-end gap-2">
+              <Button @click="closePasswordModal">取消</Button>
+              <Button type="primary" :loading="passwordLoading" @click="handlePasswordSubmit">
+                确认修改
+              </Button>
             </div>
           </template>
         </Modal>
@@ -115,6 +162,10 @@ import { useAuthStore } from '@/stores/auth'
 import SidebarMenu from '@/components/business/system/SidebarMenu.vue'
 import Modal from '@/components/basic/Modal.vue'
 import Button from '@/components/basic/Button.vue'
+import Input from '@/components/basic/Input.vue'
+
+// 4. API
+import { updatePassword } from '@/api/user'
 
 // 路由实例
 const route = useRoute()
@@ -129,11 +180,80 @@ const collapsed = ref(false)
 // 个人信息弹窗状态
 const showUserInfo = ref(false)
 
+// 修改密码弹窗状态
+const showPasswordModal = ref(false)
+const passwordLoading = ref(false)
+const passwordForm = ref({
+  oldPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+})
+const passwordErrors = ref({})
+
 /**
  * 打开个人信息弹窗
  */
 const openUserInfoModal = () => {
   showUserInfo.value = true
+}
+
+/**
+ * 打开修改密码弹窗
+ */
+const openPasswordModal = () => {
+  showPasswordModal.value = true
+  // 重置表单
+  passwordForm.value = { oldPassword: '', newPassword: '', confirmPassword: '' }
+  passwordErrors.value = {}
+}
+
+/**
+ * 关闭修改密码弹窗
+ */
+const closePasswordModal = () => {
+  showPasswordModal.value = false
+}
+
+/**
+ * 验证密码表单
+ */
+const validatePasswordForm = () => {
+  const errors = {}
+  if (!passwordForm.value.oldPassword) {
+    errors.oldPassword = '请输入旧密码'
+  }
+  if (!passwordForm.value.newPassword) {
+    errors.newPassword = '请输入新密码'
+  } else if (passwordForm.value.newPassword.length < 6) {
+    errors.newPassword = '新密码至少6位'
+  }
+  if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
+    errors.confirmPassword = '两次密码不一致'
+  }
+  passwordErrors.value = errors
+  return Object.keys(errors).length === 0
+}
+
+/**
+ * 提交修改密码
+ */
+const handlePasswordSubmit = async () => {
+  if (!validatePasswordForm()) return
+
+  passwordLoading.value = true
+  try {
+    await updatePassword({
+      oldPassword: passwordForm.value.oldPassword,
+      newPassword: passwordForm.value.newPassword
+    })
+    // 成功后退出登录
+    handleLogout()
+  } catch (error) {
+    // 错误已在 request 拦截器处理，这里只需提示
+    console.error('修改密码失败:', error)
+  } finally {
+    passwordLoading.value = false
+  }
 }
 
 // 用户信息

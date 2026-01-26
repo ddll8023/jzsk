@@ -238,11 +238,17 @@ export function useGateStatus(options = {}) {
       console.log('获取闸门数据:', { selectedGate: query.selectedGate, url })
       
       const response = await request.get(url)
-      // request 封装返回完整 response，需要取 data
-      const res = response.data
-      console.log('接口响应:', res)
-      
-      const records = Array.isArray(res) ? res : (res?.records || [])
+      // request 拦截器虽然处理了 response，但为了保险起见，这里做完整的防御性编程
+      // 后端返回结构: { code: 200, data: [...], msg: "..." }
+
+      const res = response.data // Axios 的 response.data 是服务器返回的 JSON body
+
+      // 核心修正：获取 Result.data
+      const resultData = res.data
+
+      // 兼容 List (后端当前实现) 和 Page (旧版/通用结构)
+      const records = Array.isArray(resultData) ? resultData : (resultData?.records || [])
+
       console.log('解析后的记录:', records)
 
       // 按时间排序（最新在前）
