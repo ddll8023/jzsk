@@ -264,8 +264,17 @@ const loadData = async () => {
   error.value = null
 
   try {
-    const res = await getHourlyRainfall()
-    const data = res.data || []
+    // 传递日期范围参数，后端按范围查询
+    const params = {}
+    if (startDate.value) {
+      params.startDate = startDate.value.replace('T', ' ') + ':00'
+    }
+    if (endDate.value) {
+      params.endDate = endDate.value.replace('T', ' ') + ':00'
+    }
+
+    const res = await getHourlyRainfall(params)
+    const data = res.data
 
     // 处理数据，添加格式化字段
     allData.value = data.map((item, index) => ({

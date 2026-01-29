@@ -9,10 +9,13 @@ import request from '@/utils/request'
 
 /**
  * 获取小时雨量列表
+ * @param {Object} params - 查询参数
+ * @param {string} params.startDate - 开始时间 (可选)
+ * @param {string} params.endDate - 结束时间 (可选)
  * @returns {Promise} 小时雨量数据列表
  */
-export function getHourlyRainfall() {
-  return request.get('/st-pptn-hour/list')
+export function getHourlyRainfall(params) {
+  return request.get('/st-pptn-hour/list', { params })
 }
 
 // ==================== 水位数据接口 ====================

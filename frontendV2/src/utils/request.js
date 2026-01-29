@@ -61,6 +61,18 @@ service.interceptors.response.use(
     const fullUrl = response.config.baseURL ? `${response.config.baseURL}${response.config.url}` : response.config.url
     console.log('📥 API响应:', response.status, fullUrl)
     console.log('   数据:', response.data?.code, response.data?.message || '成功')
+
+    // 解包响应数据：仅解包直接数组格式 {code, message, data: []}
+    // 保持分页格式 {code, message, data: {records: [], total: 0}} 不变，由调用方自行处理
+    if (response.data && typeof response.data === 'object') {
+      const data = response.data.data
+      // 仅当 data 本身是数组时才解包
+      if (Array.isArray(data)) {
+        response.data = data
+      }
+      // 分页对象不解包，保留 records 和 total 字段
+    }
+
     return response
   },
   (error) => {

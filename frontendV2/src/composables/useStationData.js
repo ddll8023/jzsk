@@ -148,12 +148,14 @@ export function useStationData() {
   /**
    * 获取雨量数据
    * API: /st-pptn-hour/list
+   * 响应格式：{code, message, data: []}
    */
   const fetchRainfallData = async () => {
     try {
       const res = await request.get('/st-pptn-hour/list')
-      const lst = Array.isArray(res.data) ? res.data : (res.data && res.data.records) || []
-      
+      // 拦截器已解包，res.data 直接为数组
+      const lst = Array.isArray(res.data) ? res.data : []
+
       if (lst.length > 0) {
         // 取最新的一条
         const sorted = lst.sort((a, b) => new Date(b.tm) - new Date(a.tm))
