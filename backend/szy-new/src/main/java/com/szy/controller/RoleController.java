@@ -30,13 +30,13 @@ public class RoleController {
     @GetMapping("/list")
     @ApiOperation("获取角色列表")
     public Result<PageInfo<Role>> list(RoleQueryDTO queryDTO) {
-        return Result.ok(roleService.list(queryDTO));
+        return Result.success(roleService.list(queryDTO));
     }
 
     @GetMapping("/info/{id}")
     @ApiOperation("获取角色详情")
     public Result<RoleVO> info(@PathVariable Long id) {
-        return Result.ok(roleService.getInfo(id));
+        return Result.success(roleService.getInfo(id));
     }
 
     @PostMapping("/save")
@@ -44,7 +44,7 @@ public class RoleController {
     @PreAuthorize("hasAuthority('xtgl')")
     public Result<Void> save(@Validated @RequestBody RoleDTO dto) {
         roleService.save(dto);
-        return Result.ok();
+        return Result.success("操作成功");
     }
 
     @PostMapping("/update")
@@ -52,7 +52,7 @@ public class RoleController {
     @PreAuthorize("hasAuthority('xtgl')")
     public Result<Void> update(@Validated @RequestBody RoleDTO dto) {
         roleService.update(dto);
-        return Result.ok();
+        return Result.success("操作成功");
     }
 
     @PostMapping("/delete/{id}")
@@ -60,7 +60,7 @@ public class RoleController {
     @PreAuthorize("hasAuthority('xtgl')")
     public Result<Void> delete(@PathVariable Long id) {
         roleService.delete(id);
-        return Result.ok();
+        return Result.success("操作成功");
     }
 
     @PostMapping("/menu/{roleId}")
@@ -68,12 +68,12 @@ public class RoleController {
     @PreAuthorize("hasAuthority('xtgl')")
     public Result<Void> allocateMenu(@PathVariable Long roleId, @RequestBody List<Long> menuIds) {
         roleService.allocateMenu(roleId, menuIds);
-        return Result.ok();
+        return Result.success("操作成功");
     }
 
     @GetMapping("/menus/{roleId}")
     @ApiOperation("获取角色菜单ID列表")
     public Result<List<Long>> getMenus(@PathVariable Long roleId) {
-        return Result.ok(roleService.getRoleMenus(roleId));
+        return Result.success(roleService.getRoleMenus(roleId));
     }
 }

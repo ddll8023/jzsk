@@ -41,7 +41,7 @@ public class UserController {
      */
     @ApiOperation("获取当前用户信息")
     @GetMapping("/userInfo")
-    public Result userInfo(@AuthenticationPrincipal AccountUser accountUser) {
+    public Result<UserVO> userInfo(@AuthenticationPrincipal AccountUser accountUser) {
         User user = userService.getById(accountUser.getUserId());
         if (user == null) {
             throw new BusinessException("用户不存在");
@@ -55,7 +55,7 @@ public class UserController {
      */
     @ApiOperation("修改密码")
     @PostMapping("/updatePass")
-    public Result updatePassword(@Validated @RequestBody UpdatePasswordDTO dto,
+    public Result<Void> updatePassword(@Validated @RequestBody UpdatePasswordDTO dto,
                                   @AuthenticationPrincipal AccountUser accountUser) {
         // 验证新密码和确认密码是否一致
         if (!dto.getPassword().equals(dto.getConfirmPassword())) {
@@ -90,7 +90,7 @@ public class UserController {
     @ApiOperation("获取用户列表")
     @PreAuthorize("hasAuthority('xtgl')")
     public Result<PageInfo<UserDetailVO>> list(UserQueryDTO queryDTO) {
-        return Result.ok(userService.list(queryDTO));
+        return Result.success(userService.list(queryDTO));
     }
 
     /**
@@ -107,7 +107,7 @@ public class UserController {
         queryDTO.setCurrentPage(currentPage);
         queryDTO.setPageSize(pageSize);
         queryDTO.setName(name);
-        return Result.ok(userService.list(queryDTO));
+        return Result.success(userService.list(queryDTO));
     }
 
     /**
@@ -117,7 +117,7 @@ public class UserController {
     @ApiOperation("获取用户详情")
     @PreAuthorize("hasAuthority('xtgl')")
     public Result<UserDetailVO> info(@PathVariable Long id) {
-        return Result.ok(userService.getDetail(id));
+        return Result.success(userService.getDetail(id));
     }
 
     /**
@@ -128,7 +128,7 @@ public class UserController {
     @PreAuthorize("hasAuthority('xtgl')")
     public Result<Void> save(@Validated @RequestBody UserDTO dto) {
         userService.save(dto);
-        return Result.ok();
+        return Result.success("操作成功");
     }
 
     /**
@@ -139,7 +139,7 @@ public class UserController {
     @PreAuthorize("hasAuthority('xtgl')")
     public Result<Void> update(@Validated @RequestBody UserDTO dto) {
         userService.update(dto);
-        return Result.ok();
+        return Result.success("操作成功");
     }
 
     /**
@@ -150,7 +150,7 @@ public class UserController {
     @PreAuthorize("hasAuthority('xtgl')")
     public Result<Void> delete(@PathVariable Long id) {
         userService.delete(id);
-        return Result.ok();
+        return Result.success("操作成功");
     }
 
     /**
@@ -161,7 +161,7 @@ public class UserController {
     @PreAuthorize("hasAuthority('xtgl')")
     public Result<Void> allocateRole(@PathVariable Long userId, @RequestBody List<Long> roleIds) {
         userService.allocateRole(userId, roleIds);
-        return Result.ok();
+        return Result.success("操作成功");
     }
 
     /**
@@ -172,7 +172,7 @@ public class UserController {
     @PreAuthorize("hasAuthority('xtgl')")
     public Result<Void> repass(@RequestParam("id") Long id) {
         userService.resetPassword(id);
-        return Result.ok();
+        return Result.success("密码已重置为123456");
     }
 
     /**
@@ -183,6 +183,6 @@ public class UserController {
     public Result<Void> updatePassword(@Validated @RequestBody ResetPasswordDTO dto, Principal principal) {
         User user = userService.getByUsername(principal.getName());
         userService.changePassword(user.getId(), dto.getOldPassword(), dto.getNewPassword());
-        return Result.ok();
+        return Result.success("密码修改成功");
     }
 }
