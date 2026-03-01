@@ -1,31 +1,45 @@
 package com.szy.security;
 
+import com.szy.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 用户详情服务实现
- * 用途：加载用户信息用于认证
- * 注意：此处为示例实现，实际应从数据库加载用户
+ * 用途：加载用户信息用于Spring Security认证
  */
 @Service
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
+    private final UserService userService;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // TODO: 从数据库加载用户信息
-        // 示例：创建一个默认用户，实际项目需要从数据库查询
-        if ("admin".equals(username)) {
-            return new User("admin", "$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iAt6Z5EH", new ArrayList<>());
+        com.szy.pojo.entity.User user = userService.getByUsername(username);
+        if (user == null) {
+            throw new UsernameNotFoundException("用户名或密码不正确");
         }
-        throw new UsernameNotFoundException("用户不存在: " + username);
+        return new AccountUser(
+                user.getId(),
+                user.getUsername(),
+                user.getPassword(),
+                getUserAuthority(user.getId())
+        );
     }
 
+    /**
+     * 获取用户权限信息
+     */
+    private List<GrantedAuthority> getUserAuthority(Long userId) {
+        String authority = userService.getUserAuthorityInfo(userId);
+        return AuthorityUtils.commaSeparatedStringToAuthorityList(authority);
+    }
 }
