@@ -50,4 +50,38 @@
         WHERE ur.user_id = #{userId}
     </select>
 
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM user
+        <where>
+            <if test="username != null and username != ''">
+                AND username LIKE CONCAT('%', #{username}, '%')
+            </if>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+        </where>
+        ORDER BY id
+    </select>
+
+    <insert id="insert" parameterType="com.szy.pojo.entity.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user (username, password, name, type, department, phone, email)
+        VALUES (#{username}, #{password}, #{name}, #{type}, #{department}, #{phone}, #{email})
+    </insert>
+
+    <update id="update" parameterType="com.szy.pojo.entity.User">
+        UPDATE user
+        SET username = #{username},
+            name = #{name},
+            type = #{type},
+            department = #{department},
+            phone = #{phone},
+            email = #{email}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM user WHERE id = #{id}
+    </delete>
+
 </mapper>

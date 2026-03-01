@@ -38,4 +38,24 @@ public interface UserMapper {
      * 根据用户ID查询角色编码
      */
     List<String> selectRoleCodesByUserId(@Param("userId") Long userId);
+
+    /**
+     * 分页查询用户
+     */
+    List<User> selectList(@Param("username") String username, @Param("name") String name);
+
+    /**
+     * 新增用户
+     */
+    int insert(User user);
+
+    /**
+     * 更新用户
+     */
+    int update(User user);
+
+    /**
+     * 删除用户
+     */
+    int deleteById(@Param("id") Long id);
 }
