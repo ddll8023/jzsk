@@ -5,6 +5,7 @@ import com.szy.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -54,8 +55,8 @@ public class SecurityConfig {
             .authorizeRequests()
             // 放行路径
             .antMatchers(
-                "/auth/login",
-                "/auth/register",
+                "/login",
+                "/logout",
                 "/doc.html",
                 "/webjars/**",
                 "/swagger-resources/**",
@@ -71,4 +72,12 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * 认证管理器
+     */
+    @Bean
+    public AuthenticationManager authenticationManager(
+            org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
+    }
 }
