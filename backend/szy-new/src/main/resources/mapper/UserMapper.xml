@@ -9,12 +9,12 @@
         <result column="name" property="name"/>
         <result column="type" property="type"/>
         <result column="department" property="department"/>
-        <result column="phone" property="phone"/>
+        <result column="phone_number" property="phone"/>
         <result column="email" property="email"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, username, password, name, type, department, phone, email
+        id, username, password, name, type, department, phone_number as phone, email
     </sql>
 
     <select id="selectByUsername" resultMap="BaseResultMap">
@@ -65,7 +65,7 @@
     </select>
 
     <insert id="insert" parameterType="com.szy.pojo.entity.User" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO user (username, password, name, type, department, phone, email)
+        INSERT INTO user (username, password, name, type, department, phone_number, email)
         VALUES (#{username}, #{password}, #{name}, #{type}, #{department}, #{phone}, #{email})
     </insert>
 
@@ -75,7 +75,7 @@
             name = #{name},
             type = #{type},
             department = #{department},
-            phone = #{phone},
+            phone_number = #{phone},
             email = #{email}
         WHERE id = #{id}
     </update>

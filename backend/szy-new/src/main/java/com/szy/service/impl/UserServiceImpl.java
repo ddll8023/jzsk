@@ -17,7 +17,7 @@ import com.szy.service.RoleService;
 import com.szy.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
     private final UserRoleMapper userRoleMapper;
     private final RoleService roleService;
     private final StringRedisTemplate stringRedisTemplate;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
     /** 权限缓存Key前缀 */
     private static final String AUTHORITY_CACHE_PREFIX = "GrantedAuthority:";
@@ -67,9 +67,15 @@ public class UserServiceImpl implements UserService {
         }
 
         String cacheKey = AUTHORITY_CACHE_PREFIX + user.getUsername();
-        String cachedAuthority = stringRedisTemplate.opsForValue().get(cacheKey);
-        if (cachedAuthority != null) {
-            return cachedAuthority;
+
+        // 尝试从Redis获取缓存（Redis不可用时跳过）
+        try {
+            String cachedAuthority = stringRedisTemplate.opsForValue().get(cacheKey);
+            if (cachedAuthority != null) {
+                return cachedAuthority;
+            }
+        } catch (Exception e) {
+            // Redis不可用，继续查询数据库
         }
 
         // 查询角色
@@ -91,13 +97,17 @@ public class UserServiceImpl implements UserService {
             authorityInfo += authorities;
         }
 
-        // 缓存结果
-        stringRedisTemplate.opsForValue().set(
-                cacheKey,
-                authorityInfo,
-                AUTHORITY_CACHE_EXPIRE_HOURS,
-                TimeUnit.HOURS
-        );
+        // 尝试缓存结果（Redis不可用时跳过）
+        try {
+            stringRedisTemplate.opsForValue().set(
+                    cacheKey,
+                    authorityInfo,
+                    AUTHORITY_CACHE_EXPIRE_HOURS,
+                    TimeUnit.HOURS
+            );
+        } catch (Exception e) {
+            // Redis不可用，跳过缓存
+        }
 
         return authorityInfo;
     }

@@ -33,7 +33,7 @@ public class AuthController {
      */
     @ApiOperation("用户登录")
     @PostMapping("/login")
-    public Result login(@Validated LoginDTO loginDTO) {
+    public Result login(@Validated @RequestBody LoginDTO loginDTO) {
         // 表单登录方式
         UsernamePasswordAuthenticationToken token =
                 new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword());
