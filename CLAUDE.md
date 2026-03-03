@@ -9,12 +9,121 @@
 
 | 组件 | 版本 | 说明 |
 |-----|------|------|
+| JDK | 1.8 | Amazon Corretto 1.8.0_452 |
+| Maven | 3.x | 使用项目自定义 settings |
 | Spring Boot | 2.6.2 | 保持现有版本 |
 | MyBatis | 2.2.2 | 原生MyBatis，非Plus |
 | PageHelper | 1.4.6 | 分页插件 |
 | dynamic-datasource | 3.2.1 | 多数据源 |
 | Knife4j | 3.0.3 | API文档 |
 | Hutool | 5.8.21 | 工具库 |
+
+## Maven 编译命令
+
+**项目使用 IDEA 内置 Maven，编译命令：**
+
+**方式一：在 backend/szy-new 目录下使用命令行**
+```bash
+# Windows 环境下使用 IDEA Maven（推荐）
+# 注意：路径中使用正斜杠 / 而不是反斜杠 \
+"C:/Program Files/JetBrains/IntelliJ IDEA 2024.3.1.1/plugins/maven/lib/maven3/bin/mvn" compile -s D:/demo/java/jzsk/backend/szy/maven-settings.xml -f D:/demo/java/jzsk/backend/szy-new/pom.xml
+
+# 或完整打包
+"C:/Program Files/JetBrains/IntelliJ IDEA 2024.3.1.1/plugins/maven/lib/maven3/bin/mvn" clean package -s D:/demo/java/jzsk/backend/szy/maven-settings.xml -f D:/demo/java/jzsk/backend/szy-new/pom.xml -DskipTests
+```
+
+**方式二：在 IDEA 中操作（推荐）**
+- 打开 IDEA 右侧 Maven 面板
+- 展开 szy-new → Lifecycle
+- 双击 compile 或 package
+
+**IDEA 中的 Maven 配置：**
+- Settings 文件路径：`D:\demo\java\jzsk\backend\szy\maven-settings.xml`
+- JDK 版本：Java 8 (corretto-1.8.0_452)
+- Maven Home：`C:/Program Files/JetBrains/IntelliJ IDEA 2024.3.1.1/plugins/maven/lib/maven3`
+
+---
+
+## 常见命令错误与正确写法
+
+### 1. Maven 编译失败（jar文件被占用）
+
+**错误原因：** 后端服务正在运行，占用了 target 目录下的 jar 文件
+
+**解决方案：**
+```bash
+# 方案一：先停止后端服务，再执行 clean package
+# （见下方"停止Java服务"命令）
+
+# 方案二：只编译不清理（快速编译）
+"C:/Program Files/JetBrains/IntelliJ IDEA 2024.3.1.1/plugins/maven/lib/maven3/bin/mvn" compile -s D:/demo/java/jzsk/backend/szy/maven-settings.xml -f D:/demo/java/jzsk/backend/szy-new/pom.xml
+```
+
+### 2. 启动后端服务失败
+
+**错误命令：**
+```bash
+# 错误：start 命令在 bash 中语法不正确
+start "szy-new-backend" java -jar backend/szy-new/target/szy-new-0.0.1-SNAPSHOT.jar
+```
+
+**正确命令：**
+```bash
+# 方式一：直接运行（前台）
+java -jar D:/demo/java/jzsk/backend/szy-new/target/szy-new-0.0.1-SNAPSHOT.jar
+
+# 方式二：后台运行
+java -jar D:/demo/java/jzsk/backend/szy-new/target/szy-new-0.0.1-SNAPSHOT.jar &
+
+# 方式三：使用 run_in_background 参数（Claude Code 环境）
+# 在 Bash 工具中设置 run_in_background: true
+```
+
+### 3. 停止Java服务失败
+
+**错误命令：**
+```bash
+# 错误：Windows 参数语法在 bash 中需要转义
+taskkill /F /PID 21076
+```
+
+**正确命令：**
+```bash
+# 方式一：使用双斜杠（Windows命令）
+taskkill //F //PID <PID号>
+
+# 方式二：使用 Windows 的 wmic 命令
+wmic process where "name='java.exe'" delete
+
+# 方式三：直接在 IDEA 中停止运行
+```
+
+### 4. 路径分隔符问题
+
+**错误写法：**
+```bash
+# 反斜杠 \ 在 bash 中需要转义
+mvn compile -s D:\demo\java\jzsk\backend\szy\maven-settings.xml
+```
+
+**正确写法：**
+```bash
+# 使用正斜杠 /
+mvn compile -s D:/demo/java/jzsk/backend/szy/maven-settings.xml
+
+# 或使用双引号包裹路径
+mvn compile -s "D:/demo/java/jzsk/backend/szy/maven-settings.xml"
+```
+
+### 5. 查看正在运行的Java进程
+
+```bash
+# Windows 查看进程
+tasklist | findstr java
+
+# 或使用 jps 命令
+jps -l
+```
 
 ## 架构设计
 
