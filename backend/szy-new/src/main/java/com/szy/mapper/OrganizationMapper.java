@@ -2,6 +2,7 @@ package com.szy.mapper;
 
 import com.szy.pojo.entity.Organization;
 import com.szy.pojo.vo.OrganizationVO;
+import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.List;
 /**
  * 组织机构Mapper
  */
+@Mapper
 public interface OrganizationMapper {
 
     /**
