@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szy.mapper.OrganizationMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.szy.pojo.entity.Organization">
+        <id column="id" property="id"/>
+        <result column="organization_name" property="organizationName"/>
+        <result column="organization_code" property="organizationCode"/>
+        <result column="administrative_name" property="administrativeName"/>
+        <result column="organization_abbr" property="organizationAbbr"/>
+        <result column="legal_representative" property="legalRepresentative"/>
+        <result column="agency_specifications" property="agencySpecifications"/>
+        <result column="subordinate_relations" property="subordinateRelations"/>
+        <result column="institutional_type" property="institutionalType"/>
+        <result column="main_function" property="mainFunction"/>
+        <result column="approve_content" property="approveContent"/>
+        <result column="website" property="website"/>
+        <result column="email" property="email"/>
+        <result column="address" property="address"/>
+        <result column="postal_code" property="postalCode"/>
+        <result column="office_telephone" property="officeTelephone"/>
+        <result column="fax" property="fax"/>
+        <result column="staff_size" property="staffSize"/>
+        <result column="whether_reform" property="whetherReform"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <!-- VO映射 -->
+    <resultMap id="VoResultMap" type="com.szy.pojo.vo.OrganizationVO">
+        <id column="id" property="id"/>
+        <result column="organization_name" property="organizationName"/>
+        <result column="organization_code" property="organizationCode"/>
+        <result column="administrative_name" property="administrativeName"/>
+        <result column="organization_abbr" property="organizationAbbr"/>
+        <result column="legal_representative" property="legalRepresentative"/>
+        <result column="agency_specifications" property="agencySpecifications"/>
+        <result column="subordinate_relations" property="subordinateRelations"/>
+        <result column="institutional_type" property="institutionalType"/>
+        <result column="main_function" property="mainFunction"/>
+        <result column="approve_content" property="approveContent"/>
+        <result column="website" property="website"/>
+        <result column="email" property="email"/>
+        <result column="address" property="address"/>
+        <result column="postal_code" property="postalCode"/>
+        <result column="office_telephone" property="officeTelephone"/>
+        <result column="fax" property="fax"/>
+        <result column="staff_size" property="staffSize"/>
+        <result column="whether_reform" property="whetherReform"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <!-- 查询列 -->
+    <sql id="selectColumns">
+        id, organization_name, organization_code, administrative_name, organization_abbr,
+        legal_representative, agency_specifications, subordinate_relations, institutional_type,
+        main_function, approve_content, website, email, address, postal_code,
+        office_telephone, fax, staff_size, whether_reform, create_time, update_time
+    </sql>
+
+    <!-- 分页查询 -->
+    <select id="selectList" resultMap="VoResultMap">
+        SELECT <include refid="selectColumns"/>
+        FROM organization
+        <where>
+            <if test="name != null and name != ''">
+                AND organization_name LIKE CONCAT('%', #{name}, '%')
+            </if>
+        </where>
+        ORDER BY id DESC
+    </select>
+
+    <!-- 根据ID查询 -->
+    <select id="selectById" resultMap="VoResultMap">
+        SELECT <include refid="selectColumns"/>
+        FROM organization
+        WHERE id = #{id}
+    </select>
+
+    <!-- 新增 -->
+    <insert id="insert" parameterType="com.szy.pojo.entity.Organization" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO organization (
+            organization_name, organization_code, administrative_name, organization_abbr,
+            legal_representative, agency_specifications, subordinate_relations, institutional_type,
+            main_function, approve_content, website, email, address, postal_code,
+            office_telephone, fax, staff_size, whether_reform, create_time, update_time
+        ) VALUES (
+            #{organizationName}, #{organizationCode}, #{administrativeName}, #{organizationAbbr},
+            #{legalRepresentative}, #{agencySpecifications}, #{subordinateRelations}, #{institutionalType},
+            #{mainFunction}, #{approveContent}, #{website}, #{email}, #{address}, #{postalCode},
+            #{officeTelephone}, #{fax}, #{staffSize}, #{whetherReform}, NOW(), NOW()
+        )
+    </insert>
+
+    <!-- 更新 -->
+    <update id="update" parameterType="com.szy.pojo.entity.Organization">
+        UPDATE organization
+        <set>
+            <if test="organizationName != null">organization_name = #{organizationName},</if>
+            <if test="organizationCode != null">organization_code = #{organizationCode},</if>
+            <if test="administrativeName != null">administrative_name = #{administrativeName},</if>
+            <if test="organizationAbbr != null">organization_abbr = #{organizationAbbr},</if>
+            <if test="legalRepresentative != null">legal_representative = #{legalRepresentative},</if>
+            <if test="agencySpecifications != null">agency_specifications = #{agencySpecifications},</if>
+            <if test="subordinateRelations != null">subordinate_relations = #{subordinateRelations},</if>
+            <if test="institutionalType != null">institutional_type = #{institutionalType},</if>
+            <if test="mainFunction != null">main_function = #{mainFunction},</if>
+            <if test="approveContent != null">approve_content = #{approveContent},</if>
+            <if test="website != null">website = #{website},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="postalCode != null">postal_code = #{postalCode},</if>
+            <if test="officeTelephone != null">office_telephone = #{officeTelephone},</if>
+            <if test="fax != null">fax = #{fax},</if>
+            <if test="staffSize != null">staff_size = #{staffSize},</if>
+            <if test="whetherReform != null">whether_reform = #{whetherReform},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除 -->
+    <delete id="deleteById">
+        DELETE FROM organization WHERE id = #{id}
+    </delete>
+
+</mapper>
