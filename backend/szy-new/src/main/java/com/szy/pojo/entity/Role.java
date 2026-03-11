@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -31,6 +32,12 @@ public class Role implements Serializable {
 
     /** 状态（1启用 0禁用） */
     private String status;
+
+    /** 创建时间 */
+    private Date createTime;
+
+    /** 更新时间 */
+    private Date updateTime;
 
     /** 菜单ID列表（非数据库字段） */
     private List<Long> menuIds = new ArrayList<>();

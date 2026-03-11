@@ -14,7 +14,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import com.szy.pojo.dto.RoleMenuDTO;
 
 /**
  * 角色管理控制器
@@ -29,8 +32,15 @@ public class RoleController {
 
     @GetMapping("/list")
     @ApiOperation("获取角色列表")
-    public Result<PageInfo<Role>> list(RoleQueryDTO queryDTO) {
-        return Result.success(roleService.list(queryDTO));
+    public Result<Map<String, Object>> list(RoleQueryDTO queryDTO) {
+        PageInfo<Role> pageInfo = roleService.list(queryDTO);
+        Map<String, Object> result = new HashMap<>();
+        result.put("records", pageInfo.getList());
+        result.put("total", pageInfo.getTotal());
+        result.put("current", pageInfo.getPageNum());
+        result.put("size", pageInfo.getPageSize());
+        result.put("pages", pageInfo.getPages());
+        return Result.success(result);
     }
 
     @GetMapping("/info/{id}")
@@ -42,7 +52,7 @@ public class RoleController {
     @PostMapping("/save")
     @ApiOperation("新增角色")
     @PreAuthorize("hasAuthority('xtgl')")
-    public Result<Void> save(@Validated @RequestBody RoleDTO dto) {
+    public Result<Void> save(@Validated RoleDTO dto) {
         roleService.save(dto);
         return Result.success("操作成功");
     }
@@ -50,7 +60,7 @@ public class RoleController {
     @PostMapping("/update")
     @ApiOperation("更新角色")
     @PreAuthorize("hasAuthority('xtgl')")
-    public Result<Void> update(@Validated @RequestBody RoleDTO dto) {
+    public Result<Void> update(@Validated RoleDTO dto) {
         roleService.update(dto);
         return Result.success("操作成功");
     }
@@ -66,8 +76,8 @@ public class RoleController {
     @PostMapping("/menu/{roleId}")
     @ApiOperation("分配菜单权限")
     @PreAuthorize("hasAuthority('xtgl')")
-    public Result<Void> allocateMenu(@PathVariable Long roleId, @RequestBody List<Long> menuIds) {
-        roleService.allocateMenu(roleId, menuIds);
+    public Result<Void> allocateMenu(@PathVariable Long roleId, @ModelAttribute RoleMenuDTO dto) {
+        roleService.allocateMenu(roleId, dto.getMenuIds());
         return Result.success("操作成功");
     }
 

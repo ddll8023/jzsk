@@ -50,6 +50,9 @@ public class SecurityConfig {
         http
             // 关闭CSRF
             .csrf().disable()
+            // 启用CORS（使用 CorsFilter）
+            .cors()
+            .and()
             // 禁用Session
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()

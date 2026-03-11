@@ -24,15 +24,3 @@ export function login(credentials) {
 export function getUserInfo() {
     return request.get('/user/userInfo')
 }
-
-/**
- * 修改密码
- * @param {Object} data - 密码数据
- * @param {string} data.currentPassword - 原密码
- * @param {string} data.password - 新密码
- * @param {string} data.confirmPassword - 确认密码
- * @returns {Promise} 修改结果
- */
-export function updatePassword(data) {
-    return request.post('/user/updatePass', data)
-}

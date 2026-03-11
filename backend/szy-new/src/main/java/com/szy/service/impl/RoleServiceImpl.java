@@ -6,12 +6,12 @@ import com.baomidou.dynamic.datasource.annotation.DS;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.szy.common.exception.BusinessException;
+import com.szy.mapper.RoleAuthorityMapper;
 import com.szy.mapper.RoleMapper;
-import com.szy.mapper.RoleMenuMapper;
 import com.szy.pojo.dto.RoleDTO;
 import com.szy.pojo.dto.RoleQueryDTO;
 import com.szy.pojo.entity.Role;
-import com.szy.pojo.entity.RoleMenu;
+import com.szy.pojo.entity.RoleAuthority;
 import com.szy.pojo.vo.RoleVO;
 import com.szy.service.RoleService;
 import lombok.RequiredArgsConstructor;
@@ -30,11 +30,14 @@ import java.util.List;
 public class RoleServiceImpl implements RoleService {
 
     private final RoleMapper roleMapper;
-    private final RoleMenuMapper roleMenuMapper;
+    private final RoleAuthorityMapper roleAuthorityMapper;
 
     @Override
     public PageInfo<Role> list(RoleQueryDTO queryDTO) {
-        PageHelper.startPage(queryDTO.getCurrentPage(), queryDTO.getPageSize());
+        // 设置分页默认值
+        int currentPage = queryDTO.getCurrentPage() == null ? 1 : queryDTO.getCurrentPage();
+        int pageSize = queryDTO.getPageSize() == null ? 10 : queryDTO.getPageSize();
+        PageHelper.startPage(currentPage, pageSize);
         List<Role> roles = roleMapper.selectList(queryDTO.getName());
         return new PageInfo<>(roles);
     }
@@ -46,7 +49,7 @@ public class RoleServiceImpl implements RoleService {
             throw new BusinessException("角色不存在");
         }
         RoleVO vo = BeanUtil.copyProperties(role, RoleVO.class);
-        vo.setMenuIds(roleMenuMapper.selectMenuIdsByRoleId(id));
+        vo.setMenuIds(roleAuthorityMapper.selectAuthorityIdsByRoleId(id));
         return vo;
     }
 
@@ -54,7 +57,13 @@ public class RoleServiceImpl implements RoleService {
     @Transactional(rollbackFor = Exception.class)
     public void save(RoleDTO dto) {
         Role role = BeanUtil.copyProperties(dto, Role.class);
+        // 处理前端传递的description字段，映射到note
+        if (StrUtil.isBlank(role.getNote()) && StrUtil.isNotBlank(dto.getDescription())) {
+            role.setNote(dto.getDescription());
+        }
+        // 处理status字段，确保是字符串类型
         role.setStatus(StrUtil.isBlank(dto.getStatus()) ? "1" : dto.getStatus());
+        role.setType("1");
         roleMapper.insert(role);
     }
 
@@ -66,6 +75,11 @@ public class RoleServiceImpl implements RoleService {
             throw new BusinessException("角色不存在");
         }
         Role role = BeanUtil.copyProperties(dto, Role.class);
+        // 处理前端传递的description字段，映射到note
+        if (StrUtil.isBlank(role.getNote()) && StrUtil.isNotBlank(dto.getDescription())) {
+            role.setNote(dto.getDescription());
+        }
+        role.setStatus(StrUtil.isBlank(dto.getStatus()) ? "1" : dto.getStatus());
         roleMapper.update(role);
     }
 
@@ -78,7 +92,7 @@ public class RoleServiceImpl implements RoleService {
         }
         roleMapper.deleteById(id);
         // 删除角色菜单关联
-        roleMenuMapper.deleteByRoleId(id);
+        roleAuthorityMapper.deleteByRoleId(id);
     }
 
     @Override
@@ -89,23 +103,23 @@ public class RoleServiceImpl implements RoleService {
             throw new BusinessException("角色不存在");
         }
         // 先删除旧的关联
-        roleMenuMapper.deleteByRoleId(roleId);
+        roleAuthorityMapper.deleteByRoleId(roleId);
         // 再插入新的关联
         if (menuIds != null && !menuIds.isEmpty()) {
-            List<RoleMenu> list = new ArrayList<>();
+            List<RoleAuthority> list = new ArrayList<>();
             for (Long menuId : menuIds) {
-                RoleMenu rm = new RoleMenu();
+                RoleAuthority rm = new RoleAuthority();
                 rm.setRoleId(roleId);
-                rm.setMenuId(menuId);
+                rm.setAuthorityId(menuId);
                 list.add(rm);
             }
-            roleMenuMapper.batchInsert(list);
+            roleAuthorityMapper.batchInsert(list);
         }
     }
 
     @Override
     public List<Long> getRoleMenus(Long roleId) {
-        return roleMenuMapper.selectMenuIdsByRoleId(roleId);
+        return roleAuthorityMapper.selectAuthorityIdsByRoleId(roleId);
     }
 
     @Override

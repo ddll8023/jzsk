@@ -285,7 +285,8 @@ const handleSearch = async () => {
       pageSize: pageSize.value
     })
     if (res.data?.code === 200) {
-      dictList.value = res.data.data?.content || res.data.data || []
+      // 兼容 content 和 records 两种字段
+      dictList.value = res.data.data?.records || res.data.data?.content || []
     }
   } catch (error) {
     console.error('查询字典列表失败:', error)

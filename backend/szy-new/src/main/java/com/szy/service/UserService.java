@@ -1,6 +1,7 @@
 package com.szy.service;
 
 import com.github.pagehelper.PageInfo;
+import com.szy.pojo.dto.UpdatePasswordDTO;
 import com.szy.pojo.dto.UserDTO;
 import com.szy.pojo.dto.UserQueryDTO;
 import com.szy.pojo.entity.User;
@@ -83,4 +84,14 @@ public interface UserService {
      * 修改密码
      */
     void changePassword(Long userId, String oldPassword, String newPassword);
+
+    /**
+     * 修改密码（根据用户名）
+     */
+    void changePassword(String username, String oldPassword, String newPassword);
+
+    /**
+     * 修改密码（包含确认密码验证）
+     */
+    void changePassword(Long userId, UpdatePasswordDTO dto);
 }

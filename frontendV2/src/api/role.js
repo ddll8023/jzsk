@@ -66,7 +66,7 @@ export function deleteRole(id) {
  * @returns {Promise} 操作结果
  */
 export function allocateMenu(roleId, menuIds) {
-  return request.post(`/role/menu/${roleId}`, menuIds)
+  return request.post(`/role/menu/${roleId}`, menuIds, { headers: { 'Content-Type': 'application/json' } })
 }
 
 /**

@@ -405,7 +405,10 @@ const handleSearch = async () => {
     loadUserList()
     return
   }
-  
+
+  // 搜索时重置到第一页
+  currentPage.value = 1
+
   loading.value = true
   try {
     const res = await searchUser({

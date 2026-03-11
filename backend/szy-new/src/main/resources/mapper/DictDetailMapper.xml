@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szy.mapper.DictDetailMapper">
+
+    <resultMap id="BaseResultMap" type="com.szy.pojo.entity.DictDetail">
+        <id column="detail_id" property="id"/>
+        <result column="dict_id" property="dictId"/>
+        <result column="label" property="label"/>
+        <result column="value" property="value"/>
+        <result column="dict_sort" property="dictSort"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        detail_id, dict_id, label, value, dict_sort, create_time, update_time
+    </sql>
+
+    <select id="findByDictId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM dict_detail
+        WHERE dict_id = #{dictId}
+        ORDER BY dict_sort ASC, detail_id ASC
+    </select>
+
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM dict_detail
+        WHERE detail_id = #{id}
+    </select>
+
+    <select id="countByDictIdAndValue" resultType="int">
+        SELECT COUNT(*) FROM dict_detail
+        WHERE dict_id = #{dictId} AND value = #{value}
+        <if test="excludeId != null">
+            AND detail_id != #{excludeId}
+        </if>
+    </select>
+
+    <insert id="insert" parameterType="com.szy.pojo.entity.DictDetail" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dict_detail (dict_id, label, value, dict_sort)
+        VALUES (#{dictId}, #{label}, #{value}, #{dictSort})
+    </insert>
+
+    <update id="update" parameterType="com.szy.pojo.entity.DictDetail">
+        UPDATE dict_detail
+        SET label = #{label},
+            value = #{value},
+            dict_sort = #{dictSort}
+        WHERE detail_id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM dict_detail WHERE detail_id = #{id}
+    </delete>
+
+    <delete id="deleteByDictId">
+        DELETE FROM dict_detail WHERE dict_id = #{dictId}
+    </delete>
+
+</mapper>

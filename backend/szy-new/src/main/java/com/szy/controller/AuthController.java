@@ -30,10 +30,11 @@ public class AuthController {
 
     /**
      * 用户登录
+     * 支持表单格式（application/x-www-form-urlencoded）和JSON格式
      */
     @ApiOperation("用户登录")
     @PostMapping("/login")
-    public Result login(@Validated @RequestBody LoginDTO loginDTO) {
+    public Result login(@Validated LoginDTO loginDTO) {
         // 表单登录方式
         UsernamePasswordAuthenticationToken token =
                 new UsernamePasswordAuthenticationToken(loginDTO.getUsername(), loginDTO.getPassword());

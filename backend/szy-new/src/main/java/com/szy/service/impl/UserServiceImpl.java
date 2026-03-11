@@ -1,11 +1,13 @@
 package com.szy.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.szy.common.exception.BusinessException;
 import com.szy.mapper.UserMapper;
 import com.szy.mapper.UserRoleMapper;
+import com.szy.pojo.dto.UpdatePasswordDTO;
 import com.szy.pojo.dto.UserDTO;
 import com.szy.pojo.dto.UserQueryDTO;
 import com.szy.pojo.entity.Role;
@@ -16,13 +18,11 @@ import com.szy.pojo.vo.UserVO;
 import com.szy.service.RoleService;
 import com.szy.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -36,14 +36,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final UserRoleMapper userRoleMapper;
     private final RoleService roleService;
-    private final StringRedisTemplate stringRedisTemplate;
     private final PasswordEncoder passwordEncoder;
-
-    /** 权限缓存Key前缀 */
-    private static final String AUTHORITY_CACHE_PREFIX = "GrantedAuthority:";
-
-    /** 权限缓存过期时间（小时） */
-    private static final long AUTHORITY_CACHE_EXPIRE_HOURS = 1;
 
     /** 默认密码 */
     private static final String DEFAULT_PASSWORD = "123456";
@@ -60,22 +53,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String getUserAuthorityInfo(Long userId) {
-        // 先从缓存获取
         User user = userMapper.selectById(userId);
         if (user == null) {
             return "";
-        }
-
-        String cacheKey = AUTHORITY_CACHE_PREFIX + user.getUsername();
-
-        // 尝试从Redis获取缓存（Redis不可用时跳过）
-        try {
-            String cachedAuthority = stringRedisTemplate.opsForValue().get(cacheKey);
-            if (cachedAuthority != null) {
-                return cachedAuthority;
-            }
-        } catch (Exception e) {
-            // Redis不可用，继续查询数据库
         }
 
         // 查询角色
@@ -97,25 +77,12 @@ public class UserServiceImpl implements UserService {
             authorityInfo += authorities;
         }
 
-        // 尝试缓存结果（Redis不可用时跳过）
-        try {
-            stringRedisTemplate.opsForValue().set(
-                    cacheKey,
-                    authorityInfo,
-                    AUTHORITY_CACHE_EXPIRE_HOURS,
-                    TimeUnit.HOURS
-            );
-        } catch (Exception e) {
-            // Redis不可用，跳过缓存
-        }
-
         return authorityInfo;
     }
 
     @Override
     public void clearUserAuthorityCache(String username) {
-        String cacheKey = AUTHORITY_CACHE_PREFIX + username;
-        stringRedisTemplate.delete(cacheKey);
+        // 暂不实现（Redis已移除）
     }
 
     @Override
@@ -141,7 +108,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public PageInfo<UserDetailVO> list(UserQueryDTO queryDTO) {
-        PageHelper.startPage(queryDTO.getCurrentPage(), queryDTO.getPageSize());
+        // 设置分页默认值
+        int currentPage = queryDTO.getCurrentPage() == null ? 1 : queryDTO.getCurrentPage();
+        int pageSize = queryDTO.getPageSize() == null ? 10 : queryDTO.getPageSize();
+        PageHelper.startPage(currentPage, pageSize);
         List<User> users = userMapper.selectList(queryDTO.getUsername(), queryDTO.getName());
         PageInfo<User> pageInfo = new PageInfo<>(users);
 
@@ -182,10 +152,11 @@ public class UserServiceImpl implements UserService {
         user.setUsername(dto.getUsername());
         user.setPassword(passwordEncoder.encode(DEFAULT_PASSWORD));
         user.setName(dto.getName());
-        user.setType(dto.getType());
-        user.setDepartment(dto.getDepartment());
-        user.setPhone(dto.getPhone());
-        user.setEmail(dto.getEmail());
+        // 处理空字符串，转换为null
+        user.setType(StrUtil.isBlank(dto.getType()) ? null : dto.getType());
+        user.setDepartment(StrUtil.isBlank(dto.getDepartment()) ? null : dto.getDepartment());
+        user.setPhone(StrUtil.isBlank(dto.getPhoneNumber()) ? null : dto.getPhoneNumber());
+        user.setEmail(StrUtil.isBlank(dto.getEmail()) ? null : dto.getEmail());
 
         userMapper.insert(user);
 
@@ -213,10 +184,11 @@ public class UserServiceImpl implements UserService {
         // 更新用户
         User user = new User();
         user.setId(dto.getId());
+        user.setUsername(dto.getUsername());
         user.setName(dto.getName());
         user.setType(dto.getType());
         user.setDepartment(dto.getDepartment());
-        user.setPhone(dto.getPhone());
+        user.setPhone(dto.getPhoneNumber());
         user.setEmail(dto.getEmail());
 
         userMapper.update(user);
@@ -295,6 +267,41 @@ public class UserServiceImpl implements UserService {
         // 更新新密码
         String encodedPassword = passwordEncoder.encode(newPassword);
         userMapper.updatePassword(userId, encodedPassword);
+    }
+
+    @Override
+    public void changePassword(String username, String oldPassword, String newPassword) {
+        User user = userMapper.selectByUsername(username);
+        if (user == null) {
+            throw new BusinessException("用户不存在");
+        }
+        changePassword(user.getId(), oldPassword, newPassword);
+    }
+
+    @Override
+    public void changePassword(Long userId, UpdatePasswordDTO dto) {
+        // 验证新密码和确认密码是否一致
+        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+            throw new BusinessException("新密码与确认密码不一致");
+        }
+
+        // 获取用户
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            throw new BusinessException("用户不存在");
+        }
+
+        // 验证原密码
+        if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
+            throw new BusinessException("原密码不正确");
+        }
+
+        // 更新密码
+        String encodedPassword = passwordEncoder.encode(dto.getPassword());
+        userMapper.updatePassword(userId, encodedPassword);
+
+        // 清除权限缓存
+        clearUserAuthorityCache(user.getUsername());
     }
 
     /**

@@ -1,7 +1,9 @@
 package com.szy.config;
 
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -30,6 +32,20 @@ public class CorsConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
+    }
+
+    /**
+     * 注册CorsFilter，确保其在Spring Security之前执行
+     */
+    @Bean
+    public FilterRegistrationBean<CorsFilter> corsFilterRegistration() {
+        FilterRegistrationBean<CorsFilter> registration = new FilterRegistrationBean<>();
+        registration.setFilter(corsFilter());
+        registration.addUrlPatterns("/*");
+        // 设置最高优先级，确保在Spring Security之前执行
+        registration.setOrder(Ordered.HIGHEST_PRECEDENCE);
+        registration.setName("corsFilter");
+        return registration;
     }
 
 }

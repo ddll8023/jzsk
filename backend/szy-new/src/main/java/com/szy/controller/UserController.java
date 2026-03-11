@@ -4,7 +4,6 @@ import com.github.pagehelper.PageInfo;
 import com.szy.common.exception.BusinessException;
 import com.szy.common.lang.Result;
 import com.szy.pojo.dto.ResetPasswordDTO;
-import com.szy.pojo.dto.UpdatePasswordDTO;
 import com.szy.pojo.dto.UserDTO;
 import com.szy.pojo.dto.UserQueryDTO;
 import com.szy.pojo.entity.User;
@@ -17,12 +16,13 @@ import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 用户控制器
@@ -34,7 +34,6 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-    private final PasswordEncoder passwordEncoder;
 
     /**
      * 获取当前用户信息
@@ -51,46 +50,20 @@ public class UserController {
     }
 
     /**
-     * 修改密码
-     */
-    @ApiOperation("修改密码")
-    @PostMapping("/updatePass")
-    public Result<Void> updatePassword(@Validated @RequestBody UpdatePasswordDTO dto,
-                                  @AuthenticationPrincipal AccountUser accountUser) {
-        // 验证新密码和确认密码是否一致
-        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
-            throw new BusinessException("新密码与确认密码不一致");
-        }
-
-        // 获取当前用户
-        User user = userService.getById(accountUser.getUserId());
-        if (user == null) {
-            throw new BusinessException("用户不存在");
-        }
-
-        // 验证原密码
-        if (!passwordEncoder.matches(dto.getCurrentPassword(), user.getPassword())) {
-            throw new BusinessException("原密码不正确");
-        }
-
-        // 更新密码
-        String encodedPassword = passwordEncoder.encode(dto.getPassword());
-        userService.updatePassword(user.getId(), encodedPassword);
-
-        // 清除权限缓存
-        userService.clearUserAuthorityCache(user.getUsername());
-
-        return Result.success("密码修改成功");
-    }
-
-    /**
      * 获取用户列表
      */
     @GetMapping("/list")
     @ApiOperation("获取用户列表")
     @PreAuthorize("hasAuthority('xtgl')")
-    public Result<PageInfo<UserDetailVO>> list(UserQueryDTO queryDTO) {
-        return Result.success(userService.list(queryDTO));
+    public Result<Map<String, Object>> list(UserQueryDTO queryDTO) {
+        PageInfo<UserDetailVO> pageInfo = userService.list(queryDTO);
+        Map<String, Object> result = new HashMap<>();
+        result.put("records", pageInfo.getList());
+        result.put("total", pageInfo.getTotal());
+        result.put("current", pageInfo.getPageNum());
+        result.put("size", pageInfo.getPageSize());
+        result.put("pages", pageInfo.getPages());
+        return Result.success(result);
     }
 
     /**
@@ -99,15 +72,15 @@ public class UserController {
     @GetMapping("/search-list")
     @ApiOperation("搜索用户（按姓名）")
     @PreAuthorize("hasAuthority('xtgl')")
-    public Result<PageInfo<UserDetailVO>> searchList(
-            @RequestParam("currentPage") Integer currentPage,
-            @RequestParam("pageSize") Integer pageSize,
-            @RequestParam("name") String name) {
-        UserQueryDTO queryDTO = new UserQueryDTO();
-        queryDTO.setCurrentPage(currentPage);
-        queryDTO.setPageSize(pageSize);
-        queryDTO.setName(name);
-        return Result.success(userService.list(queryDTO));
+    public Result<Map<String, Object>> searchList(UserQueryDTO queryDTO) {
+        PageInfo<UserDetailVO> pageInfo = userService.list(queryDTO);
+        Map<String, Object> result = new HashMap<>();
+        result.put("records", pageInfo.getList());
+        result.put("total", pageInfo.getTotal());
+        result.put("current", pageInfo.getPageNum());
+        result.put("size", pageInfo.getPageSize());
+        result.put("pages", pageInfo.getPages());
+        return Result.success(result);
     }
 
     /**
@@ -126,7 +99,7 @@ public class UserController {
     @PostMapping("/save")
     @ApiOperation("新增用户")
     @PreAuthorize("hasAuthority('xtgl')")
-    public Result<Void> save(@Validated @RequestBody UserDTO dto) {
+    public Result<Void> save(@Validated UserDTO dto) {
         userService.save(dto);
         return Result.success("操作成功");
     }
@@ -137,7 +110,7 @@ public class UserController {
     @PostMapping("/update")
     @ApiOperation("更新用户")
     @PreAuthorize("hasAuthority('xtgl')")
-    public Result<Void> update(@Validated @RequestBody UserDTO dto) {
+    public Result<Void> update(@Validated UserDTO dto) {
         userService.update(dto);
         return Result.success("操作成功");
     }
@@ -159,7 +132,7 @@ public class UserController {
     @PostMapping("/role/{userId}")
     @ApiOperation("分配角色")
     @PreAuthorize("hasAuthority('xtgl')")
-    public Result<Void> allocateRole(@PathVariable Long userId, @RequestBody List<Long> roleIds) {
+    public Result<Void> allocateRole(@PathVariable Long userId, List<Long> roleIds) {
         userService.allocateRole(userId, roleIds);
         return Result.success("操作成功");
     }
@@ -176,13 +149,12 @@ public class UserController {
     }
 
     /**
-     * 修改当前用户密码（新版本）
+     * 修改当前用户密码
      */
     @PutMapping("/updatePassword")
     @ApiOperation("修改当前用户密码")
-    public Result<Void> updatePassword(@Validated @RequestBody ResetPasswordDTO dto, Principal principal) {
-        User user = userService.getByUsername(principal.getName());
-        userService.changePassword(user.getId(), dto.getOldPassword(), dto.getNewPassword());
+    public Result<Void> updatePassword(@Validated ResetPasswordDTO dto, Principal principal) {
+        userService.changePassword(principal.getName(), dto.getOldPassword(), dto.getNewPassword());
         return Result.success("密码修改成功");
     }
 }

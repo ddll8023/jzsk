@@ -13,6 +13,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 部门管理控制器
  */
@@ -26,8 +29,15 @@ public class DeptController {
 
     @GetMapping("/list")
     @Operation(summary = "获取部门列表")
-    public Result<PageInfo<DeptVO>> list(DeptQueryDTO queryDTO) {
-        return Result.success(deptService.list(queryDTO));
+    public Result<Map<String, Object>> list(DeptQueryDTO queryDTO) {
+        PageInfo<DeptVO> pageInfo = deptService.list(queryDTO);
+        Map<String, Object> result = new HashMap<>();
+        result.put("records", pageInfo.getList());
+        result.put("total", pageInfo.getTotal());
+        result.put("current", pageInfo.getPageNum());
+        result.put("size", pageInfo.getPageSize());
+        result.put("pages", pageInfo.getPages());
+        return Result.success(result);
     }
 
     @GetMapping("/{id}")
@@ -39,14 +49,14 @@ public class DeptController {
     @PostMapping("/save")
     @Operation(summary = "新增部门")
     @PreAuthorize("hasAuthority('xtgl')")
-    public Result<DeptVO> save(@Validated @RequestBody DeptDTO dto) {
+    public Result<DeptVO> save(@Validated DeptDTO dto) {
         return Result.success(deptService.save(dto));
     }
 
     @PutMapping("/update")
     @Operation(summary = "更新部门")
     @PreAuthorize("hasAuthority('xtgl')")
-    public Result<DeptVO> update(@Validated @RequestBody DeptDTO dto) {
+    public Result<DeptVO> update(@Validated DeptDTO dto) {
         return Result.success(deptService.update(dto));
     }
 

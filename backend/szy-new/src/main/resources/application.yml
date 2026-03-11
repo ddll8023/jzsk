@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8081
 
 spring:
   mvc:
@@ -21,10 +21,10 @@ spring:
           url: jdbc:mysql://localhost:3306/gcdd?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
           username: root
           password: admin123
-  redis:
-    host: localhost
-    port: 6379
-    database: 1
+#  redis:
+#    host: localhost
+#    port: 6379
+#    database: 1
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml

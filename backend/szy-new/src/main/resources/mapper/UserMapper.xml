@@ -48,6 +48,7 @@
         LEFT JOIN role_authority ra ON ur.role_id = ra.role_id
         LEFT JOIN authority a ON ra.authority_id = a.id
         WHERE ur.user_id = #{userId}
+        AND a.code IS NOT NULL
     </select>
 
     <select id="selectList" resultMap="BaseResultMap">
@@ -65,8 +66,8 @@
     </select>
 
     <insert id="insert" parameterType="com.szy.pojo.entity.User" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO user (username, password, name, type, department, phone_number, email)
-        VALUES (#{username}, #{password}, #{name}, #{type}, #{department}, #{phone}, #{email})
+        INSERT INTO user (username, password, name, type, department, phone_number, email, create_time, update_time)
+        VALUES (#{username}, #{password}, #{name}, #{type}, #{department}, #{phone}, #{email}, NOW(), NOW())
     </insert>
 
     <update id="update" parameterType="com.szy.pojo.entity.User">
@@ -76,7 +77,8 @@
             type = #{type},
             department = #{department},
             phone_number = #{phone},
-            email = #{email}
+            email = #{email},
+            update_time = NOW()
         WHERE id = #{id}
     </update>
 

@@ -41,10 +41,11 @@ service.interceptors.request.use(
       console.error('❌ baseURL未配置，请求可能失败:', config.url)
     }
     
-    // 添加 Authorization 请求头
+    // 添加 Authorization 请求头（Bearer Token 格式）
     const token = sessionStorage.getItem('token')
     if (token) {
-      config.headers.Authorization = token
+      // 添加 Bearer 前缀，符合 RFC 6750 规范
+      config.headers.Authorization = token.startsWith('Bearer ') ? token : `Bearer ${token}`
     }
     
     return config
