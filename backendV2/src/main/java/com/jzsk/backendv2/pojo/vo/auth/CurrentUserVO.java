@@ -24,6 +24,6 @@ public class CurrentUserVO {
     @Schema(description = "显示名称", example = "系统管理员")
     private String displayName;
 
-    @Schema(description = "权限列表")
+    @Schema(description = "权限列表", example = "[\"ROLE_ADMIN\"]")
     private List<String> authorities;
 }

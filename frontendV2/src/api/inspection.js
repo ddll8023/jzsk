@@ -4,6 +4,7 @@
  * Source: 参考 frontend/src/components/menu/EngineeringPolling/PollingRecordRead.vue
  */
 import request from '@/utils/request'
+import { buildIdPayload, normalizePageParams } from './_helpers'
 
 /**
  * 获取巡检记录列表
@@ -11,7 +12,7 @@ import request from '@/utils/request'
  * @returns {Promise}
  */
 export function getInspectionList(params) {
-  return request.get('/inspection-records/list', { params })
+  return request.get('/api/inspection-records/page', { params: normalizePageParams(params) })
 }
 
 /**
@@ -20,7 +21,7 @@ export function getInspectionList(params) {
  * @returns {Promise}
  */
 export function getInspectionInfo(id) {
-  return request.get(`/inspection-records/info/${id}`)
+  return request.get(`/api/inspection-records/${id}`)
 }
 
 /**
@@ -29,7 +30,7 @@ export function getInspectionInfo(id) {
  * @returns {Promise}
  */
 export function saveInspection(data) {
-  return request.post('/inspection-records/save', data)
+  return request.post('/api/inspection-records/create', data)
 }
 
 /**
@@ -38,7 +39,7 @@ export function saveInspection(data) {
  * @returns {Promise}
  */
 export function updateInspection(data) {
-  return request.post('/inspection-records/update', data)
+  return request.post('/api/inspection-records/update', data)
 }
 
 /**
@@ -47,7 +48,7 @@ export function updateInspection(data) {
  * @returns {Promise}
  */
 export function deleteInspection(id) {
-  return request.post(`/inspection-records/delete/${id}`)
+  return request.post('/api/inspection-records/delete', buildIdPayload(id))
 }
 
 /**
@@ -56,7 +57,7 @@ export function deleteInspection(id) {
  * @returns {Promise}
  */
 export function solveInspection(data) {
-  return request.post('/inspection-records/solveRecords', data)
+  return request.post('/api/inspection-records/solve', data)
 }
 
 /**
@@ -64,7 +65,7 @@ export function solveInspection(data) {
  * @returns {Promise}
  */
 export function exportInspectionExcel() {
-  return request.get('/inspection-records/export-excel')
+  return request.get('/api/inspection-records/export')
 }
 
 /**
@@ -73,7 +74,7 @@ export function exportInspectionExcel() {
  * @returns {Promise}
  */
 export function uploadInspectionImage(formData) {
-  return request.post('/inspection-records/upload2', formData, {
+  return request.post('/api/inspection-records/upload', formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
     }

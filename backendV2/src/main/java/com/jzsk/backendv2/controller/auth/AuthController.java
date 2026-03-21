@@ -6,6 +6,7 @@ import com.jzsk.backendv2.pojo.vo.auth.CurrentUserVO;
 import com.jzsk.backendv2.pojo.vo.auth.LoginResponseVO;
 import com.jzsk.backendv2.service.auth.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,6 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 
+/**
+ * 认证控制器
+ * 用途：提供用户登录和当前用户信息查询的 RESTful API 接口
+ * 遵循 KISS 原则：简单清晰的接口设计，只做请求转发
+ */
 @Validated
 @RestController
 @RequiredArgsConstructor
@@ -33,6 +39,7 @@ public class AuthController {
     @ApiResponse(responseCode = "200", description = "登录成功")
     @PostMapping("/login")
     public ResponseEntity<ApiResult<LoginResponseVO>> login(
+            @Parameter(description = "登录请求参数", required = true)
             @Valid @RequestBody LoginRequestDTO request) {
         return ResponseEntity.ok(ApiResult.success(authService.login(request), "登录成功"));
     }

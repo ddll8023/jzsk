@@ -3,6 +3,7 @@
  * 包含值班安排、值班日志相关接口
  */
 import request from '@/utils/request'
+import { buildIdPayload, buildIdsPayload, normalizePageParams } from './_helpers'
 
 // ==================== 值班安排 ====================
 
@@ -12,7 +13,7 @@ import request from '@/utils/request'
  * @returns {Promise}
  */
 export const getDutySchedulePage = (params) => {
-  return request.get('/duty-schedule/page', { params })
+  return request.get('/api/duty-schedules/page', { params: normalizePageParams(params) })
 }
 
 /**
@@ -21,7 +22,7 @@ export const getDutySchedulePage = (params) => {
  * @returns {Promise}
  */
 export const saveDutySchedule = (data) => {
-  return request.post('/duty-schedule', data)
+  return request.post('/api/duty-schedules/create', data)
 }
 
 /**
@@ -31,7 +32,7 @@ export const saveDutySchedule = (data) => {
  * @returns {Promise}
  */
 export const updateDutySchedule = (id, data) => {
-  return request.put(`/duty-schedule/${id}`, data)
+  return request.post('/api/duty-schedules/update', { ...data, id })
 }
 
 /**
@@ -40,7 +41,7 @@ export const updateDutySchedule = (id, data) => {
  * @returns {Promise}
  */
 export const deleteDutySchedule = (id) => {
-  return request.delete(`/duty-schedule/${id}`)
+  return request.post('/api/duty-schedules/delete', buildIdPayload(id))
 }
 
 /**
@@ -49,7 +50,7 @@ export const deleteDutySchedule = (id) => {
  * @returns {Promise}
  */
 export const batchDeleteDutySchedule = (ids) => {
-  return request.delete('/duty-schedule/batch', { data: ids })
+  return request.post('/api/duty-schedules/batch-delete', buildIdsPayload(ids))
 }
 
 // ==================== 值班日志 ====================
@@ -60,7 +61,7 @@ export const batchDeleteDutySchedule = (ids) => {
  * @returns {Promise}
  */
 export const getDutyLogPage = (params) => {
-  return request.get('/duty-log/page', { params })
+  return request.get('/api/duty-logs/page', { params: normalizePageParams(params) })
 }
 
 /**
@@ -69,7 +70,7 @@ export const getDutyLogPage = (params) => {
  * @returns {Promise}
  */
 export const saveDutyLog = (data) => {
-  return request.post('/duty-log', data)
+  return request.post('/api/duty-logs/create', data)
 }
 
 /**
@@ -79,7 +80,7 @@ export const saveDutyLog = (data) => {
  * @returns {Promise}
  */
 export const updateDutyLog = (id, data) => {
-  return request.put(`/duty-log/${id}`, data)
+  return request.post('/api/duty-logs/update', { ...data, id })
 }
 
 /**
@@ -88,7 +89,7 @@ export const updateDutyLog = (id, data) => {
  * @returns {Promise}
  */
 export const deleteDutyLog = (id) => {
-  return request.delete(`/duty-log/${id}`)
+  return request.post('/api/duty-logs/delete', buildIdPayload(id))
 }
 
 /**
@@ -97,5 +98,5 @@ export const deleteDutyLog = (id) => {
  * @returns {Promise}
  */
 export const batchDeleteDutyLog = (ids) => {
-  return request.delete('/duty-log/batch', { data: ids })
+  return request.post('/api/duty-logs/batch-delete', buildIdsPayload(ids))
 }

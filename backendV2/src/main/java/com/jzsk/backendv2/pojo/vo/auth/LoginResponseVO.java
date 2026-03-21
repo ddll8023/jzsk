@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Schema(name = "登录响应", description = "登录成功后的返回信息")
 public class LoginResponseVO {
 
-    @Schema(description = "JWT令牌")
+    @Schema(description = "JWT令牌", example = "eyJhbGciOiJIUzUxMiJ9...")
     private String token;
 
     @Schema(description = "当前登录用户")

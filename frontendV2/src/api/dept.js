@@ -4,6 +4,7 @@
  * 遵循原则：KISS - 简洁实现，接口定义清晰
  */
 import request from '@/utils/request'
+import { buildIdPayload, normalizePageParams } from './_helpers'
 
 /**
  * 获取部门列表（分页）
@@ -14,11 +15,7 @@ import request from '@/utils/request'
  * @returns {Promise} 部门列表数据
  */
 export function getDeptList(params) {
-  return request({
-    url: '/department/list',
-    method: 'get',
-    params
-  })
+  return request.get('/api/departments/page', { params: normalizePageParams(params) })
 }
 
 /**
@@ -27,10 +24,7 @@ export function getDeptList(params) {
  * @returns {Promise} 部门详细信息
  */
 export function getDeptInfo(id) {
-  return request({
-    url: `/department/${id}`,
-    method: 'get'
-  })
+  return request.get(`/api/departments/${id}`)
 }
 
 /**
@@ -43,11 +37,7 @@ export function getDeptInfo(id) {
  * @returns {Promise} 新增结果
  */
 export function saveDept(data) {
-  return request({
-    url: '/department/save',
-    method: 'post',
-    data
-  })
+  return request.post('/api/departments/create', data)
 }
 
 /**
@@ -56,11 +46,7 @@ export function saveDept(data) {
  * @returns {Promise} 更新结果
  */
 export function updateDept(data) {
-  return request({
-    url: '/department/update',
-    method: 'put',
-    data
-  })
+  return request.post('/api/departments/update', data)
 }
 
 /**
@@ -69,8 +55,5 @@ export function updateDept(data) {
  * @returns {Promise} 删除结果
  */
 export function deleteDept(id) {
-  return request({
-    url: `/department/${id}`,
-    method: 'delete'
-  })
+  return request.post('/api/departments/delete', buildIdPayload(id))
 }

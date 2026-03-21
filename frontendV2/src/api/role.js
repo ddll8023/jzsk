@@ -5,6 +5,7 @@
  * Source: 参考 user.js、dept.js 的接口封装模式
  */
 import request from '@/utils/request'
+import { buildIdPayload, normalizePageParams } from './_helpers'
 
 /**
  * 获取角色列表（分页）
@@ -15,7 +16,7 @@ import request from '@/utils/request'
  * @returns {Promise} 角色列表数据
  */
 export function getRoleList(params) {
-  return request.get('/role/list', { params })
+  return request.get('/api/roles/page', { params: normalizePageParams(params) })
 }
 
 /**
@@ -24,7 +25,7 @@ export function getRoleList(params) {
  * @returns {Promise} 角色详细信息
  */
 export function getRoleInfo(id) {
-  return request.get(`/role/info/${id}`)
+  return request.get(`/api/roles/${id}`)
 }
 
 /**
@@ -38,7 +39,7 @@ export function getRoleInfo(id) {
  * @returns {Promise} 操作结果
  */
 export function saveRole(data) {
-  return request.post('/role/save', data)
+  return request.post('/api/roles/create', data)
 }
 
 /**
@@ -47,7 +48,7 @@ export function saveRole(data) {
  * @returns {Promise} 操作结果
  */
 export function updateRole(data) {
-  return request.post('/role/update', data)
+  return request.post('/api/roles/update', data)
 }
 
 /**
@@ -56,7 +57,7 @@ export function updateRole(data) {
  * @returns {Promise} 操作结果
  */
 export function deleteRole(id) {
-  return request.post(`/role/delete/${id}`)
+  return request.post('/api/roles/delete', buildIdPayload(id))
 }
 
 /**
@@ -66,7 +67,7 @@ export function deleteRole(id) {
  * @returns {Promise} 操作结果
  */
 export function allocateMenu(roleId, menuIds) {
-  return request.post(`/role/menu/${roleId}`, menuIds, { headers: { 'Content-Type': 'application/json' } })
+  return request.post('/api/roles/menus/assign', { roleId, menuIds })
 }
 
 /**
@@ -75,5 +76,5 @@ export function allocateMenu(roleId, menuIds) {
  * @returns {Promise} 菜单ID数组
  */
 export function getRoleMenus(roleId) {
-  return request.get(`/role/menus/${roleId}`)
+  return request.get(`/api/roles/${roleId}/menus`)
 }

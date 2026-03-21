@@ -4,6 +4,7 @@
  * 遵循原则：KISS - 简洁的接口封装
  */
 import request from '@/utils/request'
+import { buildIdPayload, normalizePageParams } from './_helpers'
 
 // ==================== 字典主表接口 ====================
 
@@ -16,7 +17,7 @@ import request from '@/utils/request'
  * @returns {Promise} 字典列表
  */
 export function getDictList(params) {
-  return request.get('/dict/list', { params })
+  return request.get('/api/dicts/page', { params: normalizePageParams(params) })
 }
 
 /**
@@ -25,7 +26,7 @@ export function getDictList(params) {
  * @returns {Promise} 字典信息
  */
 export function getDictInfo(id) {
-  return request.get(`/dict/info/${id}`)
+  return request.get(`/api/dicts/${id}`)
 }
 
 /**
@@ -36,7 +37,7 @@ export function getDictInfo(id) {
  * @returns {Promise} 操作结果
  */
 export function saveDict(data) {
-  return request.post('/dict/save', data)
+  return request.post('/api/dicts/create', data)
 }
 
 /**
@@ -48,7 +49,7 @@ export function saveDict(data) {
  * @returns {Promise} 操作结果
  */
 export function updateDict(data) {
-  return request.post('/dict/update', data)
+  return request.post('/api/dicts/update', data)
 }
 
 /**
@@ -57,7 +58,7 @@ export function updateDict(data) {
  * @returns {Promise} 操作结果
  */
 export function deleteDict(id) {
-  return request.post(`/dict/delete/${id}`)
+  return request.post('/api/dicts/delete', buildIdPayload(id))
 }
 
 /**
@@ -66,7 +67,7 @@ export function deleteDict(id) {
  * @returns {Promise} 字典选项列表
  */
 export function getDictKinds(name) {
-  return request.get('/dict/kinds', { params: { name } })
+  return request.get('/api/dicts/options/tree', { params: { name } })
 }
 
 /**
@@ -75,7 +76,7 @@ export function getDictKinds(name) {
  * @returns {Promise} 字典选项列表
  */
 export function getDictLVs(name) {
-  return request.get('/dict/LVs', { params: { name } })
+  return request.get('/api/dicts/options/list', { params: { name } })
 }
 
 // ==================== 字典详情接口 ====================
@@ -86,7 +87,7 @@ export function getDictLVs(name) {
  * @returns {Promise} 详情信息
  */
 export function getDictDetailInfo(id) {
-  return request.get(`/dict-detail/info/${id}`)
+  return request.get(`/api/dict-details/${id}`)
 }
 
 /**
@@ -99,7 +100,7 @@ export function getDictDetailInfo(id) {
  * @returns {Promise} 操作结果
  */
 export function saveDictDetail(data) {
-  return request.post('/dict-detail/save', data)
+  return request.post('/api/dict-details/create', data)
 }
 
 /**
@@ -112,7 +113,7 @@ export function saveDictDetail(data) {
  * @returns {Promise} 操作结果
  */
 export function updateDictDetail(data) {
-  return request.post('/dict-detail/update', data)
+  return request.post('/api/dict-details/update', data)
 }
 
 /**
@@ -121,5 +122,5 @@ export function updateDictDetail(data) {
  * @returns {Promise} 操作结果
  */
 export function deleteDictDetail(id) {
-  return request.post(`/dict-detail/delete/${id}`)
+  return request.post('/api/dict-details/delete', buildIdPayload(id))
 }

@@ -5,6 +5,7 @@
  * Source: frontend/src/components/menu/SystemServe/UserManage.vue
  */
 import request from '@/utils/request'
+import { buildIdPayload, normalizePageParams } from './_helpers'
 
 /**
  * 获取用户列表（分页）
@@ -15,7 +16,7 @@ import request from '@/utils/request'
  * @returns {Promise} 用户列表数据
  */
 export function getUserList(params) {
-  return request.get('/user/list', { params })
+  return request.get('/api/users/page', { params: normalizePageParams(params) })
 }
 
 /**
@@ -27,7 +28,7 @@ export function getUserList(params) {
  * @returns {Promise} 用户列表数据
  */
 export function searchUser(params) {
-  return request.get('/user/search-list', { params })
+  return request.get('/api/users/page', { params: normalizePageParams(params) })
 }
 
 /**
@@ -36,7 +37,7 @@ export function searchUser(params) {
  * @returns {Promise} 用户详细信息
  */
 export function getUserInfo(id) {
-  return request.get(`/user/info/${id}`)
+  return request.get(`/api/users/${id}`)
 }
 
 /**
@@ -45,7 +46,7 @@ export function getUserInfo(id) {
  * @returns {Promise} 操作结果
  */
 export function saveUser(data) {
-  return request.post('/user/save', data)
+  return request.post('/api/users/create', data)
 }
 
 /**
@@ -54,7 +55,7 @@ export function saveUser(data) {
  * @returns {Promise} 操作结果
  */
 export function updateUser(data) {
-  return request.post('/user/update', data)
+  return request.post('/api/users/update', data)
 }
 
 /**
@@ -63,7 +64,7 @@ export function updateUser(data) {
  * @returns {Promise} 操作结果
  */
 export function deleteUser(id) {
-  return request.post(`/user/delete/${id}`)
+  return request.post('/api/users/delete', buildIdPayload(id))
 }
 
 /**
@@ -73,7 +74,7 @@ export function deleteUser(id) {
  * @returns {Promise} 操作结果
  */
 export function allocateRole(userId, roleIds) {
-  return request.post(`/user/role/${userId}`, roleIds)
+  return request.post('/api/users/roles/assign', { userId, roleIds })
 }
 
 /**
@@ -82,7 +83,7 @@ export function allocateRole(userId, roleIds) {
  * @returns {Promise} 操作结果
  */
 export function resetPassword(id) {
-  return request.post('/user/repass', null, { params: { id } })
+  return request.post('/api/users/password/reset', buildIdPayload(id))
 }
 
 /**
@@ -93,7 +94,7 @@ export function resetPassword(id) {
  * @returns {Promise} 操作结果
  */
 export function updatePassword(data) {
-  return request.put('/user/updatePassword', data)
+  return request.post('/api/users/password/update', data)
 }
 
 /**
@@ -102,5 +103,5 @@ export function updatePassword(data) {
  * @returns {Promise} 角色列表
  */
 export function getRoleList(params) {
-  return request.get('/role/list', { params })
+  return request.get('/api/roles/page', { params: normalizePageParams(params) })
 }

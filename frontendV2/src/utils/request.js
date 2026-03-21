@@ -9,7 +9,7 @@ import axios from 'axios'
 const service = axios.create({
   timeout: 30000,
   headers: {
-    'Content-Type': 'application/x-www-form-urlencoded'
+    'Content-Type': 'application/json'
   }
 })
 

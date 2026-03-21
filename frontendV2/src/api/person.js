@@ -5,6 +5,7 @@
  * Source: backend/szy/src/main/java/com/szy/controller/PersonController.java
  */
 import request from '@/utils/request'
+import { buildIdPayload, normalizePageParams } from './_helpers'
 
 /**
  * 获取人员列表（分页）
@@ -15,7 +16,7 @@ import request from '@/utils/request'
  * @returns {Promise} 人员列表数据
  */
 export function getPersonList(params) {
-  return request.get('/person/list', { params })
+  return request.get('/api/persons/page', { params: normalizePageParams(params) })
 }
 
 /**
@@ -24,7 +25,7 @@ export function getPersonList(params) {
  * @returns {Promise} 人员详细信息
  */
 export function getPersonInfo(id) {
-  return request.get(`/person/info/${id}`)
+  return request.get(`/api/persons/${id}`)
 }
 
 /**
@@ -33,7 +34,7 @@ export function getPersonInfo(id) {
  * @returns {Promise} 操作结果
  */
 export function savePerson(data) {
-  return request.post('/person/save', data)
+  return request.post('/api/persons/create', data)
 }
 
 /**
@@ -42,7 +43,7 @@ export function savePerson(data) {
  * @returns {Promise} 操作结果
  */
 export function updatePerson(data) {
-  return request.post('/person/update', data)
+  return request.post('/api/persons/update', data)
 }
 
 /**
@@ -51,5 +52,5 @@ export function updatePerson(data) {
  * @returns {Promise} 操作结果
  */
 export function deletePerson(id) {
-  return request.post(`/person/delete/${id}`)
+  return request.post('/api/persons/delete', buildIdPayload(id))
 }

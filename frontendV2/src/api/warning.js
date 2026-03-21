@@ -3,7 +3,8 @@
  * 功能：预警信息、预警指标相关接口
  * 遵循原则：KISS - 简洁实现
  */
-import request from '../utils/request'
+import request from '@/utils/request'
+import { buildIdPayload, normalizePageParams } from './_helpers'
 
 // ==================== 预警信息接口 ====================
 
@@ -21,7 +22,7 @@ import request from '../utils/request'
  * @returns {Promise}
  */
 export function getWarningList(params) {
-  return request.get('/warning-information/list', { params })
+  return request.get('/api/warnings/page', { params: normalizePageParams(params) })
 }
 
 /**
@@ -30,7 +31,7 @@ export function getWarningList(params) {
  * @returns {Promise}
  */
 export function getWarningInfo(id) {
-  return request.get(`/warning-information/info/${id}`)
+  return request.get(`/api/warnings/${id}`)
 }
 
 /**
@@ -39,7 +40,7 @@ export function getWarningInfo(id) {
  * @returns {Promise}
  */
 export function updateWarning(data) {
-  return request.post('/warning-information/update', data)
+  return request.post('/api/warnings/update', data)
 }
 
 /**
@@ -48,7 +49,7 @@ export function updateWarning(data) {
  * @returns {Promise}
  */
 export function deleteWarning(id) {
-  return request.post(`/warning-information/delete/${id}`)
+  return request.post('/api/warnings/delete', buildIdPayload(id))
 }
 
 /**
@@ -57,7 +58,7 @@ export function deleteWarning(id) {
  * @returns {Promise}
  */
 export function searchWarningByPosition(params) {
-  return request.get('/warning-information/position', { params })
+  return request.get('/api/warnings/page', { params: normalizePageParams(params) })
 }
 
 // ==================== 预警指标接口 ====================
@@ -71,7 +72,7 @@ export function searchWarningByPosition(params) {
  * @returns {Promise}
  */
 export function getIndicatorList(params) {
-  return request.get('/warning-indicator-setting/search-list', { params })
+  return request.get('/api/warning-indicators/page', { params: normalizePageParams(params) })
 }
 
 /**
@@ -80,7 +81,7 @@ export function getIndicatorList(params) {
  * @returns {Promise}
  */
 export function searchIndicatorByPosition(params) {
-  return request.get('/warning-indicator-setting/search-position', { params })
+  return request.get('/api/warning-indicators/page', { params: normalizePageParams(params) })
 }
 
 /**
@@ -88,7 +89,7 @@ export function searchIndicatorByPosition(params) {
  * @returns {Promise}
  */
 export function getIndicatorTypes() {
-  return request.get('/warning-indicator-setting/types')
+  return request.get('/api/warning-indicators/types')
 }
 
 /**
@@ -97,7 +98,7 @@ export function getIndicatorTypes() {
  * @returns {Promise}
  */
 export function getIndicatorInfo(id) {
-  return request.get(`/warning-indicator-setting/info/${id}`)
+  return request.get(`/api/warning-indicators/${id}`)
 }
 
 /**
@@ -106,7 +107,7 @@ export function getIndicatorInfo(id) {
  * @returns {Promise}
  */
 export function saveIndicator(data) {
-  return request.post('/warning-indicator-setting/save', data)
+  return request.post('/api/warning-indicators/create', data)
 }
 
 /**
@@ -115,7 +116,7 @@ export function saveIndicator(data) {
  * @returns {Promise}
  */
 export function updateIndicator(data) {
-  return request.post('/warning-indicator-setting/update', data)
+  return request.post('/api/warning-indicators/update', data)
 }
 
 /**
@@ -124,7 +125,7 @@ export function updateIndicator(data) {
  * @returns {Promise}
  */
 export function deleteIndicator(id) {
-  return request.post(`/warning-indicator-setting/delete/${id}`)
+  return request.post('/api/warning-indicators/delete', buildIdPayload(id))
 }
 
 // ==================== 字典接口 ====================
@@ -135,5 +136,5 @@ export function deleteIndicator(id) {
  * @returns {Promise}
  */
 export function getDictKinds(name) {
-  return request.get('/dict/kinds', { params: { name } })
+  return request.get('/api/dicts/options/tree', { params: { name } })
 }

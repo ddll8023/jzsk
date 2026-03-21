@@ -4,6 +4,7 @@
  * 注意：使用旧项目实际接口路径 /measuring-station/*
  */
 import request from '@/utils/request'
+import { buildIdPayload, normalizePageParams } from './_helpers'
 
 /**
  * 获取监测站点列表
@@ -14,7 +15,7 @@ import request from '@/utils/request'
  * @returns {Promise}
  */
 export function getMonitorSiteList(params) {
-  return request.get('/measuring-station/list', { params })
+  return request.get('/api/measuring-stations/page', { params: normalizePageParams(params) })
 }
 
 /**
@@ -23,7 +24,7 @@ export function getMonitorSiteList(params) {
  * @returns {Promise}
  */
 export function getMonitorSiteInfo(id) {
-  return request.get(`/measuring-station/info/${id}`)
+  return request.get(`/api/measuring-stations/${id}`)
 }
 
 /**
@@ -32,7 +33,7 @@ export function getMonitorSiteInfo(id) {
  * @returns {Promise}
  */
 export function saveMonitorSite(data) {
-  return request.post('/measuring-station/save', data)
+  return request.post('/api/measuring-stations/create', data)
 }
 
 /**
@@ -41,7 +42,7 @@ export function saveMonitorSite(data) {
  * @returns {Promise}
  */
 export function updateMonitorSite(data) {
-  return request.post('/measuring-station/update', data)
+  return request.post('/api/measuring-stations/update', data)
 }
 
 /**
@@ -50,7 +51,7 @@ export function updateMonitorSite(data) {
  * @returns {Promise}
  */
 export function deleteMonitorSite(id) {
-  return request.post(`/measuring-station/delete/${id}`)
+  return request.post('/api/measuring-stations/delete', buildIdPayload(id))
 }
 
 /**
@@ -58,9 +59,7 @@ export function deleteMonitorSite(id) {
  * @returns {Promise}
  */
 export function getMonitorSiteNames() {
-  return request.get('/dict/kinds', {
-    params: { name: '监测站名称' }
-  })
+  return request.get('/api/measuring-stations/options')
 }
 
 /**
@@ -72,7 +71,7 @@ export function getMonitorSiteNames() {
  * @returns {Promise}
  */
 export function getMonitorItemList(params) {
-  return request.get('/measuring-item/list', { params })
+  return request.get('/api/measuring-items/page', { params: normalizePageParams(params) })
 }
 
 /**
@@ -81,7 +80,7 @@ export function getMonitorItemList(params) {
  * @returns {Promise}
  */
 export function getMonitorItemInfo(id) {
-  return request.get(`/measuring-item/info/${id}`)
+  return request.get(`/api/measuring-items/${id}`)
 }
 
 /**
@@ -90,7 +89,7 @@ export function getMonitorItemInfo(id) {
  * @returns {Promise}
  */
 export function saveMonitorItem(data) {
-  return request.post('/measuring-item/save', data)
+  return request.post('/api/measuring-items/create', data)
 }
 
 /**
@@ -99,7 +98,7 @@ export function saveMonitorItem(data) {
  * @returns {Promise}
  */
 export function updateMonitorItem(data) {
-  return request.post('/measuring-item/update', data)
+  return request.post('/api/measuring-items/update', data)
 }
 
 /**
@@ -108,7 +107,7 @@ export function updateMonitorItem(data) {
  * @returns {Promise}
  */
 export function deleteMonitorItem(id) {
-  return request.post(`/measuring-item/delete/${id}`)
+  return request.post('/api/measuring-items/delete', buildIdPayload(id))
 }
 
 /**
@@ -116,9 +115,7 @@ export function deleteMonitorItem(id) {
  * @returns {Promise}
  */
 export function getMonitorItemNames() {
-  return request.get('/dict/kinds', {
-    params: { name: '测项名称' }
-  })
+  return request.get('/api/measuring-items/options')
 }
 
 /**
@@ -126,7 +123,7 @@ export function getMonitorItemNames() {
  * @returns {Promise}
  */
 export function exportMonitorItemExcel() {
-  return request.get('/measuring-item/export-excel')
+  return request.get('/api/measuring-items/export')
 }
 
 // ==================== 洪水防御预案 ====================
@@ -136,7 +133,7 @@ export function exportMonitorItemExcel() {
  * @returns {Promise}
  */
 export function getFloodPlanList() {
-  return request.get('/flood-plan/list')
+  return request.get('/api/flood-plans/list')
 }
 
 /**
@@ -145,7 +142,7 @@ export function getFloodPlanList() {
  * @returns {Promise}
  */
 export function getFloodPlanInfo(id) {
-  return request.get(`/flood-plan/info/${id}`)
+  return request.get(`/api/flood-plans/${id}`)
 }
 
 /**
@@ -157,7 +154,7 @@ export function getFloodPlanInfo(id) {
  * @returns {Promise}
  */
 export function saveFloodPlan(data) {
-  return request.post('/flood-plan/save', data)
+  return request.post('/api/flood-plans/create', data)
 }
 
 /**
@@ -166,7 +163,7 @@ export function saveFloodPlan(data) {
  * @returns {Promise}
  */
 export function updateFloodPlan(data) {
-  return request.post('/flood-plan/update', data)
+  return request.post('/api/flood-plans/update', data)
 }
 
 /**
@@ -175,7 +172,7 @@ export function updateFloodPlan(data) {
  * @returns {Promise}
  */
 export function deleteFloodPlan(id) {
-  return request.post(`/flood-plan/delete/${id}`)
+  return request.post('/api/flood-plans/delete', buildIdPayload(id))
 }
 
 // ==================== 预警设施接口 ====================
@@ -188,7 +185,7 @@ export function deleteFloodPlan(id) {
  * @returns {Promise}
  */
 export function getWarningFacilityList(params) {
-  return request.get('/warning-facilities/list', { params })
+  return request.get('/api/warning-facilities/page', { params: normalizePageParams(params) })
 }
 
 /**
@@ -197,7 +194,7 @@ export function getWarningFacilityList(params) {
  * @returns {Promise}
  */
 export function getWarningFacilityInfo(id) {
-  return request.get(`/warning-facilities/info/${id}`)
+  return request.get(`/api/warning-facilities/${id}`)
 }
 
 /**
@@ -206,7 +203,7 @@ export function getWarningFacilityInfo(id) {
  * @returns {Promise}
  */
 export function saveWarningFacility(data) {
-  return request.post('/warning-facilities/add', data)
+  return request.post('/api/warning-facilities/create', data)
 }
 
 /**
@@ -215,7 +212,7 @@ export function saveWarningFacility(data) {
  * @returns {Promise}
  */
 export function updateWarningFacility(data) {
-  return request.put('/warning-facilities/update', data)
+  return request.post('/api/warning-facilities/update', data)
 }
 
 /**
@@ -224,5 +221,5 @@ export function updateWarningFacility(data) {
  * @returns {Promise}
  */
 export function deleteWarningFacility(id) {
-  return request.delete(`/warning-facilities/delete/${id}`)
+  return request.post('/api/warning-facilities/delete', buildIdPayload(id))
 }

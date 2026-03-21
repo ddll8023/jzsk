@@ -4,6 +4,7 @@
  * 遵循原则：KISS - 简洁实现，接口定义清晰
  */
 import request from '@/utils/request'
+import { buildIdPayload, normalizePageParams } from './_helpers'
 
 /**
  * 获取机构列表（分页）
@@ -14,11 +15,7 @@ import request from '@/utils/request'
  * @returns {Promise} 机构列表数据
  */
 export function getOrgList(params) {
-  return request({
-    url: '/organization/list',
-    method: 'get',
-    params
-  })
+  return request.get('/api/organizations/page', { params: normalizePageParams(params) })
 }
 
 /**
@@ -27,10 +24,7 @@ export function getOrgList(params) {
  * @returns {Promise} 机构详细信息
  */
 export function getOrgInfo(id) {
-  return request({
-    url: `/organization/info/${id}`,
-    method: 'get'
-  })
+  return request.get(`/api/organizations/${id}`)
 }
 
 /**
@@ -57,11 +51,7 @@ export function getOrgInfo(id) {
  * @returns {Promise} 新增结果
  */
 export function saveOrg(data) {
-  return request({
-    url: '/organization/save',
-    method: 'post',
-    data
-  })
+  return request.post('/api/organizations/create', data)
 }
 
 /**
@@ -70,11 +60,7 @@ export function saveOrg(data) {
  * @returns {Promise} 更新结果
  */
 export function updateOrg(data) {
-  return request({
-    url: '/organization/update',
-    method: 'post',
-    data
-  })
+  return request.post('/api/organizations/update', data)
 }
 
 /**
@@ -83,8 +69,5 @@ export function updateOrg(data) {
  * @returns {Promise} 删除结果
  */
 export function deleteOrg(id) {
-  return request({
-    url: `/organization/delete/${id}`,
-    method: 'post'
-  })
+  return request.post('/api/organizations/delete', buildIdPayload(id))
 }

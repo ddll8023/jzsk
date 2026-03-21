@@ -4,6 +4,7 @@
  * 遵循原则：KISS - 简洁的接口封装
  */
 import request from '@/utils/request'
+import { buildIdPayload, normalizePageParams } from './_helpers'
 
 // ==================== 降雨数据接口 ====================
 
@@ -15,7 +16,7 @@ import request from '@/utils/request'
  * @returns {Promise} 小时雨量数据列表
  */
 export function getHourlyRainfall(params) {
-  return request.get('/st-pptn-hour/list', { params })
+  return request.get('/api/hourly-rainfalls/list', { params })
 }
 
 // ==================== 水位数据接口 ====================
@@ -28,7 +29,7 @@ export function getHourlyRainfall(params) {
  * @returns {Promise} 水位数据分页结果
  */
 export function getWaterLevelPage(params) {
-  return request.get('/st-rivers-r/page', { params })
+  return request.get('/api/water-levels/page', { params: normalizePageParams(params) })
 }
 
 /**
@@ -36,7 +37,7 @@ export function getWaterLevelPage(params) {
  * @returns {Promise} 水位数据列表
  */
 export function getWaterLevelList() {
-  return request.get('/st-rivers-r/list')
+  return request.get('/api/water-levels/list')
 }
 
 // ==================== 逐日雨量接口 ====================
@@ -46,7 +47,7 @@ export function getWaterLevelList() {
  * @returns {Promise} 逐日雨量数据列表
  */
 export function getDailyRainfallList() {
-  return request.get('/daily-rainfall')
+  return request.get('/api/daily-rainfalls/list')
 }
 
 /**
@@ -66,7 +67,7 @@ export function getDailyRainfallList() {
  * @returns {Promise} 操作结果
  */
 export function saveDailyRainfall(data) {
-  return request.post('/daily-rainfall', data)
+  return request.post('/api/daily-rainfalls/create', data)
 }
 
 /**
@@ -76,7 +77,7 @@ export function saveDailyRainfall(data) {
  * @returns {Promise} 操作结果
  */
 export function updateDailyRainfall(id, data) {
-  return request.put(`/daily-rainfall/${id}`, data)
+  return request.post('/api/daily-rainfalls/update', { ...data, id })
 }
 
 // ==================== 河道站接口 ====================
@@ -86,7 +87,7 @@ export function updateDailyRainfall(id, data) {
  * @returns {Promise} 河道站数据列表
  */
 export function getRiverStationList() {
-  return request.get('/river-station')
+  return request.get('/api/river-stations/list')
 }
 
 // ==================== 历年水情接口 ====================
@@ -96,7 +97,7 @@ export function getRiverStationList() {
  * @returns {Promise} 历年水情数据列表
  */
 export function getAnnualWaterList() {
-  return request.get('/annual-water-situation')
+  return request.get('/api/annual-water-situations/list')
 }
 
 /**
@@ -114,7 +115,7 @@ export function getAnnualWaterList() {
  * @returns {Promise} 操作结果
  */
 export function saveAnnualWater(data) {
-  return request.post('/annual-water-situation', data)
+  return request.post('/api/annual-water-situations/create', data)
 }
 
 /**
@@ -124,7 +125,7 @@ export function saveAnnualWater(data) {
  * @returns {Promise} 操作结果
  */
 export function updateAnnualWater(id, data) {
-  return request.put(`/annual-water-situation/${id}`, data)
+  return request.post('/api/annual-water-situations/update', { ...data, id })
 }
 
 /**
@@ -133,7 +134,7 @@ export function updateAnnualWater(id, data) {
  * @returns {Promise} 操作结果
  */
 export function deleteAnnualWater(id) {
-  return request.delete(`/annual-water-situation/${id}`)
+  return request.post('/api/annual-water-situations/delete', buildIdPayload(id))
 }
 
 // ==================== 测站极值接口 ====================
@@ -145,7 +146,7 @@ export function deleteAnnualWater(id) {
  */
 export function getStationExtremumList(stcd) {
   const params = stcd ? { stcd } : {}
-  return request.get('/st-pextremum-b', { params })
+  return request.get('/api/station-extremums/list', { params })
 }
 
 /**
@@ -166,7 +167,7 @@ export function getStationExtremumList(stcd) {
  * @returns {Promise} 操作结果
  */
 export function saveStationExtremum(data) {
-  return request.post('/st-pextremum-b', data)
+  return request.post('/api/station-extremums/create', data)
 }
 
 /**
@@ -176,5 +177,5 @@ export function saveStationExtremum(data) {
  * @returns {Promise} 操作结果
  */
 export function updateStationExtremum(stcd, data) {
-  return request.put(`/st-pextremum-b/${stcd}`, data)
+  return request.post('/api/station-extremums/update', { ...data, stcd })
 }

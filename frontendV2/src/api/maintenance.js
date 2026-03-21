@@ -4,6 +4,7 @@
  * Source: 参考 frontend/src/components/menu/EngineeringPolling/MaintenceRecordRead.vue
  */
 import request from '@/utils/request'
+import { buildIdPayload, normalizePageParams } from './_helpers'
 
 /**
  * 获取维护记录列表
@@ -11,7 +12,7 @@ import request from '@/utils/request'
  * @returns {Promise}
  */
 export function getMaintenanceList(params) {
-  return request.get('/maintence-records/list', { params })
+  return request.get('/api/maintenance-records/page', { params: normalizePageParams(params) })
 }
 
 /**
@@ -20,7 +21,7 @@ export function getMaintenanceList(params) {
  * @returns {Promise}
  */
 export function getMaintenanceInfo(id) {
-  return request.get(`/maintence-records/info/${id}`)
+  return request.get(`/api/maintenance-records/${id}`)
 }
 
 /**
@@ -29,7 +30,7 @@ export function getMaintenanceInfo(id) {
  * @returns {Promise}
  */
 export function saveMaintenance(data) {
-  return request.post('/maintence-records/save', data)
+  return request.post('/api/maintenance-records/create', data)
 }
 
 /**
@@ -38,7 +39,7 @@ export function saveMaintenance(data) {
  * @returns {Promise}
  */
 export function updateMaintenance(data) {
-  return request.post('/maintence-records/update', data)
+  return request.post('/api/maintenance-records/update', data)
 }
 
 /**
@@ -47,7 +48,7 @@ export function updateMaintenance(data) {
  * @returns {Promise}
  */
 export function deleteMaintenance(id) {
-  return request.post(`/maintence-records/delete/${id}`)
+  return request.post('/api/maintenance-records/delete', buildIdPayload(id))
 }
 
 /**
@@ -55,5 +56,5 @@ export function deleteMaintenance(id) {
  * @returns {Promise}
  */
 export function exportMaintenanceExcel() {
-  return request.get('/maintence-records/export-excel')
+  return request.get('/api/maintenance-records/export')
 }

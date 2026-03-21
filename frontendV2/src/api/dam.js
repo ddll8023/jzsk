@@ -3,12 +3,13 @@
  * 功能：渗流压力、浸润线等监测数据接口
  */
 import request from '@/utils/request'
+import { normalizePageParams } from './_helpers'
 
 /**
  * 获取监测点列表
  */
 export function getPoints() {
-  return request.get('/data-new/points')
+  return request.get('/api/dam-monitoring/points')
 }
 
 /**
@@ -16,7 +17,7 @@ export function getPoints() {
  * @param {Object} params - { pointId, pointIds, startTime, endTime, current, size }
  */
 export function getSeepagePage(params) {
-  return request.get('/data-new/page', { params })
+  return request.get('/api/dam-monitoring/seepage/page', { params: normalizePageParams(params) })
 }
 
 /**
@@ -24,35 +25,35 @@ export function getSeepagePage(params) {
  * @param {Object} params - { pointId, startTime, endTime }
  */
 export function getTimeWaterElevation(params) {
-  return request.get('/data-new/time-water-elevation', { params })
+  return request.get('/api/dam-monitoring/time-water-elevation', { params })
 }
 
 /**
  * 获取水位时序数据
  */
 export function getTimeWaterLevel(params) {
-  return request.get('/data-new/time-water-level', { params })
+  return request.get('/api/dam-monitoring/time-water-level', { params })
 }
 
 /**
  * 获取温度时序数据
  */
 export function getTimeTemperature(params) {
-  return request.get('/data-new/time-temperature', { params })
+  return request.get('/api/dam-monitoring/time-temperature', { params })
 }
 
 /**
  * 获取水压时序数据
  */
 export function getTimeWaterPressure(params) {
-  return request.get('/data-new/time-water-pressure', { params })
+  return request.get('/api/dam-monitoring/time-water-pressure', { params })
 }
 
 /**
  * 获取最新水位高程
  */
 export function getLatestWaterElevation() {
-  return request.get('/data-new/latest-water-elevation')
+  return request.get('/api/dam-monitoring/latest-water-elevation')
 }
 
 /**
@@ -60,7 +61,7 @@ export function getLatestWaterElevation() {
  * @param {Object} params - { page, size }
  */
 export function getRiverWaterLevel(params) {
-  return request.get('/st-rivers-r/page', { params })
+  return request.get('/api/dam-monitoring/river-water-level/page', { params: normalizePageParams(params) })
 }
 
 /**
@@ -68,7 +69,7 @@ export function getRiverWaterLevel(params) {
  * @param {Object} params - { page, size }
  */
 export function getSeepageFlowPage(params) {
-  return request.get('/st-rivers-r/page', { params })
+  return request.get('/api/dam-monitoring/seepage-flow/page', { params: normalizePageParams(params) })
 }
 
 /**
@@ -76,5 +77,5 @@ export function getSeepageFlowPage(params) {
  * @param {Object} params - { startTime, endTime, sensor, stationIds, projectId, page, size }
  */
 export function getDisplacementHistory(params) {
-  return request.get('/external-data/displacement-history', { params })
+  return request.get('/api/external/displacement-history/page', { params: normalizePageParams(params) })
 }
