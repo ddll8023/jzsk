@@ -4,7 +4,6 @@
  * 参考：frontend/src/main.js 中的 axios 配置
  */
 import axios from 'axios'
-import qs from 'qs'
 
 // 创建 Axios 实例
 const service = axios.create({
@@ -25,6 +24,32 @@ export const setupAxios = (baseURL) => {
   // 验证配置是否生效
   if (service.defaults.baseURL !== baseURL) {
     console.error('❌ Axios baseURL 配置失败')
+  }
+}
+
+function normalizePageData(pageData) {
+  if (!pageData || typeof pageData !== 'object' || Array.isArray(pageData)) {
+    return
+  }
+
+  if (Array.isArray(pageData.list) && !Array.isArray(pageData.records)) {
+    pageData.records = pageData.list
+  }
+
+  if (Array.isArray(pageData.records) && !Array.isArray(pageData.list)) {
+    pageData.list = pageData.records
+  }
+
+  if (typeof pageData.page === 'number' && typeof pageData.current !== 'number') {
+    pageData.current = pageData.page
+  }
+
+  if (typeof pageData.current === 'number' && typeof pageData.page !== 'number') {
+    pageData.page = pageData.current
+  }
+
+  if (typeof pageData.totalPages !== 'number' && typeof pageData.total === 'number' && typeof pageData.size === 'number' && pageData.size > 0) {
+    pageData.totalPages = Math.ceil(pageData.total / pageData.size)
   }
 }
 
@@ -63,15 +88,14 @@ service.interceptors.response.use(
     console.log('📥 API响应:', response.status, fullUrl)
     console.log('   数据:', response.data?.code, response.data?.message || '成功')
 
-    // 解包响应数据：仅解包直接数组格式 {code, message, data: []}
-    // 保持分页格式 {code, message, data: {records: [], total: 0}} 不变，由调用方自行处理
     if (response.data && typeof response.data === 'object') {
+      normalizePageData(response.data)
       const data = response.data.data
-      // 仅当 data 本身是数组时才解包
+      normalizePageData(data)
+
       if (Array.isArray(data)) {
         response.data = data
       }
-      // 分页对象不解包，保留 records 和 total 字段
     }
 
     return response
@@ -92,9 +116,6 @@ service.interceptors.response.use(
     return Promise.reject(error)
   }
 )
-
-// 导出 qs 工具
-export { qs }
 
 // 导出请求实例
 export default service

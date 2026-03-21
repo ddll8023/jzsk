@@ -1,104 +1,57 @@
 server:
   port: 8081
 
-# DataSource Config
 spring:
+  application:
+    name: backendV2
+  config:
+    import: optional:classpath:application-runtime.yml
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
-  datasource:
-    dynamic:
-      primary: gcdd
-      strict: false
-      lazy: true
-      datasource:
-        gcdd:
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/gcdd?useUnicode=true&useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-          username: root
-          password: admin123
-        jcxx:
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/jcxx?useUnicode=true&useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-          username: root
-          password: admin123
-        yjxx:
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/yjxx?useUnicode=true&useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-          username: root
-          password: admin123
-        collector:
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/collector?useUnicode=true&useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-          username: root
-          password: admin123
-        eb_database:
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/eb_database?useUnicode=true&useSSL=false&allowPublicKeyRetrieval=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
-          username: root
-          password: admin123
-        dbo:
-          driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-          url: jdbc:sqlserver://111.4.68.108:1433;databaseName=COLLECTOR;encrypt=true;trustServerCertificate=true;sslProtocol=TLSv1
-          username: sa
-          password: dse@123456
-          hikari:
-            initialization-fail-timeout: -1
-            connection-timeout: 5000
-        zkxt:
-          driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-          url: jdbc:sqlserver://111.4.68.108:1433;databaseName=ZKXT;encrypt=true;trustServerCertificate=true;sslProtocol=TLSv1
-          username: sa
-          password: dse@123456
-          hikari:
-            initialization-fail-timeout: -1
-            connection-timeout: 5000
-        pgsql:
-          driver-class-name: org.postgresql.Driver
-          url: jdbc:postgresql://111.4.68.108:5433/dbaqjc
-          username: postgres
-          password: GNPassw0rd!
-          hikari:
-            initialization-fail-timeout: -1
-            connection-timeout: 5000
+    serialization:
+      write-dates-as-timestamps: false
 
-  mvc:
-    pathmatch:
-      matching-strategy: ant_path_matcher
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: health,info
 
-  # 文件上传配置
-  servlet:
-    multipart:
-      enabled: true
-      file-size-threshold: 0
-      max-file-size: 100MB
-      max-request-size: 100MB
+logging:
+  level:
+    root: INFO
+    com.jzsk.backendv2: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} traceId=%X{traceId:-N/A} - %msg%n"
 
-# MyBatis配置（规范要求：使用XML）
-mybatis:
-  mapper-locations: classpath:mapper/**/*.xml
-  type-aliases-package: com.szy.entity
-  configuration:
-    map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-
-# PageHelper分页配置
-pagehelper:
-  helper-dialect: mysql
-  reasonable: true
-  support-methods-arguments: true
-  params: count=countSql
-
-# JWT配置
-config:
-  jwt:
-    header: Authorization
-    expire: 604800
-    secret: ji8n3439n439n43ld9ne9343fdfer49h
-
-# 文件上传路径
-upload:
-  path: D:/tencent/szy_project/photo/
-
-# 允许循环依赖
-spring.main.allow-circular-references: true
+jzsk:
+  v2:
+    project-name: JZSK Backend V2
+    api-prefix: /api
+    security:
+      header: Authorization
+      token-prefix: "Bearer "
+      expire-seconds: 604800
+      permit-all:
+        - /actuator/health
+        - /error
+      bootstrap-user:
+        user-id: 1
+        authorities:
+          - ROLE_ADMIN
+          - system:manage
+    task:
+      warning-enabled: false
+      sync-enabled: false
+      task-switches: {}
+      zone: Asia/Shanghai
+      pool-size: 4
+      thread-name-prefix: jzsk-task-
+      shutdown-await-seconds: 30
+    logging:
+      request-enabled: true
+      trace-header: X-Trace-Id

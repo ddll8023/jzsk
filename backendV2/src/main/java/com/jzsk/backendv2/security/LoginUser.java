@@ -1,0 +1,49 @@
+package com.jzsk.backendv2.security;
+
+import lombok.Getter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.Collection;
+
+@Getter
+public class LoginUser implements UserDetails {
+
+    private final Long userId;
+    private final String username;
+    private final String password;
+    private final String displayName;
+    private final Collection<? extends GrantedAuthority> authorities;
+
+    public LoginUser(Long userId,
+                     String username,
+                     String password,
+                     String displayName,
+                     Collection<? extends GrantedAuthority> authorities) {
+        this.userId = userId;
+        this.username = username;
+        this.password = password;
+        this.displayName = displayName;
+        this.authorities = authorities;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+}
