@@ -90,12 +90,7 @@ service.interceptors.response.use(
 
     if (response.data && typeof response.data === 'object') {
       normalizePageData(response.data)
-      const data = response.data.data
-      normalizePageData(data)
-
-      if (Array.isArray(data)) {
-        response.data = data
-      }
+      normalizePageData(response.data.data)
     }
 
     return response

@@ -3,10 +3,10 @@
 <mapper namespace="com.jzsk.backendv2.mapper.system.RoleMenuMapper">
 
     <insert id="batchInsert">
-        INSERT INTO role_authority (role_id, authority_id)
+        INSERT INTO role_authority (role_id, authority_id, create_time, update_time)
         VALUES
         <foreach collection="list" item="item" separator=",">
-            (#{item.roleId}, #{item.authorityId})
+            (#{item.roleId}, #{item.authorityId}, NOW(), NOW())
         </foreach>
     </insert>
 

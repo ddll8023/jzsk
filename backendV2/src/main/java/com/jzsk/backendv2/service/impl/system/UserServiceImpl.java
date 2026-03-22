@@ -71,6 +71,11 @@ public class UserServiceImpl implements UserService {
                 .map(this::toUserVO)
                 .collect(Collectors.toList());
 
+        // 填充每个用户的角色信息
+        for (UserVO vo : voList) {
+            fillUserRoles(vo, vo.getId());
+        }
+
         return PageUtils.buildPage(voList, total, normalized.getPage(), normalized.getSize());
     }
 
@@ -82,18 +87,7 @@ public class UserServiceImpl implements UserService {
         }
         UserVO vo = toUserVO(entity);
         // 填充角色信息
-        List<OptionVO> roles = userMapper.selectUserRoles(id);
-        if (roles != null && !roles.isEmpty()) {
-            vo.setRoles(roles.stream()
-                    .map(opt -> {
-                        UserVO.RoleInfo roleInfo = new UserVO.RoleInfo();
-                        roleInfo.setId(Long.valueOf(opt.getValue().toString()));
-                        roleInfo.setName(opt.getLabel());
-                        roleInfo.setCode(null);
-                        return roleInfo;
-                    })
-                    .collect(Collectors.toList()));
-        }
+        fillUserRoles(vo, id);
         return vo;
     }
 
@@ -362,5 +356,23 @@ public class UserServiceImpl implements UserService {
         vo.setUpdateTime(entity.getUpdateTime());
         vo.setRoles(Collections.emptyList());
         return vo;
+    }
+
+    /**
+     * 填充用户角色信息
+     */
+    private void fillUserRoles(UserVO vo, Long userId) {
+        List<OptionVO> roles = userMapper.selectUserRoles(userId);
+        if (roles != null && !roles.isEmpty()) {
+            vo.setRoles(roles.stream()
+                    .map(opt -> {
+                        UserVO.RoleInfo roleInfo = new UserVO.RoleInfo();
+                        roleInfo.setId(Long.valueOf(opt.getValue().toString()));
+                        roleInfo.setName(opt.getLabel());
+                        roleInfo.setCode(null);
+                        return roleInfo;
+                    })
+                    .collect(Collectors.toList()));
+        }
     }
 }

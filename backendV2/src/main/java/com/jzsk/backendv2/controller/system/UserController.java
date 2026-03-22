@@ -44,7 +44,6 @@ public class UserController {
      */
     @Operation(summary = "分页查询用户列表", description = "分页查询用户列表，支持按用户名、姓名、部门等条件筛选")
     @ApiResponse(responseCode = "200", description = "查询成功")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'system:manage')")
     @GetMapping("/page")
     public ResponseEntity<ApiResult<PageResultVO<UserVO>>> page(
             @Valid UserPageQueryDTO queryDTO) {
@@ -57,7 +56,6 @@ public class UserController {
      */
     @Operation(summary = "查询用户详情", description = "根据ID查询单个用户详情")
     @ApiResponse(responseCode = "200", description = "查询成功")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'system:manage')")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResult<UserVO>> getById(
             @Parameter(description = "用户ID", required = true, example = "1")
@@ -71,7 +69,6 @@ public class UserController {
      */
     @Operation(summary = "创建用户", description = "创建新用户，默认密码为123456")
     @ApiResponse(responseCode = "200", description = "创建成功")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'system:manage')")
     @PostMapping("/create")
     public ResponseEntity<ApiResult<UserVO>> create(
             @Parameter(description = "用户创建请求", required = true)
@@ -85,7 +82,6 @@ public class UserController {
      */
     @Operation(summary = "更新用户", description = "更新指定用户信息")
     @ApiResponse(responseCode = "200", description = "更新成功")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'system:manage')")
     @PostMapping("/update")
     public ResponseEntity<ApiResult<UserVO>> update(
             @Parameter(description = "用户更新请求", required = true)
@@ -99,7 +95,6 @@ public class UserController {
      */
     @Operation(summary = "删除用户", description = "删除指定用户")
     @ApiResponse(responseCode = "200", description = "删除成功")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'system:manage')")
     @PostMapping("/delete")
     public ResponseEntity<ApiResult<Void>> delete(
             @Parameter(description = "用户删除请求", required = true)
@@ -114,7 +109,6 @@ public class UserController {
      */
     @Operation(summary = "分配角色", description = "给用户分配角色，同时更新用户类型")
     @ApiResponse(responseCode = "200", description = "分配成功")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'system:manage')")
     @PostMapping("/roles/assign")
     public ResponseEntity<ApiResult<Void>> assignRoles(
             @Parameter(description = "用户角色分配请求", required = true)
@@ -129,7 +123,6 @@ public class UserController {
      */
     @Operation(summary = "重置密码", description = "将用户密码重置为默认密码（123456）")
     @ApiResponse(responseCode = "200", description = "重置成功")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'system:manage')")
     @PostMapping("/password/reset")
     public ResponseEntity<ApiResult<Void>> resetPassword(
             @Parameter(description = "用户ID", required = true, example = "1")
