@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzsk.backendv2.mapper.auth.LegacyAuthMapper">
+
+    <resultMap id="LegacyAuthUserResultMap" type="com.jzsk.backendv2.pojo.entity.auth.LegacyAuthUserEntity">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="name" property="name"/>
+    </resultMap>
+
+    <select id="selectByUsername" resultMap="LegacyAuthUserResultMap">
+        SELECT id, username, password, name
+        FROM user
+        WHERE username = #{username}
+    </select>
+
+    <select id="selectRoleCodesByUserId" resultType="java.lang.String">
+        SELECT DISTINCT CONCAT('ROLE_', r.code)
+        FROM role r
+        INNER JOIN user_role ur ON r.id = ur.role_id
+        WHERE ur.user_id = #{userId}
+    </select>
+
+    <select id="selectAuthorityCodesByUserId" resultType="java.lang.String">
+        SELECT DISTINCT a.code
+        FROM authority a
+        INNER JOIN role_authority ra ON a.id = ra.authority_id
+        INNER JOIN user_role ur ON ra.role_id = ur.role_id
+        WHERE ur.user_id = #{userId}
+    </select>
+
+</mapper>

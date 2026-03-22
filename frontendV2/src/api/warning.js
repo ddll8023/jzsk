@@ -128,13 +128,3 @@ export function deleteIndicator(id) {
   return request.post('/api/warning-indicators/delete', buildIdPayload(id))
 }
 
-// ==================== 字典接口 ====================
-
-/**
- * 获取字典数据
- * @param {string} name - 字典名称（预警状态/预警等级/预警类型/预警地点/监测项）
- * @returns {Promise}
- */
-export function getDictKinds(name) {
-  return request.get('/api/dicts/options/tree', { params: { name } })
-}

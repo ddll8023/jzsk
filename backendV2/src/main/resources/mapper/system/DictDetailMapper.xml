@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzsk.backendv2.mapper.system.DictDetailMapper">
+
+    <select id="selectById" resultType="com.jzsk.backendv2.pojo.entity.system.DictDetailEntity">
+        SELECT
+            detail_id as id,
+            dict_id as dict_id,
+            label,
+            value,
+            dict_sort,
+            create_time,
+            update_time
+        FROM dict_detail
+        WHERE detail_id = #{id}
+    </select>
+
+    <select id="selectByDictId" resultType="com.jzsk.backendv2.pojo.entity.system.DictDetailEntity">
+        SELECT
+            detail_id as id,
+            dict_id as dict_id,
+            label,
+            value,
+            dict_sort,
+            create_time,
+            update_time
+        FROM dict_detail
+        WHERE dict_id = #{dictId}
+        ORDER BY dict_sort ASC, detail_id ASC
+    </select>
+
+    <select id="countByDictId" resultType="int">
+        SELECT COUNT(*)
+        FROM dict_detail
+        WHERE dict_id = #{dictId}
+    </select>
+
+    <select id="countByDictIdAndLabel" resultType="int">
+        SELECT COUNT(*)
+        FROM dict_detail
+        WHERE dict_id = #{dictId}
+          AND label = #{label}
+        <if test="excludeId != null">
+            AND detail_id != #{excludeId}
+        </if>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dict_detail (
+            dict_id,
+            label,
+            value,
+            dict_sort,
+            create_time,
+            update_time
+        ) VALUES (
+            #{dictId},
+            #{label},
+            #{value},
+            #{dictSort},
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE dict_detail
+        SET
+            label = #{label},
+            value = #{value},
+            dict_sort = #{dictSort},
+            update_time = NOW()
+        WHERE detail_id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM dict_detail
+        WHERE detail_id = #{id}
+    </delete>
+
+    <delete id="deleteByDictId">
+        DELETE FROM dict_detail
+        WHERE dict_id = #{dictId}
+    </delete>
+</mapper>

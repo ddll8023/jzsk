@@ -23,7 +23,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenService jwtTokenService;
-    private final BootstrapUserDetailsService bootstrapUserDetailsService;
+    private final DatabaseUserDetailsService databaseUserDetailsService;
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
     private final SecurityPathProvider securityPathProvider;
 
@@ -45,7 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             Claims claims = jwtTokenService.parseToken(token);
             String username = claims.getSubject();
-            LoginUser loginUser = (LoginUser) bootstrapUserDetailsService.loadUserByUsername(username);
+            LoginUser loginUser = (LoginUser) databaseUserDetailsService.loadUserByUsername(username);
 
             JwtUserAuthenticationToken authentication = new JwtUserAuthenticationToken(
                     loginUser,

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzsk.backendv2.mapper.system.UserMapper">
+
+    <resultMap id="BaseResultMap" type="com.jzsk.backendv2.pojo.entity.system.UserEntity">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="name" property="name"/>
+        <result column="department" property="department"/>
+        <result column="type" property="type"/>
+        <result column="gender" property="gender"/>
+        <result column="ID_number" property="idNumber"/>
+        <result column="position" property="position"/>
+        <result column="technical_title" property="technicalTitle"/>
+        <result column="academic_qualifications" property="academicQualifications"/>
+        <result column="expiration_time" property="expirationTime"/>
+        <result column="phone_number" property="phoneNumber"/>
+        <result column="working_time" property="workingTime"/>
+        <result column="graduation_institution" property="graduationInstitution"/>
+        <result column="major" property="major"/>
+        <result column="address" property="address"/>
+        <result column="birthplace" property="birthplace"/>
+        <result column="ethnicity" property="ethnicity"/>
+        <result column="email" property="email"/>
+        <result column="birthday" property="birthday"/>
+        <result column="political_appearance" property="politicalAppearance"/>
+        <result column="note" property="note"/>
+        <result column="user_order" property="userOrder"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="status" property="status"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, username, password, name, department, type, gender, ID_number,
+        position, technical_title, academic_qualifications, expiration_time,
+        phone_number, working_time, graduation_institution, major, address,
+        birthplace, ethnicity, email, birthday, political_appearance, note,
+        user_order, create_time, update_time, status
+    </sql>
+
+    <sql id="WhereClause">
+        <where>
+            <if test="query != null">
+                <if test="query.username != null and query.username != ''">
+                    AND username LIKE CONCAT('%', #{query.username}, '%')
+                </if>
+                <if test="query.name != null and query.name != ''">
+                    AND name LIKE CONCAT('%', #{query.name}, '%')
+                </if>
+                <if test="query.department != null and query.department != ''">
+                    AND department = #{query.department}
+                </if>
+                <if test="query.type != null and query.type != ''">
+                    AND type = #{query.type}
+                </if>
+                <if test="query.status != null">
+                    AND status = #{query.status}
+                </if>
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM sys_user
+        <include refid="WhereClause"/>
+        ORDER BY user_order ASC, id ASC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countPage" resultType="long">
+        SELECT COUNT(*)
+        FROM sys_user
+        <include refid="WhereClause"/>
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM sys_user
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByUsername" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM sys_user
+        WHERE username = #{username}
+    </select>
+
+    <select id="countByUsername" resultType="int">
+        SELECT COUNT(*)
+        FROM sys_user
+        WHERE username = #{username}
+        <if test="excludeId != null">
+            AND id != #{excludeId}
+        </if>
+    </select>
+
+    <select id="selectMaxUserOrder" resultType="java.lang.Integer">
+        SELECT MAX(user_order)
+        FROM sys_user
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_user (
+            username, password, name, department, type, gender, ID_number,
+            position, technical_title, academic_qualifications, expiration_time,
+            phone_number, working_time, graduation_institution, major, address,
+            birthplace, ethnicity, email, birthday, political_appearance, note,
+            user_order, create_time, update_time, status
+        ) VALUES (
+            #{username}, #{password}, #{name}, #{department}, #{type}, #{gender}, #{idNumber},
+            #{position}, #{technicalTitle}, #{academicQualifications}, #{expirationTime},
+            #{phoneNumber}, #{workingTime}, #{graduationInstitution}, #{major}, #{address},
+            #{birthplace}, #{ethnicity}, #{email}, #{birthday}, #{politicalAppearance}, #{note},
+            #{userOrder}, NOW(), NOW(), #{status}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE sys_user
+        <set>
+            <if test="username != null">username = #{username},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="department != null">department = #{department},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="idNumber != null">ID_number = #{idNumber},</if>
+            <if test="position != null">position = #{position},</if>
+            <if test="technicalTitle != null">technical_title = #{technicalTitle},</if>
+            <if test="academicQualifications != null">academic_qualifications = #{academicQualifications},</if>
+            <if test="expirationTime != null">expiration_time = #{expirationTime},</if>
+            <if test="phoneNumber != null">phone_number = #{phoneNumber},</if>
+            <if test="workingTime != null">working_time = #{workingTime},</if>
+            <if test="graduationInstitution != null">graduation_institution = #{graduationInstitution},</if>
+            <if test="major != null">major = #{major},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="birthplace != null">birthplace = #{birthplace},</if>
+            <if test="ethnicity != null">ethnicity = #{ethnicity},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="birthday != null">birthday = #{birthday},</if>
+            <if test="politicalAppearance != null">political_appearance = #{politicalAppearance},</if>
+            <if test="note != null">note = #{note},</if>
+            <if test="userOrder != null">user_order = #{userOrder},</if>
+            <if test="status != null">status = #{status},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM sys_user
+        WHERE id = #{id}
+    </delete>
+
+    <select id="selectUserRoles" resultType="com.jzsk.backendv2.pojo.vo.OptionVO">
+        SELECT
+            r.id as value,
+            r.name as label
+        FROM sys_role r
+        INNER JOIN sys_user_role ur ON r.id = ur.role_id
+        WHERE ur.user_id = #{userId}
+    </select>
+
+    <select id="selectAuthorityCodesByUserId" resultType="java.lang.String">
+        SELECT r.code
+        FROM sys_role r
+        INNER JOIN sys_user_role ur ON r.id = ur.role_id
+        WHERE ur.user_id = #{userId}
+          AND r.status = '1'
+        ORDER BY r.sort ASC, r.id ASC
+    </select>
+
+    <select id="selectUserIdsByRoleId" resultType="java.lang.Long">
+        SELECT user_id
+        FROM sys_user_role
+        WHERE role_id = #{roleId}
+    </select>
+
+</mapper>

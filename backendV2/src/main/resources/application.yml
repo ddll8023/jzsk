@@ -12,6 +12,12 @@ spring:
     serialization:
       write-dates-as-timestamps: false
 
+mybatis:
+  mapper-locations: classpath*:mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    jdbc-type-for-null: 'NULL'
+
 management:
   endpoint:
     health:
@@ -39,11 +45,6 @@ jzsk:
       permit-all:
         - /actuator/health
         - /error
-      bootstrap-user:
-        user-id: 1
-        authorities:
-          - ROLE_ADMIN
-          - system:manage
     task:
       warning-enabled: false
       sync-enabled: false
@@ -52,6 +53,21 @@ jzsk:
       pool-size: 4
       thread-name-prefix: jzsk-task-
       shutdown-await-seconds: 30
+    cors:
+      allowed-origins:
+        - http://localhost:8084
+      allowed-methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+      allowed-headers:
+        - Authorization
+        - Content-Type
+        - X-Requested-With
+      allow-credentials: true
+      max-age: 3600
     logging:
       request-enabled: true
       trace-header: X-Trace-Id

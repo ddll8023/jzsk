@@ -12,8 +12,8 @@ import { buildIdPayload, normalizePageParams } from './_helpers'
  * 分页查询字典列表
  * @param {Object} params - 查询参数
  * @param {string} params.blurry - 模糊搜索关键词
- * @param {number} params.currentPage - 当前页码
- * @param {number} params.pageSize - 每页条数
+ * @param {number} params.page - 当前页码
+ * @param {number} params.size - 每页条数
  * @returns {Promise} 字典列表
  */
 export function getDictList(params) {
@@ -27,6 +27,15 @@ export function getDictList(params) {
  */
 export function getDictInfo(id) {
   return request.get(`/api/dicts/${id}`)
+}
+
+/**
+ * 获取字典详情列表
+ * @param {number|string} id - 字典ID
+ * @returns {Promise} 字典详情列表
+ */
+export function getDictDetails(id) {
+  return request.get(`/api/dicts/${id}/details`)
 }
 
 /**

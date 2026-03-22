@@ -108,7 +108,7 @@
                   <!-- 详情行操作 -->
                   <template v-else>
                     <Button size="sm" @click="showEditDetailDialog(row)">编辑</Button>
-                    <Button type="danger" size="sm" @click="handleDeleteDetail(row.id)">删除</Button>
+                    <Button type="danger" size="sm" @click="handleDeleteDetail(row)">删除</Button>
                   </template>
                 </div>
               </td>
@@ -186,7 +186,7 @@
  * 遵循原则：KISS - 简洁实现，SOLID - 职责分离
  */
 import { ref, computed, onMounted } from 'vue'
-import { getDictList, saveDict, updateDict, deleteDict, saveDictDetail, updateDictDetail, deleteDictDetail } from '@/api/dict'
+import { getDictList, getDictDetails, saveDict, updateDict, deleteDict, saveDictDetail, updateDictDetail, deleteDictDetail } from '@/api/dict'
 import { useDictStore } from '@/stores/dict'
 // 基础组件
 import Button from '@/components/basic/Button.vue'
@@ -198,8 +198,11 @@ const dictList = ref([])
 const loading = ref(false)
 const expandedIds = ref([])
 const searchName = ref('')
-// 分页参数（后端必传，设置大值一次性获取全部）
+// 当前页面暂未接入分页组件，使用大页长读取字典主表
 const pageSize = ref(9999)
+
+// ==================== 详情缓存 ====================
+const detailsCache = ref(new Map())
 
 // ==================== 弹窗状态 ====================
 const dictDialogVisible = ref(false)
@@ -220,11 +223,12 @@ const dictStore = useDictStore()
  */
 const displayDictList = computed(() => {
   const result = []
-  
+
   dictList.value.forEach(dict => {
-    const hasChildren = dict.dictDetails && dict.dictDetails.length > 0
+    const detailCount = dict.detailCount || 0
+    const hasChildren = detailCount > 0
     const isExpanded = expandedIds.value.includes(dict.id)
-    
+
     // 添加字典行
     result.push({
       rowKey: `dict-${dict.id}`,
@@ -235,12 +239,13 @@ const displayDictList = computed(() => {
       level: 0,
       hasChildren,
       isExpanded,
-      detailCount: dict.dictDetails?.length || 0
+      detailCount
     })
-    
-    // 如果展开，添加详情行
+
+    // 如果展开，添加详情行（从缓存获取）
     if (hasChildren && isExpanded) {
-      dict.dictDetails.forEach(detail => {
+      const cachedDetails = detailsCache.value.get(dict.id) || []
+      cachedDetails.forEach(detail => {
         result.push({
           rowKey: `detail-${detail.id}`,
           id: detail.id,
@@ -254,39 +259,57 @@ const displayDictList = computed(() => {
       })
     }
   })
-  
+
   return result
 })
 
 // ==================== 方法 ====================
 
 /**
- * 切换展开/折叠
+ * 加载字典详情列表
  */
-const toggleExpand = (id) => {
+const loadDictDetails = async (id) => {
+  try {
+    const res = await getDictDetails(id)
+    if (Array.isArray(res.data)) {
+      detailsCache.value.set(id, res.data)
+    } else if (res.data?.code === 200) {
+      detailsCache.value.set(id, res.data.data || [])
+    }
+  } catch (error) {
+    console.error('加载字典详情失败:', error)
+  }
+}
+
+/**
+ * 切换展开/折叠（懒加载详情）
+ */
+const toggleExpand = async (id) => {
   const index = expandedIds.value.indexOf(id)
   if (index > -1) {
     expandedIds.value.splice(index, 1)
   } else {
+    if (!detailsCache.value.has(id)) {
+      await loadDictDetails(id)
+    }
     expandedIds.value.push(id)
   }
 }
 
 /**
- * 查询字典列表（一次性加载全部数据）
- * 后端要求currentPage必传，设置pageSize=9999获取全部
+ * 查询字典列表
+ * 当前页面暂未提供分页控件，使用大页长读取字典主表数据
  */
 const handleSearch = async () => {
   loading.value = true
   try {
     const res = await getDictList({
       blurry: searchName.value,
-      currentPage: 1,
-      pageSize: pageSize.value
+      page: 1,
+      size: pageSize.value
     })
     if (res.data?.code === 200) {
-      // 兼容 content 和 records 两种字段
-      dictList.value = res.data.data?.records || res.data.data?.content || []
+      dictList.value = res.data.data?.list || []
     }
   } catch (error) {
     console.error('查询字典列表失败:', error)
@@ -327,7 +350,7 @@ const submitDict = async () => {
     if (res.data?.code === 200) {
       dictDialogVisible.value = false
       handleSearch() // 重新加载列表
-      dictStore.clearCache(dictForm.value.name)
+      dictStore.clearCache()
     } else {
       alert(res.data?.message || '操作失败')
     }
@@ -344,7 +367,10 @@ const handleDelete = async (id) => {
   try {
     const res = await deleteDict(id)
     if (res.data?.code === 200) {
-      handleSearch() // 重新加载列表
+      dictStore.clearCache()
+      detailsCache.value.delete(id)
+      expandedIds.value = expandedIds.value.filter(item => item !== id)
+      await handleSearch()
     } else {
       alert(res.data?.message || '删除失败')
     }
@@ -367,7 +393,13 @@ const showAddDetailDialog = (dictId) => {
  */
 const showEditDetailDialog = (item) => {
   isEditDetail.value = true
-  detailForm.value = { id: item.id, label: item.label, value: item.value, dictSort: item.dictSort }
+  detailForm.value = {
+    id: item.id,
+    dictId: item.dictId,
+    label: item.label,
+    value: item.value,
+    dictSort: item.dictSort
+  }
   detailDialogVisible.value = true
 }
 
@@ -388,7 +420,15 @@ const submitDetail = async () => {
     const res = await fn(detailForm.value)
     if (res.data?.code === 200) {
       detailDialogVisible.value = false
-      handleSearch() // 重新加载列表
+      dictStore.clearCache()
+      const dictId = detailForm.value.dictId
+      if (detailsCache.value.has(dictId)) {
+        detailsCache.value.delete(dictId)
+      }
+      await handleSearch()
+      if (expandedIds.value.includes(dictId)) {
+        await loadDictDetails(dictId)
+      }
     } else {
       alert(res.data?.message || '操作失败')
     }
@@ -400,12 +440,19 @@ const submitDetail = async () => {
 /**
  * 删除字典详情
  */
-const handleDeleteDetail = async (id) => {
+const handleDeleteDetail = async (item) => {
   if (!confirm('此操作将永久删除该数据, 是否继续?')) return
   try {
-    const res = await deleteDictDetail(id)
+    const res = await deleteDictDetail(item.id)
     if (res.data?.code === 200) {
-      handleSearch() // 重新加载列表
+      dictStore.clearCache()
+      if (detailsCache.value.has(item.dictId)) {
+        detailsCache.value.delete(item.dictId)
+      }
+      await handleSearch()
+      if (expandedIds.value.includes(item.dictId)) {
+        await loadDictDetails(item.dictId)
+      }
     } else {
       alert(res.data?.message || '删除失败')
     }

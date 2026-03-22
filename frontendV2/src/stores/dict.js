@@ -48,13 +48,10 @@ export const useDictStore = defineStore('dict', () => {
     try {
       const fetchFn = type === 'kinds' ? getDictKinds : getDictLVs
       const res = await fetchFn(name)
-      
-      if (res.data?.code === 200) {
-        const options = res.data.data || []
-        dictCache.value.set(cacheKey, options)
-        return options
-      }
-      return []
+      const isRawArray = Array.isArray(res.data)
+      const options = isRawArray ? res.data : (res.data?.code === 200 ? (res.data.data || []) : [])
+      dictCache.value.set(cacheKey, options)
+      return options
     } catch (error) {
       console.error(`[Dict Store] 获取字典失败: ${name}`, error)
       return []

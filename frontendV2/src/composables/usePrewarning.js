@@ -4,13 +4,16 @@
  * 遵循原则：KISS, YAGNI, SOLID
  */
 import { ref, reactive, computed } from 'vue'
-import { getWarningList, updateWarning, getDictKinds } from '../api/warning'
+import { getWarningList, updateWarning } from '../api/warning'
+import { useDict } from './useDict'
 
 /**
  * 预警信息管理
  * @returns {Object} 预警状态和方法
  */
 export function usePrewarning() {
+  const { getDictOptions } = useDict()
+
   // 数据列表
   const warningList = ref([])
   const loading = ref(true) // 初始加载状态为 true，显示加载动画
@@ -139,36 +142,15 @@ export function usePrewarning() {
   const loadDictData = async () => {
     try {
       console.log('🔍 开始加载字典数据...')
-      
-      // 加载预警状态
-      const { data: statusRes } = await getDictKinds('预警状态')
-      if (statusRes.code === 200) {
-        dictData.statuses = statusRes.data.map(item => ({
-          value: item,
-          label: item
-        }))
-        console.log('   预警状态:', dictData.statuses.length, '项')
-      }
 
-      // 加载预警等级
-      const { data: levelRes } = await getDictKinds('预警等级')
-      if (levelRes.code === 200) {
-        dictData.levels = levelRes.data.map(item => ({
-          value: item,
-          label: item
-        }))
-        console.log('   预警等级:', dictData.levels.length, '项')
-      }
+      dictData.statuses = await getDictOptions('预警状态')
+      console.log('   预警状态:', dictData.statuses.length, '项')
 
-      // 加载预警类型
-      const { data: typeRes } = await getDictKinds('预警类型')
-      if (typeRes.code === 200) {
-        dictData.types = typeRes.data.map(item => ({
-          value: item,
-          label: item
-        }))
-        console.log('   预警类型:', dictData.types.length, '项')
-      }
+      dictData.levels = await getDictOptions('预警等级')
+      console.log('   预警等级:', dictData.levels.length, '项')
+
+      dictData.types = await getDictOptions('预警类型')
+      console.log('   预警类型:', dictData.types.length, '项')
 
       // 预警地点（写死）
       dictData.positions = [

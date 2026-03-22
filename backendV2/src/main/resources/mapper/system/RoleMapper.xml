@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzsk.backendv2.mapper.system.RoleMapper">
+
+    <resultMap id="BaseResultMap" type="com.jzsk.backendv2.pojo.entity.system.RoleEntity">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <result column="note" property="note"/>
+        <result column="type" property="type"/>
+        <result column="status" property="status"/>
+        <result column="sort" property="sort"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, name, code, note, type, status, sort, create_time, update_time
+    </sql>
+
+    <sql id="WhereClause">
+        <where>
+            <if test="query != null">
+                <if test="query.name != null and query.name != ''">
+                    AND name LIKE CONCAT('%', #{query.name}, '%')
+                </if>
+                <if test="query.code != null and query.code != ''">
+                    AND code LIKE CONCAT('%', #{query.code}, '%')
+                </if>
+                <if test="query.status != null and query.status != ''">
+                    AND status = #{query.status}
+                </if>
+                <if test="query.type != null and query.type != ''">
+                    AND type = #{query.type}
+                </if>
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM sys_role
+        <include refid="WhereClause"/>
+        ORDER BY sort ASC, id ASC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countPage" resultType="long">
+        SELECT COUNT(*)
+        FROM sys_role
+        <include refid="WhereClause"/>
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM sys_role
+        WHERE id = #{id}
+    </select>
+
+    <select id="countByName" resultType="int">
+        SELECT COUNT(*)
+        FROM sys_role
+        WHERE name = #{name}
+        <if test="excludeId != null">
+            AND id != #{excludeId}
+        </if>
+    </select>
+
+    <select id="countByCode" resultType="int">
+        SELECT COUNT(*)
+        FROM sys_role
+        WHERE code = #{code}
+        <if test="excludeId != null">
+            AND id != #{excludeId}
+        </if>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_role (
+            name, code, note, type, status, sort, create_time, update_time
+        ) VALUES (
+            #{name}, #{code}, #{note}, #{type}, #{status}, #{sort}, NOW(), NOW()
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE sys_role
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="code != null">code = #{code},</if>
+            <if test="note != null">note = #{note},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="sort != null">sort = #{sort},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM sys_role
+        WHERE id = #{id}
+    </delete>
+
+    <select id="selectEnabledOptions" resultType="com.jzsk.backendv2.pojo.vo.OptionVO">
+        SELECT
+            id as value,
+            name as label
+        FROM sys_role
+        WHERE status = '1'
+        ORDER BY sort ASC, id ASC
+    </select>
+
+    <select id="selectMenuIdsByRoleId" resultType="java.lang.Long">
+        SELECT authority_id
+        FROM sys_role_authority
+        WHERE role_id = #{roleId}
+    </select>
+
+</mapper>
