@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 @DS("jcxx")
 public class UserServiceImpl implements UserService {
 
-    private static final long MAX_PAGE_SIZE = 10000L;
+    private static final long MAX_PAGE_SIZE = 500L;
     private static final String DEFAULT_PASSWORD = "123456";
     private static final String ROLE_CODE_ADMIN = "ROLE_ADMIN";
     private static final String ROLE_CODE_DATA_MAINTAINER = "ROLE_DATA_MAINTAINER";

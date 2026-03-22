@@ -17,11 +17,11 @@ import com.jzsk.backendv2.pojo.vo.system.dict.DictDetailVO;
 import com.jzsk.backendv2.pojo.vo.system.dict.DictVO;
 import com.jzsk.backendv2.service.system.DictService;
 import com.jzsk.backendv2.utils.PageUtils;
+import com.jzsk.backendv2.utils.ValidationUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -31,14 +31,24 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+/**
+ * 字典服务实现类
+ * 职责：提供字典管理和字典选项查询功能
+ * 遵循KISS原则：方法简洁，职责单一
+ */
 public class DictServiceImpl implements DictService {
 
-    private static final long MAX_PAGE_SIZE = 10000L;
+    private static final long MAX_PAGE_SIZE = 100L;
 
     private final DictMapper dictMapper;
     private final DictDetailMapper dictDetailMapper;
 
     @Override
+    /**
+     * 分页查询字典
+     * @param queryDTO 分页查询参数
+     * @return 分页结果
+     */
     public PageResultVO<DictVO> page(DictPageQueryDTO queryDTO) {
         DictPageQueryDTO normalized = normalizePageQuery(queryDTO);
         long total = dictMapper.countPage(normalized);
@@ -73,6 +83,11 @@ public class DictServiceImpl implements DictService {
     }
 
     @Override
+    /**
+     * 根据ID查询字典
+     * @param id 字典ID
+     * @return 字典VO
+     */
     public DictVO getById(Long id) {
         DictEntity entity = dictMapper.selectBaseById(id);
         if (entity == null) {
@@ -85,13 +100,18 @@ public class DictServiceImpl implements DictService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    /**
+     * 创建字典
+     * @param request 创建请求
+     * @return 字典VO
+     */
     public DictVO create(DictCreateDTO request) {
-        String name = normalizeRequiredText(request.getName(), "字典名称不能为空");
+        String name = ValidationUtils.requireNonBlank(request.getName(), "字典名称不能为空");
         ensureDictNameUnique(name, null);
 
         DictEntity entity = new DictEntity();
         entity.setName(name);
-        entity.setDescription(normalizeOptionalText(request.getDescription()));
+        entity.setDescription(ValidationUtils.normalizeOptional(request.getDescription()));
         dictMapper.insert(entity);
         log.info("创建字典成功，dictId={}, name={}", entity.getId(), entity.getName());
         return getById(entity.getId());
@@ -99,17 +119,22 @@ public class DictServiceImpl implements DictService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    /**
+     * 更新字典
+     * @param request 更新请求
+     * @return 字典VO
+     */
     public DictVO update(DictUpdateDTO request) {
         DictEntity existing = dictMapper.selectBaseById(request.getId());
         if (existing == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND, "字典不存在");
         }
 
-        String name = normalizeRequiredText(request.getName(), "字典名称不能为空");
+        String name = ValidationUtils.requireNonBlank(request.getName(), "字典名称不能为空");
         ensureDictNameUnique(name, request.getId());
 
         existing.setName(name);
-        existing.setDescription(normalizeOptionalText(request.getDescription()));
+        existing.setDescription(ValidationUtils.normalizeOptional(request.getDescription()));
         dictMapper.update(existing);
         log.info("更新字典成功，dictId={}, name={}", existing.getId(), existing.getName());
         return getById(existing.getId());
@@ -117,6 +142,10 @@ public class DictServiceImpl implements DictService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    /**
+     * 删除字典
+     * @param id 字典ID
+     */
     public void delete(Long id) {
         DictEntity existing = dictMapper.selectBaseById(id);
         if (existing == null) {
@@ -129,13 +158,23 @@ public class DictServiceImpl implements DictService {
     }
 
     @Override
+    /**
+     * 查询字典扁平选项
+     * @param queryDTO 选项查询参数
+     * @return 选项列表
+     */
     public List<OptionVO> listOptions(DictOptionQueryDTO queryDTO) {
         String name = queryDTO == null ? null : queryDTO.getName();
-        List<OptionVO> options = dictMapper.selectOptionsByName(normalizeRequiredText(name, "字典名称不能为空"));
+        List<OptionVO> options = dictMapper.selectOptionsByName(ValidationUtils.requireNonBlank(name, "字典名称不能为空"));
         return options == null ? Collections.emptyList() : options;
     }
 
     @Override
+    /**
+     * 查询字典树形选项
+     * @param queryDTO 选项查询参数
+     * @return 树形选项列表
+     */
     public List<TreeOptionVO> treeOptions(DictOptionQueryDTO queryDTO) {
         return listOptions(queryDTO).stream()
                 .map(option -> new TreeOptionVO(option.getLabel(), option.getValue()))
@@ -143,6 +182,11 @@ public class DictServiceImpl implements DictService {
     }
 
     @Override
+    /**
+     * 根据字典ID查询详情列表
+     * @param id 字典ID
+     * @return 字典详情列表
+     */
     public List<DictDetailVO> getDetailsById(Long id) {
         DictEntity entity = dictMapper.selectBaseById(id);
         if (entity == null) {
@@ -160,7 +204,7 @@ public class DictServiceImpl implements DictService {
         normalized.setPage(page);
         normalized.setSize(size);
         if (queryDTO != null) {
-            normalized.setBlurry(normalizeOptionalText(queryDTO.getBlurry()));
+            normalized.setBlurry(ValidationUtils.normalizeOptional(queryDTO.getBlurry()));
         }
         return normalized;
     }
@@ -203,18 +247,4 @@ public class DictServiceImpl implements DictService {
                 .collect(Collectors.toList());
     }
 
-    private String normalizeRequiredText(String value, String message) {
-        String normalized = normalizeOptionalText(value);
-        if (!StringUtils.hasText(normalized)) {
-            throw new IllegalArgumentException(message);
-        }
-        return normalized;
-    }
-
-    private String normalizeOptionalText(String value) {
-        if (!StringUtils.hasText(value)) {
-            return null;
-        }
-        return value.trim();
-    }
 }

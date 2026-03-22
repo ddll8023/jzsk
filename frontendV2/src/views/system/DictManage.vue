@@ -198,8 +198,7 @@ const dictList = ref([])
 const loading = ref(false)
 const expandedIds = ref([])
 const searchName = ref('')
-// 当前页面暂未接入分页组件，使用大页长读取字典主表
-const pageSize = ref(9999)
+const pageSize = ref(20)
 
 // ==================== 详情缓存 ====================
 const detailsCache = ref(new Map())
@@ -298,7 +297,6 @@ const toggleExpand = async (id) => {
 
 /**
  * 查询字典列表
- * 当前页面暂未提供分页控件，使用大页长读取字典主表数据
  */
 const handleSearch = async () => {
   loading.value = true

@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
 @DS("jcxx")
 public class RoleServiceImpl implements RoleService {
 
-    private static final long MAX_PAGE_SIZE = 10000L;
+    private static final long MAX_PAGE_SIZE = 500L;
 
     private final RoleMapper roleMapper;
     private final RoleMenuMapper roleMenuMapper;

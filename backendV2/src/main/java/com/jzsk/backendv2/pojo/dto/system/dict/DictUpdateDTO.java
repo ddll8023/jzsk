@@ -12,6 +12,6 @@ import javax.validation.constraints.NotNull;
 public class DictUpdateDTO extends DictCreateDTO {
 
     @NotNull(message = "字典ID不能为空")
-    @Schema(description = "字典ID", example = "1", required = true)
+    @Schema(description = "字典ID", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
     private Long id;
 }

@@ -2,6 +2,8 @@ package com.jzsk.backendv2.controller.system;
 
 import com.jzsk.backendv2.pojo.dto.IdRequestDTO;
 import com.jzsk.backendv2.pojo.dto.system.dict.DictCreateDTO;
+import com.jzsk.backendv2.pojo.dto.system.dict.DictDetailCreateDTO;
+import com.jzsk.backendv2.pojo.dto.system.dict.DictDetailUpdateDTO;
 import com.jzsk.backendv2.pojo.dto.system.dict.DictOptionQueryDTO;
 import com.jzsk.backendv2.pojo.dto.system.dict.DictPageQueryDTO;
 import com.jzsk.backendv2.pojo.dto.system.dict.DictUpdateDTO;
@@ -11,6 +13,7 @@ import com.jzsk.backendv2.pojo.vo.PageResultVO;
 import com.jzsk.backendv2.pojo.vo.TreeOptionVO;
 import com.jzsk.backendv2.pojo.vo.system.dict.DictDetailVO;
 import com.jzsk.backendv2.pojo.vo.system.dict.DictVO;
+import com.jzsk.backendv2.service.system.DictDetailService;
 import com.jzsk.backendv2.service.system.DictService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -39,21 +42,28 @@ import java.util.List;
 public class DictController {
 
     private final DictService dictService;
+    private final DictDetailService dictDetailService;
 
+    /**
+     * 分页查询字典
+     * 权限：登录即可访问
+     */
     @Operation(summary = "分页查询字典", description = "分页查询字典摘要列表")
     @ApiResponse(responseCode = "200", description = "查询成功")
     @SecurityRequirement(name = "JWT")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'system:manage')")
     @GetMapping("/page")
     public ResponseEntity<ApiResult<PageResultVO<DictVO>>> page(
             @Valid DictPageQueryDTO queryDTO) {
         return ResponseEntity.ok(ApiResult.success(dictService.page(queryDTO), "查询成功"));
     }
 
+    /**
+     * 查询字典详情
+     * 权限：登录即可访问
+     */
     @Operation(summary = "查询字典详情", description = "根据ID查询单个字典摘要")
     @ApiResponse(responseCode = "200", description = "查询成功")
     @SecurityRequirement(name = "JWT")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'system:manage')")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResult<DictVO>> getById(
             @Parameter(description = "字典ID", required = true, example = "1")
@@ -61,10 +71,13 @@ public class DictController {
         return ResponseEntity.ok(ApiResult.success(dictService.getById(id), "查询成功"));
     }
 
+    /**
+     * 创建字典
+     * 权限：登录即可访问
+     */
     @Operation(summary = "创建字典", description = "创建新的字典")
     @ApiResponse(responseCode = "200", description = "创建成功")
     @SecurityRequirement(name = "JWT")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'system:manage')")
     @PostMapping("/create")
     public ResponseEntity<ApiResult<DictVO>> create(
             @Parameter(description = "字典创建请求", required = true)
@@ -72,10 +85,13 @@ public class DictController {
         return ResponseEntity.ok(ApiResult.success(dictService.create(request), "创建成功"));
     }
 
+    /**
+     * 更新字典
+     * 权限：登录即可访问
+     */
     @Operation(summary = "更新字典", description = "更新指定字典")
     @ApiResponse(responseCode = "200", description = "更新成功")
     @SecurityRequirement(name = "JWT")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'system:manage')")
     @PostMapping("/update")
     public ResponseEntity<ApiResult<DictVO>> update(
             @Parameter(description = "字典更新请求", required = true)
@@ -83,10 +99,13 @@ public class DictController {
         return ResponseEntity.ok(ApiResult.success(dictService.update(request), "更新成功"));
     }
 
+    /**
+     * 删除字典
+     * 权限：登录即可访问
+     */
     @Operation(summary = "删除字典", description = "删除指定字典及其详情")
     @ApiResponse(responseCode = "200", description = "删除成功")
     @SecurityRequirement(name = "JWT")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'system:manage')")
     @PostMapping("/delete")
     public ResponseEntity<ApiResult<Void>> delete(
             @Parameter(description = "字典删除请求", required = true)
@@ -95,6 +114,10 @@ public class DictController {
         return ResponseEntity.ok(ApiResult.successMessage("删除成功"));
     }
 
+    /**
+     * 查询字典扁平选项
+     * 权限：登录即可访问
+     */
     @Operation(summary = "查询字典扁平选项", description = "按字典名称查询扁平选项列表")
     @ApiResponse(responseCode = "200", description = "查询成功")
     @SecurityRequirement(name = "JWT")
@@ -104,6 +127,10 @@ public class DictController {
         return ResponseEntity.ok(ApiResult.success(dictService.listOptions(queryDTO), "查询成功"));
     }
 
+    /**
+     * 查询字典树形选项
+     * 权限：登录即可访问
+     */
     @Operation(summary = "查询字典树形选项", description = "按字典名称查询树形选项列表")
     @ApiResponse(responseCode = "200", description = "查询成功")
     @SecurityRequirement(name = "JWT")
@@ -113,6 +140,10 @@ public class DictController {
         return ResponseEntity.ok(ApiResult.success(dictService.treeOptions(queryDTO), "查询成功"));
     }
 
+    /**
+     * 查询字典详情列表
+     * 权限：登录即可访问
+     */
     @Operation(summary = "查询字典详情列表", description = "根据字典ID查询该字典下的所有详情")
     @ApiResponse(responseCode = "200", description = "查询成功")
     @SecurityRequirement(name = "JWT")
@@ -121,5 +152,66 @@ public class DictController {
             @Parameter(description = "字典ID", required = true, example = "1")
             @PathVariable Long id) {
         return ResponseEntity.ok(ApiResult.success(dictService.getDetailsById(id), "查询成功"));
+    }
+
+    /**
+     * 查询字典详情
+     * 权限：登录即可访问
+     */
+    @Operation(summary = "查询字典详情", description = "根据ID查询单个字典详情")
+    @ApiResponse(responseCode = "200", description = "查询成功")
+    @SecurityRequirement(name = "JWT")
+    @GetMapping("/{dictId}/items/{itemId}")
+    public ResponseEntity<ApiResult<DictDetailVO>> getDetailById(
+            @Parameter(description = "字典ID", required = true, example = "1")
+            @PathVariable Long dictId,
+            @Parameter(description = "字典详情ID", required = true, example = "1")
+            @PathVariable Long itemId) {
+        return ResponseEntity.ok(ApiResult.success(dictDetailService.getById(itemId), "查询成功"));
+    }
+
+    /**
+     * 创建字典详情
+     * 权限：登录即可访问
+     */
+    @Operation(summary = "创建字典详情", description = "在指定字典下创建新的详情项")
+    @ApiResponse(responseCode = "200", description = "创建成功")
+    @SecurityRequirement(name = "JWT")
+    @PostMapping("/{dictId}/items/create")
+    public ResponseEntity<ApiResult<DictDetailVO>> createDetail(
+            @Parameter(description = "字典ID", required = true, example = "1")
+            @PathVariable Long dictId,
+            @Parameter(description = "字典详情创建请求", required = true)
+            @Valid @RequestBody DictDetailCreateDTO request) {
+        return ResponseEntity.ok(ApiResult.success(dictDetailService.create(request), "创建成功"));
+    }
+
+    /**
+     * 更新字典详情
+     * 权限：登录即可访问
+     */
+    @Operation(summary = "更新字典详情", description = "更新指定字典详情")
+    @ApiResponse(responseCode = "200", description = "更新成功")
+    @SecurityRequirement(name = "JWT")
+    @PostMapping("/{dictId}/items/update")
+    public ResponseEntity<ApiResult<DictDetailVO>> updateDetail(
+            @Parameter(description = "字典详情更新请求", required = true)
+            @Valid @RequestBody DictDetailUpdateDTO request) {
+        return ResponseEntity.ok(ApiResult.success(dictDetailService.update(request), "更新成功"));
+    }
+
+    /**
+     * 删除字典详情
+     * 权限：登录即可访问
+     */
+    @Operation(summary = "删除字典详情", description = "删除指定字典详情")
+    @ApiResponse(responseCode = "200", description = "删除成功")
+    @SecurityRequirement(name = "JWT")
+    @PostMapping("/{dictId}/items/delete")
+    public ResponseEntity<ApiResult<Void>> deleteDetail(
+            @Parameter(description = "字典详情删除请求", required = true)
+            @Valid @RequestBody IdRequestDTO request) {
+        dictDetailService.delete(request.getId());
+        return ResponseEntity.ok(ApiResult.successMessage("删除成功"));
     }
 }
