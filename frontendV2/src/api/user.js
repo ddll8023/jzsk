@@ -97,11 +97,3 @@ export function updatePassword(data) {
   return request.post('/api/users/password/update', data)
 }
 
-/**
- * 获取角色列表
- * @param {Object} params - 查询参数
- * @returns {Promise} 角色列表
- */
-export function getRoleList(params) {
-  return request.get('/api/roles/page', { params: normalizePageParams(params) })
-}

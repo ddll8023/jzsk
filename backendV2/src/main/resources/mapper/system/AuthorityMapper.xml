@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzsk.backendv2.mapper.system.AuthorityMapper">
+
+    <resultMap id="BaseResultMap" type="com.jzsk.backendv2.pojo.entity.system.AuthorityEntity">
+        <id column="id" property="id"/>
+        <result column="subsystemID" property="subsystemid"/>
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <result column="path" property="path"/>
+        <result column="type" property="type"/>
+        <result column="orderNum" property="ordernum"/>
+        <result column="status" property="status"/>
+        <result column="note" property="note"/>
+    </resultMap>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT id, subsystemID, name, code, path, type, orderNum, status, note
+        FROM authority
+        WHERE status = '启用'
+        ORDER BY orderNum ASC, id ASC
+    </select>
+
+</mapper>

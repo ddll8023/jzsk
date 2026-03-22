@@ -78,3 +78,11 @@ export function allocateMenu(roleId, menuIds) {
 export function getRoleMenus(roleId) {
   return request.get(`/api/roles/${roleId}/menus`)
 }
+
+/**
+ * 获取启用角色选项列表
+ * @returns {Promise} 角色选项列表 [{label, value}]
+ */
+export function getRoleOptions() {
+  return request.get('/api/roles/options')
+}

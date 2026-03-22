@@ -241,17 +241,17 @@
  * Source: frontend/src/components/menu/SystemServe/UserManage.vue
  */
 import { ref, computed, onMounted } from 'vue'
-import { 
-  getUserList, 
-  searchUser, 
-  getUserInfo, 
-  saveUser, 
-  updateUser, 
-  deleteUser, 
-  allocateRole, 
-  resetPassword,
-  getRoleList 
+import {
+  getUserList,
+  searchUser,
+  getUserInfo,
+  saveUser,
+  updateUser,
+  deleteUser,
+  allocateRole,
+  resetPassword
 } from '@/api/user'
+import { getRoleOptions } from '@/api/role'
 // 基础组件
 import Button from '@/components/basic/Button.vue'
 import Modal from '@/components/basic/Modal.vue'
@@ -261,7 +261,7 @@ import Pagination from '@/components/basic/Pagination.vue'
 
 // ==================== 列表状态 ====================
 const userList = ref([])
-const roleList = ref([])
+const roleOptions = ref([])
 const loading = ref(false)
 const searchName = ref('')
 const currentPage = ref(1)
@@ -341,14 +341,6 @@ const educationOptions = [
   { label: '小学', value: '小学' }
 ]
 
-// 角色选项（动态加载）
-const roleOptions = computed(() => {
-  return roleList.value.map(role => ({
-    label: role.name,
-    value: role.id
-  }))
-})
-
 // ==================== 计算属性 ====================
 /**
  * 计算表格序号（支持分页连续）
@@ -381,19 +373,16 @@ const loadUserList = async () => {
 }
 
 /**
- * 加载角色列表
+ * 加载角色选项列表
  */
 const loadRoleList = async () => {
   try {
-    const res = await getRoleList({
-      currentPage: 1,
-      pageSize: 9999
-    })
+    const res = await getRoleOptions()
     if (res.data?.code === 200) {
-      roleList.value = res.data.data?.records || []
+      roleOptions.value = res.data.data || []
     }
   } catch (error) {
-    console.error('加载角色列表失败:', error)
+    console.error('加载角色选项失败:', error)
   }
 }
 

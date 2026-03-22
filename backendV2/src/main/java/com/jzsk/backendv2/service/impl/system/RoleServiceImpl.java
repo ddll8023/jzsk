@@ -3,6 +3,7 @@ package com.jzsk.backendv2.service.impl.system;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.jzsk.backendv2.exception.BusinessException;
 import com.jzsk.backendv2.exception.ErrorCode;
+import com.jzsk.backendv2.mapper.system.AuthorityMapper;
 import com.jzsk.backendv2.mapper.system.RoleMapper;
 import com.jzsk.backendv2.mapper.system.RoleMenuMapper;
 import com.jzsk.backendv2.mapper.system.UserMapper;
@@ -11,12 +12,13 @@ import com.jzsk.backendv2.pojo.dto.system.role.RoleCreateDTO;
 import com.jzsk.backendv2.pojo.dto.system.role.RoleMenuAssignDTO;
 import com.jzsk.backendv2.pojo.dto.system.role.RolePageQueryDTO;
 import com.jzsk.backendv2.pojo.dto.system.role.RoleUpdateDTO;
+import com.jzsk.backendv2.pojo.entity.system.AuthorityEntity;
 import com.jzsk.backendv2.pojo.entity.system.RoleEntity;
 import com.jzsk.backendv2.pojo.entity.system.RoleMenuEntity;
 import com.jzsk.backendv2.pojo.entity.system.UserEntity;
-import com.jzsk.backendv2.pojo.entity.system.UserRoleEntity;
 import com.jzsk.backendv2.pojo.vo.OptionVO;
 import com.jzsk.backendv2.pojo.vo.PageResultVO;
+import com.jzsk.backendv2.pojo.vo.system.role.MenuTreeVO;
 import com.jzsk.backendv2.pojo.vo.system.role.RoleMenuVO;
 import com.jzsk.backendv2.pojo.vo.system.role.RoleVO;
 import com.jzsk.backendv2.service.system.RoleService;
@@ -28,7 +30,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -48,6 +52,7 @@ public class RoleServiceImpl implements RoleService {
     private final RoleMenuMapper roleMenuMapper;
     private final UserMapper userMapper;
     private final UserRoleMapper userRoleMapper;
+    private final AuthorityMapper authorityMapper;
 
     @Override
     public PageResultVO<RoleVO> page(RolePageQueryDTO queryDTO) {
@@ -202,6 +207,12 @@ public class RoleServiceImpl implements RoleService {
         RoleMenuVO vo = new RoleMenuVO();
         vo.setRoleId(roleId);
         vo.setMenuIds(menuIds != null ? menuIds : new ArrayList<>());
+
+        // 构建菜单树
+        List<AuthorityEntity> allAuthorities = authorityMapper.selectAll();
+        List<MenuTreeVO> menuTree = buildMenuTree(allAuthorities);
+        vo.setMenuTree(menuTree);
+
         return vo;
     }
 
@@ -269,6 +280,53 @@ public class RoleServiceImpl implements RoleService {
             normalized.setType(queryDTO.getType());
         }
         return normalized;
+    }
+
+    /**
+     * 构建菜单树
+     * @param authorities 菜单权限列表
+     * @return 菜单树形结构
+     */
+    private List<MenuTreeVO> buildMenuTree(List<AuthorityEntity> authorities) {
+        if (authorities == null || authorities.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 使用 LinkedHashMap 保持插入顺序
+        Map<Long, MenuTreeVO> menuMap = new LinkedHashMap<>();
+        List<MenuTreeVO> rootMenus = new ArrayList<>();
+
+        // 第一遍：转换为 VO 并建立映射
+        for (AuthorityEntity entity : authorities) {
+            MenuTreeVO vo = new MenuTreeVO();
+            vo.setId(entity.getId());
+            vo.setName(entity.getName());
+            vo.setCode(entity.getCode());
+            vo.setPath(entity.getPath());
+            vo.setOrderNum(entity.getOrdernum());
+            vo.setChildren(new ArrayList<>());
+            menuMap.put(entity.getId(), vo);
+        }
+
+        // 第二遍：建立父子关系（subsystemid = 0 表示顶级菜单）
+        for (AuthorityEntity entity : authorities) {
+            MenuTreeVO vo = menuMap.get(entity.getId());
+            if (entity.getSubsystemid() == null || entity.getSubsystemid() == 0L) {
+                // 顶级菜单
+                rootMenus.add(vo);
+            } else {
+                // 非顶级菜单，找到父节点
+                MenuTreeVO parent = menuMap.get(entity.getSubsystemid());
+                if (parent != null) {
+                    parent.getChildren().add(vo);
+                } else {
+                    // 父节点不存在，当作顶级菜单
+                    rootMenus.add(vo);
+                }
+            }
+        }
+
+        return rootMenus;
     }
 
     /**

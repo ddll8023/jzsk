@@ -194,7 +194,6 @@ import {
   allocateMenu,
   getRoleMenus
 } from '@/api/role'
-import { getMenuList } from '@/api/menu'
 // 基础组件
 import Button from '@/components/basic/Button.vue'
 import Modal from '@/components/basic/Modal.vue'
@@ -297,20 +296,10 @@ const loadRoleList = async () => {
 }
 
 /**
- * 加载菜单列表
+ * 加载菜单列表（已废弃，由 showMenuDialog 统一加载后端菜单树）
  */
 const loadMenuList = async () => {
-  try {
-    const res = await getMenuList({
-      currentPage: 1,
-      pageSize: 9999
-    })
-    if (res.data?.code === 200) {
-      menuList.value = res.data.data?.records || []
-    }
-  } catch (error) {
-    console.error('加载菜单列表失败:', error)
-  }
+  // 菜单树现在由 showMenuDialog 从后端获取，不再使用前端静态数据
 }
 
 /**
@@ -426,22 +415,29 @@ const handleDelete = async (id) => {
  */
 const showMenuDialog = async (id) => {
   try {
+    // 获取角色已分配的菜单
+    const menuRes = await getRoleMenus(id)
+
     // 获取角色信息
     const roleRes = await getRoleInfo(id)
     if (roleRes.data?.code !== 200) {
       alert('获取角色信息失败')
       return
     }
-    
-    // 获取角色已分配的菜单
-    const menuRes = await getRoleMenus(id)
-    
+
+    // 使用后端返回的菜单树和已选菜单ID
+    const menuTree = menuRes.data?.data?.menuTree || []
+    const selectedMenuIds = menuRes.data?.data?.menuIds || []
+
     menuForm.value = {
       roleId: id,
       roleName: roleRes.data.data.name,
-      menuIds: menuRes.data?.code === 200 ? (menuRes.data.data || []) : []
+      menuIds: selectedMenuIds
     }
-    
+
+    // 优先使用后端菜单树，否则使用空数组
+    menuList.value = menuTree.length > 0 ? menuTree : []
+
     menuDialogVisible.value = true
   } catch (error) {
     console.error('获取权限信息失败:', error)
