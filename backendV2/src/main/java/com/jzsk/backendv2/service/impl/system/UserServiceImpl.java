@@ -1,5 +1,6 @@
 package com.jzsk.backendv2.service.impl.system;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.jzsk.backendv2.exception.BusinessException;
 import com.jzsk.backendv2.exception.ErrorCode;
 import com.jzsk.backendv2.mapper.system.UserMapper;
@@ -39,6 +40,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@DS("jcxx")
 public class UserServiceImpl implements UserService {
 
     private static final long MAX_PAGE_SIZE = 10000L;
@@ -119,7 +121,6 @@ public class UserServiceImpl implements UserService {
         entity.setIdNumber(request.getIdNumber());
         entity.setTechnicalTitle(request.getTechnicalTitle());
         entity.setAcademicQualifications(request.getAcademicQualifications());
-        entity.setStatus(request.getStatus() != null ? request.getStatus() : 1);
         entity.setNote(request.getNote());
         entity.setUserOrder(newOrder);
 
@@ -159,7 +160,6 @@ public class UserServiceImpl implements UserService {
         if (request.getIdNumber() != null) existing.setIdNumber(request.getIdNumber());
         if (request.getTechnicalTitle() != null) existing.setTechnicalTitle(request.getTechnicalTitle());
         if (request.getAcademicQualifications() != null) existing.setAcademicQualifications(request.getAcademicQualifications());
-        if (request.getStatus() != null) existing.setStatus(request.getStatus());
         if (request.getNote() != null) existing.setNote(request.getNote());
 
         userMapper.update(existing);
@@ -335,7 +335,6 @@ public class UserServiceImpl implements UserService {
             normalized.setName(queryDTO.getName());
             normalized.setDepartment(queryDTO.getDepartment());
             normalized.setType(queryDTO.getType());
-            normalized.setStatus(queryDTO.getStatus());
         }
         return normalized;
     }
@@ -358,7 +357,6 @@ public class UserServiceImpl implements UserService {
         vo.setTechnicalTitle(entity.getTechnicalTitle());
         vo.setAcademicQualifications(entity.getAcademicQualifications());
         vo.setType(entity.getType());
-        vo.setStatus(entity.getStatus());
         vo.setNote(entity.getNote());
         vo.setCreateTime(entity.getCreateTime());
         vo.setUpdateTime(entity.getUpdateTime());

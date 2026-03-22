@@ -3,7 +3,7 @@
 <mapper namespace="com.jzsk.backendv2.mapper.system.UserRoleMapper">
 
     <insert id="batchInsert">
-        INSERT INTO sys_user_role (user_id, role_id)
+        INSERT INTO user_role (user_id, role_id)
         VALUES
         <foreach collection="list" item="item" separator=",">
             (#{item.userId}, #{item.roleId})
@@ -11,24 +11,24 @@
     </insert>
 
     <delete id="deleteByUserId">
-        DELETE FROM sys_user_role
+        DELETE FROM user_role
         WHERE user_id = #{userId}
     </delete>
 
     <delete id="deleteByRoleId">
-        DELETE FROM sys_user_role
+        DELETE FROM user_role
         WHERE role_id = #{roleId}
     </delete>
 
     <select id="selectRoleIdsByUserId" resultType="java.lang.Long">
         SELECT role_id
-        FROM sys_user_role
+        FROM user_role
         WHERE user_id = #{userId}
     </select>
 
     <select id="selectFirstRoleIdByUserId" resultType="java.lang.Long">
         SELECT role_id
-        FROM sys_user_role
+        FROM user_role
         WHERE user_id = #{userId}
         ORDER BY role_id ASC
         LIMIT 1

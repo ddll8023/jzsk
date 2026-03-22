@@ -297,13 +297,12 @@ const handleLogout = () => {
 
 /**
  * 初始化加载用户信息
- * 优化：优先使用缓存，仅在缓存缺失时请求 API
+ * 登录后或刷新页面时主动同步当前登录用户信息
  */
 onMounted(async () => {
-  // 如果 store 中已有用户信息（从 sessionStorage 恢复），则无需请求
-  if (!authStore.userInfo && authStore.token) {
-    // 仅在有 token 但无用户信息时请求（降级处理）
-    await authStore.fetchUserInfo()
+  // 登录后或从 sessionStorage 恢复时，统一刷新当前用户信息，避免使用旧的精简缓存
+  if (authStore.token) {
+    await authStore.fetchCurrentUser()
   }
 })
 </script>

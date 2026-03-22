@@ -1,5 +1,6 @@
 package com.jzsk.backendv2.service.impl.system;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.jzsk.backendv2.exception.BusinessException;
 import com.jzsk.backendv2.exception.ErrorCode;
 import com.jzsk.backendv2.mapper.system.RoleMapper;
@@ -38,6 +39,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@DS("jcxx")
 public class RoleServiceImpl implements RoleService {
 
     private static final long MAX_PAGE_SIZE = 10000L;
@@ -95,8 +97,8 @@ public class RoleServiceImpl implements RoleService {
         entity.setCode(request.getCode());
         entity.setNote(request.getNote());
         entity.setType(request.getType());
-        entity.setStatus(request.getStatus() != null ? request.getStatus() : "1");
-        entity.setSort(request.getSort() != null ? request.getSort() : 0);
+        entity.setStatus(request.getStatus() != null ? request.getStatus() : "启用");
+        entity.setSort(request.getSort());
 
         roleMapper.insert(entity);
         log.info("创建角色成功，roleId={}, name={}", entity.getId(), entity.getName());

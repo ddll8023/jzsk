@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  * 用户-角色关联实体类
- * 对应数据库表：sys_user_role
+ * 对应数据库表：user_role
  * 用途：用户与角色的多对多关联映射
  */
 @Data

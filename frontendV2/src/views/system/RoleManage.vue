@@ -81,11 +81,11 @@
                   {{ row.code || '-' }}
                 </td>
                 <td class="px-4 py-3 text-center text-sm border-b border-slate-100">
-                  <span 
-                    :class="row.status === 1 ? 'bg-green-50 text-green-600' : 'bg-gray-50 text-gray-600'"
+                  <span
+                    :class="row.status === '启用' ? 'bg-green-50 text-green-600' : 'bg-gray-50 text-gray-600'"
                     class="px-2 py-0.5 text-xs rounded"
                   >
-                    {{ row.status === 1 ? '启用' : '禁用' }}
+                    {{ row.status === '启用' ? '启用' : '禁用' }}
                   </span>
                 </td>
                 <td class="px-4 py-3 text-center text-sm text-slate-600 border-b border-slate-100">
@@ -223,7 +223,7 @@ const roleForm = ref({
   name: '',
   code: '',
   description: '',
-  status: 1,
+  status: '启用',
   sort: 0
 })
 
@@ -245,8 +245,8 @@ const columns = [
 
 // ==================== 下拉选项 ====================
 const statusOptions = [
-  { label: '启用', value: 1 },
-  { label: '禁用', value: 0 }
+  { label: '启用', value: '启用' },
+  { label: '禁用', value: '禁用' }
 ]
 
 // ==================== 计算属性 ====================
@@ -338,7 +338,7 @@ const showAddDialog = () => {
     name: '',
     code: '',
     description: '',
-    status: 1,
+    status: '启用',
     sort: 0
   }
   roleDialogVisible.value = true
@@ -352,7 +352,12 @@ const showEditDialog = async (id) => {
     const res = await getRoleInfo(id)
     if (res.data?.code === 200) {
       isEdit.value = true
-      roleForm.value = { ...res.data.data }
+      const data = res.data.data
+      // 字段映射：后端 note -> 前端 description
+      roleForm.value = {
+        ...data,
+        description: data.note || ''
+      }
       roleDialogVisible.value = true
     }
   } catch (error) {
@@ -374,10 +379,15 @@ const submitRole = async () => {
     alert('请输入角色编码')
     return
   }
-  
+
   try {
     const fn = isEdit.value ? updateRole : saveRole
-    const res = await fn(roleForm.value)
+    // 字段映射：前端 description -> 后端 note
+    const submitData = {
+      ...roleForm.value,
+      note: roleForm.value.description
+    }
+    const res = await fn(submitData)
     if (res.data?.code === 200) {
       alert(isEdit.value ? '更新成功' : '添加成功')
       roleDialogVisible.value = false

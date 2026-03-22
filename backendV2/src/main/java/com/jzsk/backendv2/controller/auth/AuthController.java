@@ -23,14 +23,14 @@ import javax.validation.Valid;
 
 /**
  * 认证控制器
- * 用途：提供用户登录和当前用户信息查询的 RESTful API 接口
+ * 用途：提供用户登录的 RESTful API 接口
  * 遵循 KISS 原则：简单清晰的接口设计，只做请求转发
  */
 @Validated
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("${jzsk.v2.api-prefix:/api}/auth")
-@Tag(name = "认证管理", description = "提供登录和当前用户信息接口")
+@Tag(name = "认证管理", description = "提供登录接口")
 public class AuthController {
 
     private final AuthService authService;
@@ -44,11 +44,11 @@ public class AuthController {
         return ResponseEntity.ok(ApiResult.success(authService.login(request), "登录成功"));
     }
 
-    @Operation(summary = "获取当前用户", description = "根据当前请求中的JWT令牌返回登录用户上下文")
+    @Operation(summary = "获取当前登录用户", description = "获取当前登录用户完整信息")
     @ApiResponse(responseCode = "200", description = "查询成功")
     @SecurityRequirement(name = "JWT")
     @GetMapping("/current-user")
-    public ResponseEntity<ApiResult<CurrentUserVO>> currentUser() {
+    public ResponseEntity<ApiResult<CurrentUserVO>> getCurrentUser() {
         return ResponseEntity.ok(ApiResult.success(authService.getCurrentUser(), "查询成功"));
     }
 }

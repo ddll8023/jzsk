@@ -27,6 +27,9 @@ public class SecurityProperties {
 
     private List<String> permitAll = new ArrayList<>(Arrays.asList(
             "/actuator/health",
-            "/error"
+            "/error",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+            "/webjars/**"
     ));
 }

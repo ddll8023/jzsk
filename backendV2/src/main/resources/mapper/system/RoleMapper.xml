@@ -9,13 +9,12 @@
         <result column="note" property="note"/>
         <result column="type" property="type"/>
         <result column="status" property="status"/>
-        <result column="sort" property="sort"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
     </resultMap>
 
     <sql id="BaseColumns">
-        id, name, code, note, type, status, sort, create_time, update_time
+        id, name, code, note, type, status, create_time, update_time
     </sql>
 
     <sql id="WhereClause">
@@ -39,27 +38,27 @@
 
     <select id="selectPage" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumns"/>
-        FROM sys_role
+        FROM role
         <include refid="WhereClause"/>
-        ORDER BY sort ASC, id ASC
+        ORDER BY id ASC
         LIMIT #{offset}, #{size}
     </select>
 
     <select id="countPage" resultType="long">
         SELECT COUNT(*)
-        FROM sys_role
+        FROM role
         <include refid="WhereClause"/>
     </select>
 
     <select id="selectById" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumns"/>
-        FROM sys_role
+        FROM role
         WHERE id = #{id}
     </select>
 
     <select id="countByName" resultType="int">
         SELECT COUNT(*)
-        FROM sys_role
+        FROM role
         WHERE name = #{name}
         <if test="excludeId != null">
             AND id != #{excludeId}
@@ -68,7 +67,7 @@
 
     <select id="countByCode" resultType="int">
         SELECT COUNT(*)
-        FROM sys_role
+        FROM role
         WHERE code = #{code}
         <if test="excludeId != null">
             AND id != #{excludeId}
@@ -76,29 +75,28 @@
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO sys_role (
-            name, code, note, type, status, sort, create_time, update_time
+        INSERT INTO role (
+            name, code, note, type, status, create_time, update_time
         ) VALUES (
-            #{name}, #{code}, #{note}, #{type}, #{status}, #{sort}, NOW(), NOW()
+            #{name}, #{code}, #{note}, #{type}, #{status}, NOW(), NOW()
         )
     </insert>
 
     <update id="update">
-        UPDATE sys_role
+        UPDATE role
         <set>
             <if test="name != null">name = #{name},</if>
             <if test="code != null">code = #{code},</if>
             <if test="note != null">note = #{note},</if>
             <if test="type != null">type = #{type},</if>
             <if test="status != null">status = #{status},</if>
-            <if test="sort != null">sort = #{sort},</if>
             update_time = NOW()
         </set>
         WHERE id = #{id}
     </update>
 
     <delete id="deleteById">
-        DELETE FROM sys_role
+        DELETE FROM role
         WHERE id = #{id}
     </delete>
 
@@ -106,14 +104,14 @@
         SELECT
             id as value,
             name as label
-        FROM sys_role
-        WHERE status = '1'
-        ORDER BY sort ASC, id ASC
+        FROM role
+        WHERE status = '启用'
+        ORDER BY id ASC
     </select>
 
     <select id="selectMenuIdsByRoleId" resultType="java.lang.Long">
         SELECT authority_id
-        FROM sys_role_authority
+        FROM role_authority
         WHERE role_id = #{roleId}
     </select>
 

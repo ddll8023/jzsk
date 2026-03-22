@@ -29,7 +29,6 @@
         <result column="user_order" property="userOrder"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
-        <result column="status" property="status"/>
     </resultMap>
 
     <sql id="BaseColumns">
@@ -37,7 +36,7 @@
         position, technical_title, academic_qualifications, expiration_time,
         phone_number, working_time, graduation_institution, major, address,
         birthplace, ethnicity, email, birthday, political_appearance, note,
-        user_order, create_time, update_time, status
+        user_order, create_time, update_time
     </sql>
 
     <sql id="WhereClause">
@@ -55,16 +54,13 @@
                 <if test="query.type != null and query.type != ''">
                     AND type = #{query.type}
                 </if>
-                <if test="query.status != null">
-                    AND status = #{query.status}
-                </if>
             </if>
         </where>
     </sql>
 
     <select id="selectPage" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumns"/>
-        FROM sys_user
+        FROM user
         <include refid="WhereClause"/>
         ORDER BY user_order ASC, id ASC
         LIMIT #{offset}, #{size}
@@ -72,25 +68,25 @@
 
     <select id="countPage" resultType="long">
         SELECT COUNT(*)
-        FROM sys_user
+        FROM user
         <include refid="WhereClause"/>
     </select>
 
     <select id="selectById" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumns"/>
-        FROM sys_user
+        FROM user
         WHERE id = #{id}
     </select>
 
     <select id="selectByUsername" resultMap="BaseResultMap">
         SELECT <include refid="BaseColumns"/>
-        FROM sys_user
+        FROM user
         WHERE username = #{username}
     </select>
 
     <select id="countByUsername" resultType="int">
         SELECT COUNT(*)
-        FROM sys_user
+        FROM user
         WHERE username = #{username}
         <if test="excludeId != null">
             AND id != #{excludeId}
@@ -99,27 +95,27 @@
 
     <select id="selectMaxUserOrder" resultType="java.lang.Integer">
         SELECT MAX(user_order)
-        FROM sys_user
+        FROM user
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO sys_user (
+        INSERT INTO user (
             username, password, name, department, type, gender, ID_number,
             position, technical_title, academic_qualifications, expiration_time,
             phone_number, working_time, graduation_institution, major, address,
             birthplace, ethnicity, email, birthday, political_appearance, note,
-            user_order, create_time, update_time, status
+            user_order, create_time, update_time
         ) VALUES (
             #{username}, #{password}, #{name}, #{department}, #{type}, #{gender}, #{idNumber},
             #{position}, #{technicalTitle}, #{academicQualifications}, #{expirationTime},
             #{phoneNumber}, #{workingTime}, #{graduationInstitution}, #{major}, #{address},
             #{birthplace}, #{ethnicity}, #{email}, #{birthday}, #{politicalAppearance}, #{note},
-            #{userOrder}, NOW(), NOW(), #{status}
+            #{userOrder}, NOW(), NOW()
         )
     </insert>
 
     <update id="update">
-        UPDATE sys_user
+        UPDATE user
         <set>
             <if test="username != null">username = #{username},</if>
             <if test="name != null">name = #{name},</if>
@@ -143,14 +139,13 @@
             <if test="politicalAppearance != null">political_appearance = #{politicalAppearance},</if>
             <if test="note != null">note = #{note},</if>
             <if test="userOrder != null">user_order = #{userOrder},</if>
-            <if test="status != null">status = #{status},</if>
             update_time = NOW()
         </set>
         WHERE id = #{id}
     </update>
 
     <delete id="deleteById">
-        DELETE FROM sys_user
+        DELETE FROM user
         WHERE id = #{id}
     </delete>
 
@@ -158,23 +153,23 @@
         SELECT
             r.id as value,
             r.name as label
-        FROM sys_role r
-        INNER JOIN sys_user_role ur ON r.id = ur.role_id
+        FROM role r
+        INNER JOIN user_role ur ON r.id = ur.role_id
         WHERE ur.user_id = #{userId}
     </select>
 
     <select id="selectAuthorityCodesByUserId" resultType="java.lang.String">
         SELECT r.code
-        FROM sys_role r
-        INNER JOIN sys_user_role ur ON r.id = ur.role_id
+        FROM role r
+        INNER JOIN user_role ur ON r.id = ur.role_id
         WHERE ur.user_id = #{userId}
-          AND r.status = '1'
-        ORDER BY r.sort ASC, r.id ASC
+          AND r.status = '启用'
+        ORDER BY r.id ASC
     </select>
 
     <select id="selectUserIdsByRoleId" resultType="java.lang.Long">
         SELECT user_id
-        FROM sys_user_role
+        FROM user_role
         WHERE role_id = #{roleId}
     </select>
 

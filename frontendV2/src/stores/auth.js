@@ -5,7 +5,7 @@
  */
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
-import { getUserInfo as getUserInfoApi } from '@/api/auth'
+import { getCurrentUser as getCurrentUserApi } from '@/api/auth'
 
 
 export const useAuthStore = defineStore('auth', () => {
@@ -17,7 +17,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   // 计算属性
   const isLoggedIn = computed(() => !!token.value)
-  const userRole = computed(() => userInfo.value?.role || 'guest')
+  const userRole = computed(() => userInfo.value?.type || 'guest')
 
   /**
    * 设置 Token
@@ -43,12 +43,12 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   /**
-   * 获取用户信息
-   * 使用解构获取 response.data，与旧项目保持一致
+   * 获取当前登录用户信息
+   * 使用解构获取 response.data，与统一返回结构保持一致
    */
-  const fetchUserInfo = async () => {
+  const fetchCurrentUser = async () => {
     try {
-      const { data: res } = await getUserInfoApi()
+      const { data: res } = await getCurrentUserApi()
       if (res.code === 200) {
         // 使用 setUserInfo 确保持久化
         setUserInfo(res.data)
@@ -80,7 +80,7 @@ export const useAuthStore = defineStore('auth', () => {
     userRole,
     setToken,
     setUserInfo,
-    fetchUserInfo,
+    fetchCurrentUser,
     logout
   }
 })

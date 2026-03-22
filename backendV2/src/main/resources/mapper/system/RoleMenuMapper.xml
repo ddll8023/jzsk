@@ -3,7 +3,7 @@
 <mapper namespace="com.jzsk.backendv2.mapper.system.RoleMenuMapper">
 
     <insert id="batchInsert">
-        INSERT INTO sys_role_authority (role_id, authority_id)
+        INSERT INTO role_authority (role_id, authority_id)
         VALUES
         <foreach collection="list" item="item" separator=",">
             (#{item.roleId}, #{item.authorityId})
@@ -11,13 +11,13 @@
     </insert>
 
     <delete id="deleteByRoleId">
-        DELETE FROM sys_role_authority
+        DELETE FROM role_authority
         WHERE role_id = #{roleId}
     </delete>
 
     <select id="selectMenuIdsByRoleId" resultType="java.lang.Long">
         SELECT authority_id
-        FROM sys_role_authority
+        FROM role_authority
         WHERE role_id = #{roleId}
     </select>
 

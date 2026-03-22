@@ -5,7 +5,7 @@
  */
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { login as loginApi, getUserInfo as getUserInfoApi } from '@/api/auth'
+import { login as loginApi, getCurrentUser as getCurrentUserApi } from '@/api/auth'
 
 /**
  * 认证相关逻辑
@@ -46,12 +46,12 @@ export function useAuth() {
   }
 
   /**
-   * 获取用户信息
-   * @returns {Promise<Object>} 用户信息
+   * 获取当前登录用户信息
+   * @returns {Promise<Object>} 当前登录用户信息
    */
-  const getUserInfo = async () => {
+  const getCurrentUser = async () => {
     try {
-      const res = await getUserInfoApi()
+      const res = await getCurrentUserApi()
       if (res.data && res.data.code === 200) {
         authStore.setUserInfo(res.data.data)
         return { success: true, data: res.data.data }
@@ -65,7 +65,7 @@ export function useAuth() {
   return {
     login,
     logout,
-    getUserInfo,
+    getCurrentUser,
     isLoggedIn: authStore.isLoggedIn,
     userInfo: authStore.userInfo,
     token: authStore.token

@@ -1,5 +1,6 @@
 package com.jzsk.backendv2.mapper.system;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.jzsk.backendv2.pojo.dto.system.user.UserPageQueryDTO;
 import com.jzsk.backendv2.pojo.entity.system.UserEntity;
 import com.jzsk.backendv2.pojo.vo.OptionVO;
@@ -10,6 +11,7 @@ import java.util.List;
 /**
  * 用户 Mapper 接口
  */
+@DS("jcxx")
 public interface UserMapper {
 
     List<UserEntity> selectPage(@Param("query") UserPageQueryDTO queryDTO,

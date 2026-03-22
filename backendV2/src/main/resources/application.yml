@@ -45,6 +45,10 @@ jzsk:
       permit-all:
         - /actuator/health
         - /error
+        - /swagger-ui/**
+        - /swagger-ui/index.html
+        - /v3/api-docs/**
+        - /webjars/**
     task:
       warning-enabled: false
       sync-enabled: false

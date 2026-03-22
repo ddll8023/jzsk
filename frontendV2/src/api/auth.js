@@ -1,6 +1,6 @@
 /**
  * 认证接口模块
- * 功能：封装登录、用户信息相关API
+ * 功能：封装登录相关API
  * 遵循原则：KISS、YAGNI
  * Source: frontend/src/main.js axios配置
  */
@@ -22,9 +22,9 @@ export function login(credentials) {
 }
 
 /**
- * 获取当前用户信息
- * @returns {Promise} 用户信息
+ * 获取当前登录用户信息
+ * @returns {Promise} 当前登录用户信息
  */
-export function getUserInfo() {
+export function getCurrentUser() {
     return request.get('/api/auth/current-user')
 }
