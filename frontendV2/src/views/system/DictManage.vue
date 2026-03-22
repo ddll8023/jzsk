@@ -18,7 +18,7 @@
           </Button>
           <!-- 搜索框 -->
           <div class="flex items-center gap-2">
-            <input 
+            <input
               v-model="searchName"
               type="text"
               placeholder="请输入字典名称"
@@ -37,10 +37,12 @@
     </div>
 
     <!-- 表格区域 -->
-    <div class="flex-1 overflow-auto px-6 py-4 custom-scrollbar">
-      <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden">
-        <table class="w-full border-collapse">
-          <thead class="bg-slate-50/80 sticky top-0">
+    <div class="flex-1 px-6 py-4 flex flex-col min-h-0">
+      <div class="flex-1 bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+        <!-- 表格容器（可滚动） -->
+        <div class="flex-1 overflow-auto custom-scrollbar">
+          <table class="w-full border-collapse">
+            <thead class="bg-slate-50/80 sticky top-0">
             <tr>
               <th class="px-4 py-3 text-left text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200">字典名称</th>
               <th class="px-4 py-3 text-center text-xs text-slate-500 uppercase tracking-wider border-b border-slate-200 w-48">描述</th>
@@ -56,12 +58,12 @@
                 <p class="mt-2 text-slate-500">加载中...</p>
               </td>
             </tr>
-            
+
             <!-- 数据行 -->
-            <tr 
+            <tr
               v-else
-              v-for="row in displayDictList" 
-              :key="row.rowKey" 
+              v-for="row in displayDictList"
+              :key="row.rowKey"
               class="hover:bg-slate-50 transition-colors duration-150"
             >
               <!-- 字典/详情名称 -->
@@ -113,7 +115,7 @@
                 </div>
               </td>
             </tr>
-            
+
             <!-- 空数据提示 -->
             <tr v-if="!loading && displayDictList.length === 0">
               <td colspan="4" class="px-4 py-12 text-center">
@@ -123,21 +125,32 @@
             </tr>
           </tbody>
         </table>
+        </div>
+
+        <!-- 分页（固定在表格底部） -->
+        <div class="flex-shrink-0 flex items-center justify-center px-4 py-3 border-t border-slate-200 bg-slate-50/30">
+          <Pagination
+            :total="total"
+            :current-page="currentPage"
+            :page-size="pageSize"
+            @change="handlePageChange"
+          />
+        </div>
       </div>
     </div>
 
     <!-- 新增/编辑字典弹窗 -->
     <Modal v-model="dictDialogVisible" :title="isEditDict ? '编辑字典' : '新增字典'">
       <div class="space-y-4">
-        <Input 
-          v-model="dictForm.name" 
-          label="字典名称" 
-          required 
+        <Input
+          v-model="dictForm.name"
+          label="字典名称"
+          required
           placeholder="请输入字典名称"
         />
-        <Input 
-          v-model="dictForm.description" 
-          label="描述" 
+        <Input
+          v-model="dictForm.description"
+          label="描述"
           placeholder="请输入描述"
         />
       </div>
@@ -150,23 +163,23 @@
     <!-- 新增/编辑字典详情弹窗 -->
     <Modal v-model="detailDialogVisible" :title="isEditDetail ? '编辑字典详情' : '新增字典详情'">
       <div class="space-y-4">
-        <Input 
-          v-model="detailForm.label" 
-          label="字典标签" 
-          required 
+        <Input
+          v-model="detailForm.label"
+          label="字典标签"
+          required
           placeholder="请输入字典标签"
         />
-        <Input 
-          v-model="detailForm.value" 
-          label="字典值" 
-          required 
+        <Input
+          v-model="detailForm.value"
+          label="字典值"
+          required
           placeholder="请输入字典值"
         />
-        <Input 
-          v-model="detailForm.dictSort" 
-          type="number" 
-          label="排序" 
-          required 
+        <Input
+          v-model="detailForm.dictSort"
+          type="number"
+          label="排序"
+          required
           placeholder="请输入排序"
         />
       </div>
@@ -192,13 +205,16 @@ import { useDictStore } from '@/stores/dict'
 import Button from '@/components/basic/Button.vue'
 import Modal from '@/components/basic/Modal.vue'
 import Input from '@/components/basic/Input.vue'
+import Pagination from '@/components/basic/Pagination.vue'
 
 // ==================== 列表状态 ====================
 const dictList = ref([])
 const loading = ref(false)
 const expandedIds = ref([])
 const searchName = ref('')
-const pageSize = ref(20)
+const pageSize = ref(10)
+const currentPage = ref(1)
+const total = ref(0)
 
 // ==================== 详情缓存 ====================
 const detailsCache = ref(new Map())
@@ -303,17 +319,27 @@ const handleSearch = async () => {
   try {
     const res = await getDictList({
       blurry: searchName.value,
-      page: 1,
+      page: currentPage.value,
       size: pageSize.value
     })
     if (res.data?.code === 200) {
       dictList.value = res.data.data?.list || []
+      total.value = res.data.data?.total || 0
     }
   } catch (error) {
     console.error('查询字典列表失败:', error)
   } finally {
     loading.value = false
   }
+}
+
+/**
+ * 分页切换
+ */
+const handlePageChange = ({ page, pageSize: size }) => {
+  currentPage.value = page
+  pageSize.value = size
+  handleSearch()
 }
 
 /**
@@ -414,8 +440,9 @@ const submitDetail = async () => {
     return
   }
   try {
-    const fn = isEditDetail.value ? updateDictDetail : saveDictDetail
-    const res = await fn(detailForm.value)
+    const res = isEditDetail.value
+      ? await updateDictDetail(detailForm.value.dictId, detailForm.value)
+      : await saveDictDetail(detailForm.value)
     if (res.data?.code === 200) {
       detailDialogVisible.value = false
       dictStore.clearCache()
@@ -441,7 +468,7 @@ const submitDetail = async () => {
 const handleDeleteDetail = async (item) => {
   if (!confirm('此操作将永久删除该数据, 是否继续?')) return
   try {
-    const res = await deleteDictDetail(item.id)
+    const res = await deleteDictDetail(item.dictId, item.id)
     if (res.data?.code === 200) {
       dictStore.clearCache()
       if (detailsCache.value.has(item.dictId)) {

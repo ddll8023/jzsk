@@ -19,16 +19,6 @@ import { buildIdPayload, normalizePageParams } from './_helpers'
 export function getDictList(params) {
   return request.get('/api/dicts/page', { params: normalizePageParams(params) })
 }
-
-/**
- * 获取字典详情
- * @param {number|string} id - 字典ID
- * @returns {Promise} 字典信息
- */
-export function getDictInfo(id) {
-  return request.get(`/api/dicts/${id}`)
-}
-
 /**
  * 获取字典详情列表
  * @param {number|string} id - 字典ID
@@ -89,16 +79,6 @@ export function getDictLVs(name) {
 }
 
 // ==================== 字典详情接口 ====================
-
-/**
- * 获取字典详情项
- * @param {number|string} id - 详情ID
- * @returns {Promise} 详情信息
- */
-export function getDictDetailInfo(id) {
-  return request.get(`/api/dict-details/${id}`)
-}
-
 /**
  * 新增字典详情
  * @param {Object} data - 详情数据
@@ -109,11 +89,12 @@ export function getDictDetailInfo(id) {
  * @returns {Promise} 操作结果
  */
 export function saveDictDetail(data) {
-  return request.post('/api/dict-details/create', data)
+  return request.post(`/api/dicts/${data.dictId}/items/create`, data)
 }
 
 /**
  * 更新字典详情
+ * @param {number|string} dictId - 字典ID
  * @param {Object} data - 详情数据
  * @param {number} data.id - 详情ID
  * @param {string} data.label - 标签
@@ -121,15 +102,16 @@ export function saveDictDetail(data) {
  * @param {number} data.dictSort - 排序
  * @returns {Promise} 操作结果
  */
-export function updateDictDetail(data) {
-  return request.post('/api/dict-details/update', data)
+export function updateDictDetail(dictId, data) {
+  return request.post(`/api/dicts/${dictId}/items/update`, data)
 }
 
 /**
  * 删除字典详情
+ * @param {number|string} dictId - 字典ID
  * @param {number|string} id - 详情ID
  * @returns {Promise} 操作结果
  */
-export function deleteDictDetail(id) {
-  return request.post('/api/dict-details/delete', buildIdPayload(id))
+export function deleteDictDetail(dictId, id) {
+  return request.post(`/api/dicts/${dictId}/items/delete`, buildIdPayload(id))
 }
