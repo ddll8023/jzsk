@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzsk.backendv2.mapper.system.DepartmentMapper">
+
+    <resultMap id="BaseResultMap" type="com.jzsk.backendv2.pojo.entity.system.DepartmentEntity">
+        <id column="id" property="id"/>
+        <result column="department_name" property="departmentName"/>
+        <result column="department_responsibility" property="departmentResponsibility"/>
+        <result column="level" property="level"/>
+        <result column="company" property="company"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, department_name, department_responsibility, level, company, create_time, update_time
+    </sql>
+
+    <sql id="WhereClause">
+        <where>
+            <!-- 查询条件 -->
+            <if test="query != null">
+                <if test="query.name != null and query.name != ''">
+                    AND department_name LIKE CONCAT('%', #{query.name}, '%')
+                </if>
+                <if test="query.level != null and query.level != ''">
+                    AND level = #{query.level}
+                </if>
+                <if test="query.company != null and query.company != ''">
+                    AND company = #{query.company}
+                </if>
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM department
+        <include refid="WhereClause"/>
+        ORDER BY id ASC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countPage" resultType="long">
+        SELECT COUNT(*)
+        FROM department
+        <include refid="WhereClause"/>
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM department
+        WHERE id = #{id}
+    </select>
+
+    <select id="countByDepartmentName" resultType="int">
+        SELECT COUNT(*)
+        FROM department
+        WHERE department_name = #{departmentName}
+        <if test="excludeId != null">
+            AND id != #{excludeId}
+        </if>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO department (
+            department_name, department_responsibility, level, company, create_time, update_time
+        ) VALUES (
+            #{departmentName}, #{departmentResponsibility}, #{level}, #{company}, NOW(), NOW()
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE department
+        <set>
+            <if test="departmentName != null">department_name = #{departmentName},</if>
+            <if test="departmentResponsibility != null">department_responsibility = #{departmentResponsibility},</if>
+            <if test="level != null">level = #{level},</if>
+            <if test="company != null">company = #{company},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除部门：物理删除 -->
+    <delete id="deleteById">
+        DELETE FROM department WHERE id = #{id}
+    </delete>
+
+</mapper>
