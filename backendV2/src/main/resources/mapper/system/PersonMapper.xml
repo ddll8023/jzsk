@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzsk.backendv2.mapper.system.PersonMapper">
+
+    <resultMap id="BaseResultMap" type="com.jzsk.backendv2.pojo.entity.system.PersonEntity">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="age" property="age"/>
+        <result column="gender" property="gender"/>
+        <result column="phone" property="phone"/>
+        <result column="organization" property="organization"/>
+        <result column="position" property="position"/>
+        <result column="duty" property="duty"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, name, age, gender, phone, organization, position, duty, create_time, update_time
+    </sql>
+
+    <sql id="WhereClause">
+        <where>
+            <if test="query != null">
+                <if test="query.name != null and query.name != ''">
+                    AND name LIKE CONCAT('%', #{query.name}, '%')
+                </if>
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM person
+        <include refid="WhereClause"/>
+        ORDER BY id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countPage" resultType="long">
+        SELECT COUNT(*)
+        FROM person
+        <include refid="WhereClause"/>
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM person
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO person (
+            name, age, gender, phone, organization, position, duty, create_time, update_time
+        ) VALUES (
+            #{name}, #{age}, #{gender}, #{phone}, #{organization}, #{position}, #{duty}, #{createTime}, #{updateTime}
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE person
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="age != null">age = #{age},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="organization != null">organization = #{organization},</if>
+            <if test="position != null">position = #{position},</if>
+            <if test="duty != null">duty = #{duty},</if>
+            update_time = #{updateTime}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除人员：物理删除 -->
+    <delete id="deleteById">
+        DELETE FROM person WHERE id = #{id}
+    </delete>
+
+</mapper>
