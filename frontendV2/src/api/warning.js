@@ -32,15 +32,6 @@ export function getWarningList(params) {
 export function updateWarning(data) {
   return request.post('/api/warnings/update', data)
 }
-
-/**
- * 删除预警信息
- * @param {number|string} id - 预警ID
- * @returns {Promise}
- */
-export function deleteWarning(id) {
-  return request.post('/api/warnings/delete', buildIdPayload(id))
-}
 // ==================== 预警指标接口 ====================
 
 /**

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzsk.backendv2.mapper.warning.WarningFacilityMapper">
+
+    <!-- 基础结果映射 -->
+    <resultMap id="BaseResultMap" type="com.jzsk.backendv2.pojo.entity.warning.WarningFacilityEntity">
+        <id column="id" property="id"/>
+        <result column="facility_name" property="facilityName"/>
+        <result column="type" property="type"/>
+        <result column="location" property="location"/>
+        <result column="status" property="status"/>
+        <result column="manager" property="manager"/>
+        <result column="last_update" property="lastUpdate"/>
+        <result column="record_time" property="recordTime"/>
+    </resultMap>
+
+    <!-- 通用查询列 -->
+    <sql id="Base_Column_List">
+        id, facility_name, type, location, status, manager, last_update, record_time
+    </sql>
+
+    <!-- 根据ID查询 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM warning_facilities
+        WHERE id = #{id}
+    </select>
+
+    <!-- 分页查询 -->
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM warning_facilities
+        <where>
+            <if test="query.facilityName != null and query.facilityName != ''">
+                AND facility_name LIKE CONCAT('%', #{query.facilityName}, '%')
+            </if>
+            <if test="query.type != null and query.type != ''">
+                AND type = #{query.type}
+            </if>
+            <if test="query.status != null and query.status != ''">
+                AND status = #{query.status}
+            </if>
+        </where>
+        ORDER BY id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <!-- 统计总数 -->
+    <select id="selectCount" resultType="long">
+        SELECT COUNT(*)
+        FROM warning_facilities
+        <where>
+            <if test="facilityName != null and facilityName != ''">
+                AND facility_name LIKE CONCAT('%', #{facilityName}, '%')
+            </if>
+            <if test="type != null and type != ''">
+                AND type = #{type}
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <!-- 插入 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO warning_facilities (facility_name, type, location, status, manager, last_update, record_time)
+        VALUES (#{facilityName}, #{type}, #{location}, #{status}, #{manager}, #{lastUpdate}, #{recordTime})
+    </insert>
+
+    <!-- 更新 -->
+    <update id="update">
+        UPDATE warning_facilities
+        <set>
+            <if test="facilityName != null and facilityName != ''">
+                facility_name = #{facilityName},
+            </if>
+            <if test="type != null and type != ''">
+                type = #{type},
+            </if>
+            <if test="location != null and location != ''">
+                location = #{location},
+            </if>
+            <if test="status != null and status != ''">
+                status = #{status},
+            </if>
+            <if test="manager != null and manager != ''">
+                manager = #{manager},
+            </if>
+            <if test="lastUpdate != null">
+                last_update = #{lastUpdate},
+            </if>
+            <if test="recordTime != null">
+                record_time = #{recordTime},
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除 -->
+    <delete id="deleteById">
+        DELETE FROM warning_facilities WHERE id = #{id}
+    </delete>
+
+</mapper>
