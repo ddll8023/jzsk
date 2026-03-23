@@ -75,6 +75,7 @@
         :page-size="pagination.pageSize"
         @page-change="handlePageChange"
         @update:pageSize="handleSizeChange"
+        @update:currentPage="handleCurrentPageUpdate"
       >
         <!-- 测点名称 -->
         <template #position="{ row }">
@@ -256,8 +257,8 @@ const {
   dictData,
   pointOptions,
   getMonitorItems,
+  loadIndicatorOptions,
   loadIndicatorList,
-  loadTypes,
   getDetail,
   save,
   update,
@@ -283,10 +284,7 @@ const tableColumns = [
   { key: 'actions', title: '操作', width: '150px' }
 ]
 
-// 表单弹窗
-const formModalVisible = ref(false)
-const isEdit = ref(false)
-const formData = ref({
+const createEmptyFormData = () => ({
   id: null,
   position: '',
   type: '',
@@ -297,6 +295,11 @@ const formData = ref({
   unit: ''
 })
 
+// 表单弹窗
+const formModalVisible = ref(false)
+const isEdit = ref(false)
+const formData = ref(createEmptyFormData())
+
 // 删除弹窗
 const deleteModalVisible = ref(false)
 const currentId = ref(null)
@@ -305,6 +308,14 @@ const currentId = ref(null)
 const currentMonitorItems = computed(() => {
   return getMonitorItems(formData.value.position)
 })
+
+/**
+ * 处理分页条当前页码更新
+ * 响应 Table 组件的 update:currentPage 事件，同步更新 Pagination 组件显示
+ */
+const handleCurrentPageUpdate = (page) => {
+  pagination.currentPage = page
+}
 
 /**
  * 处理测点变化
@@ -318,16 +329,7 @@ const handlePointChange = () => {
  */
 const handleAdd = () => {
   isEdit.value = false
-  formData.value = {
-    id: null,
-    position: '',
-    type: '',
-    upUpLimit: '',
-    upLimit: '',
-    lowLimit: '',
-    lowerLimit: '',
-    unit: ''
-  }
+  formData.value = createEmptyFormData()
   formModalVisible.value = true
 }
 
@@ -338,7 +340,10 @@ const handleEdit = async (row) => {
   isEdit.value = true
   const detail = await getDetail(row.id)
   if (detail) {
-    formData.value = { ...detail }
+    formData.value = {
+      ...createEmptyFormData(),
+      ...detail
+    }
     formModalVisible.value = true
   }
 }
@@ -369,10 +374,19 @@ const confirmDelete = async () => {
  * 提交表单
  */
 const handleSubmit = async () => {
-  // 简单验证
-  if (!formData.value.position || !formData.value.type || !formData.value.upUpLimit || 
-      !formData.value.upLimit || !formData.value.lowLimit || !formData.value.lowerLimit || 
-      !formData.value.unit) {
+  const requiredFields = ['position', 'type', 'upUpLimit', 'upLimit', 'lowLimit', 'lowerLimit', 'unit']
+  const hasEmptyField = requiredFields.some((field) => {
+    const value = formData.value[field]
+    if (value === null || value === undefined) {
+      return true
+    }
+    if (typeof value === 'string') {
+      return value.trim() === ''
+    }
+    return false
+  })
+
+  if (hasEmptyField) {
     showToast('请填写完整信息', 'warning')
     return
   }
@@ -391,7 +405,7 @@ const handleSubmit = async () => {
 
 // 初始化
 onMounted(async () => {
-  await loadTypes()
+  await loadIndicatorOptions()
   await loadIndicatorList()
 })
 </script>

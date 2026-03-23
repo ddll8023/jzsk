@@ -33,25 +33,25 @@
     
     <!-- 分页按钮 -->
     <div class="flex items-center gap-2">
-      <button 
+      <button
         class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition-all duration-200 hover:bg-primary-50 hover:border-primary-300 hover:text-primary-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-200 disabled:hover:text-gray-500"
-        :disabled="currentPage <= 1"
-        @click="changePage(currentPage - 1)"
+        :disabled="localCurrentPage <= 1"
+        @click="changePage(localCurrentPage - 1)"
       >
         <i class="fa fa-angle-left" aria-hidden="true"></i>
       </button>
-      
+
       <!-- 页码显示 -->
       <div class="flex items-center gap-1 px-3 py-1.5 bg-gray-50 rounded-lg">
-        <span class="text-sm font-semibold text-primary-600">{{ currentPage }}</span>
+        <span class="text-sm font-semibold text-primary-600">{{ localCurrentPage }}</span>
         <span class="text-sm text-gray-400">/</span>
         <span class="text-sm text-gray-500">{{ totalPages }}</span>
       </div>
-      
-      <button 
+
+      <button
         class="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-500 transition-all duration-200 hover:bg-primary-50 hover:border-primary-300 hover:text-primary-600 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-200 disabled:hover:text-gray-500"
-        :disabled="currentPage >= totalPages"
-        @click="changePage(currentPage + 1)"
+        :disabled="localCurrentPage >= totalPages"
+        @click="changePage(localCurrentPage + 1)"
       >
         <i class="fa fa-angle-right" aria-hidden="true"></i>
       </button>
@@ -65,7 +65,7 @@
  * 功能：通用分页控制
  * 遵循原则：KISS - 简洁实现，SOLID - 单一职责
  */
-import { computed, ref, onMounted, onUnmounted } from 'vue'
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps({
   total: {
@@ -96,8 +96,15 @@ const props = defineProps({
 
 const emit = defineEmits(['update:currentPage', 'update:pageSize', 'change'])
 
-// 计算总页数
+// 本地 currentPage state：确保用户点击时 UI 即时更新，不依赖父组件 prop 回传
+const localCurrentPage = ref(props.currentPage)
+
 const totalPages = computed(() => Math.ceil(props.total / props.pageSize) || 1)
+
+// 监听外部 prop 变化（用于外部重置场景，如搜索后重置到第一页）
+watch(() => props.currentPage, (newVal) => {
+  localCurrentPage.value = newVal
+})
 
 // 背景样式 - 移除 orange，保留 gray 作为备选
 const bgClass = computed(() => {
@@ -121,6 +128,7 @@ const toggleSizeDropdown = () => {
 const selectSize = (size) => {
   sizeDropdownOpen.value = false
   if (size !== props.pageSize) {
+    localCurrentPage.value = 1
     emit('update:pageSize', size)
     emit('update:currentPage', 1)
     emit('change', { page: 1, pageSize: size })
@@ -149,6 +157,8 @@ onUnmounted(() => {
  */
 const changePage = (page) => {
   if (page >= 1 && page <= totalPages.value) {
+    // 立即更新本地 state，确保 UI 同步更新，不依赖父组件 prop 回传
+    localCurrentPage.value = page
     emit('update:currentPage', page)
     emit('change', { page, pageSize: props.pageSize })
   }
@@ -159,8 +169,9 @@ const changePage = (page) => {
  */
 const handleSizeChange = (e) => {
   const newSize = Number(e.target.value)
+  localCurrentPage.value = 1
   emit('update:pageSize', newSize)
-  emit('update:currentPage', 1) // 重置到第一页
+  emit('update:currentPage', 1)
   emit('change', { page: 1, pageSize: newSize })
 }
 </script>

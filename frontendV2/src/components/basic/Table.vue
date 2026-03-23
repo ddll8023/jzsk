@@ -68,6 +68,7 @@
         class="border-0 shadow-none px-0 py-0"
         @change="handlePageChange"
         @update:page-size="handleSizeChange"
+        @update:current-page="handleCurrentPageChange"
       />
     </div>
   </div>
@@ -149,5 +150,13 @@ const handlePageChange = (payload) => {
 const handleSizeChange = (size) => {
   emit('update:pageSize', size)
   // 当改变页大小时，通常重置到第一页，但这由 Pagination 组件控制触发 change 事件
+}
+
+/**
+ * 处理当前页码变化（直接响应 Pagination 组件的 update:currentPage 事件）
+ * 确保分页条 UI 能够及时同步更新
+ */
+const handleCurrentPageChange = (page) => {
+  emit('update:currentPage', page)
 }
 </script>

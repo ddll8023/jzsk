@@ -6,8 +6,7 @@
 import { ref, reactive, computed } from 'vue'
 import {
   getIndicatorList,
-  searchIndicatorByPosition,
-  getIndicatorTypes,
+  getIndicatorOptions,
   getIndicatorInfo,
   saveIndicator,
   updateIndicator,
@@ -42,39 +41,53 @@ export function useIndicator() {
     types: []
   })
 
-  // 测点→监测项映射
-  const pointOptions = [
-    { value: 'LJ1-1', label: 'LJ1-1', type: 'gnss' },
-    { value: 'LJ1-2', label: 'LJ1-2', type: 'gnss' },
-    { value: 'LJ1-3', label: 'LJ1-3', type: 'gnss' },
-    { value: 'LJ1-4', label: 'LJ1-4', type: 'gnss' },
-    { value: 'LT2-1', label: 'LT2-1', type: 'gnss' },
-    { value: 'LT2-2', label: 'LT2-2', type: 'gnss' },
-    { value: 'LT2-3', label: 'LT2-3', type: 'gnss' },
-    { value: 'LT2-4', label: 'LT2-4', type: 'gnss' },
-    { value: '坝前雨量水位站', label: '坝前雨量水位站', type: 'rain' },
-    { value: 'mcu测站', label: 'mcu测站', type: 'mcu' }
-  ]
+  const pointOptions = ref([])
+  const positionBindings = ref({})
 
-  const monitorItemMap = {
-    gnss: [
-      { value: 'x位移', label: 'x位移' },
-      { value: 'y位移', label: 'y位移' },
-      { value: 'z位移', label: 'z位移' },
-      { value: '合位移', label: '合位移' },
-      { value: '水平位移', label: '水平位移' }
-    ],
-    rain: [
-      { value: '雨量', label: '雨量' },
-      { value: '水位', label: '水位' }
-    ],
-    mcu: [
-      { value: '模数', label: '模数' },
-      { value: '温度', label: '温度' },
-      { value: '水位', label: '水位' },
-      { value: '水压', label: '水压' },
-      { value: '水位高程', label: '水位高程' }
-    ]
+  const normalizeOption = (option) => {
+    const value = option?.value ?? ''
+    const label = option?.label ?? value
+
+    return {
+      label,
+      value
+    }
+  }
+
+  const ensureOption = (options, value, label = value) => {
+    if (!value) return
+    if (!options.some(item => item.value === value)) {
+      options.push({ label, value })
+    }
+  }
+
+  const buildBindingMap = (bindings = []) => {
+    return bindings.reduce((accumulator, binding) => {
+      if (!binding?.position) {
+        return accumulator
+      }
+
+      accumulator[binding.position] = (binding.typeOptions || []).map(normalizeOption)
+      return accumulator
+    }, {})
+  }
+
+  const ensureBinding = (position, type) => {
+    if (!position) return
+
+    ensureOption(pointOptions.value, position)
+
+    if (!positionBindings.value[position]) {
+      positionBindings.value = {
+        ...positionBindings.value,
+        [position]: []
+      }
+    }
+
+    if (type) {
+      ensureOption(positionBindings.value[position], type)
+      ensureOption(dictData.types, type)
+    }
   }
 
   /**
@@ -83,9 +96,25 @@ export function useIndicator() {
    * @returns {Array}
    */
   const getMonitorItems = (point) => {
-    const found = pointOptions.find(item => item.value === point)
-    if (!found) return []
-    return monitorItemMap[found.type] || []
+    if (!point) return []
+    return positionBindings.value[point] || []
+  }
+
+  /**
+   * 加载页面选项
+   */
+  const loadIndicatorOptions = async () => {
+    try {
+      const { data: res } = await getIndicatorOptions()
+
+      if (res.code === 200 && res.data) {
+        pointOptions.value = (res.data.positionOptions || []).map(normalizeOption)
+        dictData.types = (res.data.typeOptions || []).map(normalizeOption)
+        positionBindings.value = buildBindingMap(res.data.bindings)
+      }
+    } catch (e) {
+      console.error('加载预警指标选项失败:', e)
+    }
   }
 
   /**
@@ -99,22 +128,21 @@ export function useIndicator() {
       const params = {
         currentPage: pagination.currentPage,
         pageSize: pagination.pageSize,
-        type: filters.type || ''
+        type: filters.type || '',
+        position: filters.position?.trim() || ''
       }
 
       const { data: res } = await getIndicatorList(params)
 
-      // 修复：响应拦截器返回完整response，需访问res.data
-      if (res.data.code === 200) {
-        const rawRecords = res.data.data.records || []
-        // 添加序号字段
+      if (res.code === 200) {
+        const rawRecords = res.data.list || []
         indicatorList.value = rawRecords.map((item, index) => ({
           ...item,
           index: index + 1 + (pagination.currentPage - 1) * pagination.pageSize
         }))
-        pagination.total = res.data.data.total || 0
+        pagination.total = res.data.total || 0
       } else {
-        error.value = res.data.message || '加载失败'
+        error.value = res.message || '加载失败'
       }
     } catch (e) {
       error.value = e.message || '加载失败'
@@ -125,72 +153,14 @@ export function useIndicator() {
   }
 
   /**
-   * 根据测点搜索
-   */
-  const searchByPosition = async () => {
-    if (!filters.position) {
-      loadIndicatorList()
-      return
-    }
-
-    loading.value = true
-    error.value = null
-
-    try {
-      const params = {
-        currentPage: pagination.currentPage,
-        pageSize: pagination.pageSize,
-        position: filters.position
-      }
-
-      const { data: res } = await searchIndicatorByPosition(params)
-
-      // 修复：响应拦截器返回完整response，需访问res.data
-      if (res.data.code === 200) {
-        const rawRecords = res.data.data.records || []
-        // 添加序号字段（搜索结果）
-        indicatorList.value = rawRecords.map((item, index) => ({
-          ...item,
-          index: index + 1 + (pagination.currentPage - 1) * pagination.pageSize
-        }))
-        pagination.total = res.data.data.total || 0
-      } else {
-        error.value = res.data.message || '搜索失败'
-      }
-    } catch (e) {
-      error.value = e.message || '搜索失败'
-      console.error('搜索指标失败:', e)
-    } finally {
-      loading.value = false
-    }
-  }
-
-  /**
-   * 加载监测项类型
-   */
-  const loadTypes = async () => {
-    try {
-      const { data: res } = await getIndicatorTypes()
-      if (res.code === 200 && res.data) {
-        dictData.types = res.data.map(type => ({
-          value: type,
-          label: type
-        }))
-      }
-    } catch (e) {
-      console.error('加载监测项类型失败:', e)
-    }
-  }
-
-  /**
    * 获取指标详情
-   * @param {number|string} id - 指标ID
    */
   const getDetail = async (id) => {
     try {
       const { data: res } = await getIndicatorInfo(id)
-      if (res.data.code === 200) {
-        return res.data.data
+      if (res.code === 200) {
+        ensureBinding(res.data?.position, res.data?.type)
+        return res.data
       }
       return null
     } catch (e) {
@@ -210,12 +180,12 @@ export function useIndicator() {
     try {
       const { data: res } = await saveIndicator(data)
 
-      // 修复：响应拦截器返回完整response，需访问res.data
-      if (res.data.code === 200) {
+      if (res.code === 200) {
+        await loadIndicatorOptions()
         await loadIndicatorList()
         return { success: true, message: '添加成功' }
       } else {
-        error.value = res.data.message || '添加失败'
+        error.value = res.message || '添加失败'
         return { success: false, message: error.value }
       }
     } catch (e) {
@@ -238,12 +208,12 @@ export function useIndicator() {
     try {
       const { data: res } = await updateIndicator(data)
 
-      // 修复：响应拦截器返回完整response，需访问res.data
-      if (res.data.code === 200) {
+      if (res.code === 200) {
+        await loadIndicatorOptions()
         await loadIndicatorList()
         return { success: true, message: '更新成功' }
       } else {
-        error.value = res.data.message || '更新失败'
+        error.value = res.message || '更新失败'
         return { success: false, message: error.value }
       }
     } catch (e) {
@@ -266,12 +236,12 @@ export function useIndicator() {
     try {
       const { data: res } = await deleteIndicator(id)
 
-      // 修复：响应拦截器返回完整response，需访问res.data
-      if (res.data.code === 200) {
+      if (res.code === 200) {
+        await loadIndicatorOptions()
         await loadIndicatorList()
         return { success: true, message: '删除成功' }
       } else {
-        error.value = res.data.message || '删除失败'
+        error.value = res.message || '删除失败'
         return { success: false, message: error.value }
       }
     } catch (e) {
@@ -288,11 +258,7 @@ export function useIndicator() {
    */
   const search = () => {
     pagination.currentPage = 1
-    if (filters.position) {
-      searchByPosition()
-    } else {
-      loadIndicatorList()
-    }
+    loadIndicatorList()
   }
 
   /**
@@ -310,11 +276,7 @@ export function useIndicator() {
    */
   const handlePageChange = (page) => {
     pagination.currentPage = page
-    if (filters.position) {
-      searchByPosition()
-    } else {
-      loadIndicatorList()
-    }
+    loadIndicatorList()
   }
 
   /**
@@ -323,11 +285,7 @@ export function useIndicator() {
   const handleSizeChange = (size) => {
     pagination.pageSize = size
     pagination.currentPage = 1
-    if (filters.position) {
-      searchByPosition()
-    } else {
-      loadIndicatorList()
-    }
+    loadIndicatorList()
   }
 
   // 是否有数据
@@ -343,9 +301,8 @@ export function useIndicator() {
     pointOptions,
     isEmpty,
     getMonitorItems,
+    loadIndicatorOptions,
     loadIndicatorList,
-    searchByPosition,
-    loadTypes,
     getDetail,
     save,
     update,

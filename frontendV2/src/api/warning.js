@@ -49,6 +49,7 @@ export function deleteWarning(id) {
  * @param {number} params.currentPage - 当前页码
  * @param {number} params.pageSize - 每页条数
  * @param {string} params.type - 监测项类型
+ * @param {string} params.position - 测点名称
  * @returns {Promise}
  */
 export function getIndicatorList(params) {
@@ -56,20 +57,11 @@ export function getIndicatorList(params) {
 }
 
 /**
- * 根据测点名称搜索指标
- * @param {Object} params - 查询参数
+ * 获取预警指标页面选项
  * @returns {Promise}
  */
-export function searchIndicatorByPosition(params) {
-  return request.get('/api/warning-indicators/page', { params: normalizePageParams(params) })
-}
-
-/**
- * 获取监测项类型列表
- * @returns {Promise}
- */
-export function getIndicatorTypes() {
-  return request.get('/api/warning-indicators/types')
+export function getIndicatorOptions() {
+  return request.get('/api/warning-indicators/options')
 }
 
 /**
