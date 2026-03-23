@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzsk.backendv2.mapper.warning.WarningMapper">
+
+    <!-- ===== 查询 ===== -->
+
+    <select id="selectPage" resultType="com.jzsk.backendv2.pojo.entity.warning.WarningInformationEntity">
+        SELECT id, position, project, content, type, level, status,
+               longitude, latitude, start_time, over_time, stay_time,
+               create_time, update_time
+        FROM warning_information
+        <where>
+            <if test="query.position != null and query.position != ''">
+                AND position LIKE CONCAT('%', #{query.position}, '%')
+            </if>
+            <if test="query.status != null and query.status != ''">
+                AND status = #{query.status}
+            </if>
+            <if test="query.level != null and query.level != ''">
+                AND level = #{query.level}
+            </if>
+            <if test="query.type != null and query.type != ''">
+                AND type = #{query.type}
+            </if>
+            <if test="query.startTime != null and query.endTime != null">
+                AND start_time BETWEEN #{query.startTime} AND #{query.endTime}
+            </if>
+        </where>
+        ORDER BY start_time DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countPage" resultType="long">
+        SELECT COUNT(*)
+        FROM warning_information
+        <where>
+            <if test="query.position != null and query.position != ''">
+                AND position LIKE CONCAT('%', #{query.position}, '%')
+            </if>
+            <if test="query.status != null and query.status != ''">
+                AND status = #{query.status}
+            </if>
+            <if test="query.level != null and query.level != ''">
+                AND level = #{query.level}
+            </if>
+            <if test="query.type != null and query.type != ''">
+                AND type = #{query.type}
+            </if>
+            <if test="query.startTime != null and query.endTime != null">
+                AND start_time BETWEEN #{query.startTime} AND #{query.endTime}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectById" resultType="com.jzsk.backendv2.pojo.entity.warning.WarningInformationEntity">
+        SELECT id, position, project, content, type, level, status,
+               longitude, latitude, start_time, over_time, stay_time,
+               point, create_time, update_time
+        FROM warning_information
+        WHERE id = #{id}
+    </select>
+
+    <!-- ===== 新增 ===== -->
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO warning_information (
+            position, project, content, type, level, status,
+            longitude, latitude, start_time, over_time, stay_time,
+            create_time, update_time, point
+        ) VALUES (
+            #{position},
+            #{project},
+            #{content},
+            #{type},
+            #{level},
+            #{status},
+            #{longitude},
+            #{latitude},
+            #{startTime},
+            #{overTime},
+            #{stayTime},
+            #{createTime},
+            #{updateTime},
+            <choose>
+                <when test="longitude != null and latitude != null">
+                    ST_GeomFromText(CONCAT('Point(', #{longitude}, ' ', #{latitude}, ')'))
+                </when>
+                <otherwise>
+                    NULL
+                </otherwise>
+            </choose>
+        )
+    </insert>
+
+    <!-- ===== 更新 ===== -->
+
+    <update id="update">
+        UPDATE warning_information
+        <set>
+            <if test="position != null">position = #{position},</if>
+            <if test="project != null">project = #{project},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="level != null">level = #{level},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="longitude != null">longitude = #{longitude},</if>
+            <if test="latitude != null">latitude = #{latitude},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="overTime != null">over_time = #{overTime},</if>
+            <if test="stayTime != null">stay_time = #{stayTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="longitude != null and latitude != null">
+                point = ST_GeomFromText(CONCAT('Point(', #{longitude}, ' ', #{latitude}, ')')),
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- ===== 删除 ===== -->
+
+    <delete id="deleteById">
+        DELETE FROM warning_information WHERE id = #{id}
+    </delete>
+
+</mapper>

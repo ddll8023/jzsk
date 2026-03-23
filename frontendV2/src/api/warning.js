@@ -24,16 +24,6 @@ import { buildIdPayload, normalizePageParams } from './_helpers'
 export function getWarningList(params) {
   return request.get('/api/warnings/page', { params: normalizePageParams(params) })
 }
-
-/**
- * 获取预警信息详情
- * @param {number|string} id - 预警ID
- * @returns {Promise}
- */
-export function getWarningInfo(id) {
-  return request.get(`/api/warnings/${id}`)
-}
-
 /**
  * 更新预警信息（解除预警）
  * @param {Object} data - 预警数据
@@ -51,16 +41,6 @@ export function updateWarning(data) {
 export function deleteWarning(id) {
   return request.post('/api/warnings/delete', buildIdPayload(id))
 }
-
-/**
- * 根据地点搜索预警信息
- * @param {Object} params - 查询参数
- * @returns {Promise}
- */
-export function searchWarningByPosition(params) {
-  return request.get('/api/warnings/page', { params: normalizePageParams(params) })
-}
-
 // ==================== 预警指标接口 ====================
 
 /**

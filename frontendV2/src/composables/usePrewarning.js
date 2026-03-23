@@ -68,8 +68,9 @@ export function usePrewarning() {
       console.log('   API响应:', res)
 
       // 修复：响应拦截器返回完整response，实际数据在res中
+      // V2 分页返回结构：list/total/page/size/totalPages
       if (res.code === 200) {
-        const rawRecords = res.data.records || []
+        const rawRecords = res.data.list || []
         // 添加序号字段
         warningList.value = rawRecords.map((item, index) => ({
           ...item,
@@ -248,7 +249,8 @@ export function usePrewarning() {
       const { data: res } = await getWarningList(params)
       
       if (res.code === 200) {
-        const records = res.data.records || []
+        // V2 分页返回结构：list/total/page/size/totalPages
+        const records = res.data.list || []
         
         // 统计数据
         warningStats.value = {
