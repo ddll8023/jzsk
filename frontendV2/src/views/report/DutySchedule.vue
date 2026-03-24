@@ -134,7 +134,7 @@ const handleDelete = async (row) => {
   if (!confirm('确定删除该值班安排吗？')) return
 
   try {
-    await deleteData(row.值班安排id)
+    await deleteData(row.dutyScheduleId)
     showToast('删除成功', 'success')
   } catch (error) {
     showToast('删除失败', 'error')
@@ -153,7 +153,7 @@ const handleBatchDelete = async () => {
   if (!confirm(`确定删除选中的 ${selectedRows.value.length} 条数据吗？`)) return
 
   try {
-    const ids = selectedRows.value.map(row => row.值班安排id)
+    const ids = selectedRows.value.map(row => row.dutyScheduleId)
     await batchDelete(ids)
     showToast('批量删除成功', 'success')
     selectedRows.value = []

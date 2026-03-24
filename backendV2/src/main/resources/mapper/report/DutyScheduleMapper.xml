@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzsk.backendv2.mapper.report.DutyScheduleMapper">
+
+    <!-- 基础结果映射 -->
+    <resultMap id="BaseResultMap" type="com.jzsk.backendv2.pojo.entity.report.DutyScheduleEntity">
+        <id column="值班安排ID" property="dutyScheduleId"/>
+        <result column="值班人员" property="dutyPerson"/>
+        <result column="带班领导" property="leader"/>
+        <result column="值班时间" property="dutyTime"/>
+        <result column="值班岗位" property="dutyPost"/>
+        <result column="创建时间" property="createTime"/>
+    </resultMap>
+
+    <!-- 通用查询列 -->
+    <sql id="Base_Column_List">
+        值班安排ID, 值班人员, 带班领导, 值班时间, 值班岗位, 创建时间
+    </sql>
+
+    <!-- 插入值班安排 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="dutyScheduleId">
+        INSERT INTO duty_schedule (值班人员, 带班领导, 值班时间, 值班岗位, 创建时间)
+        VALUES (#{dutyPerson}, #{leader}, #{dutyTime}, #{dutyPost}, #{createTime})
+    </insert>
+
+    <!-- 更新值班安排 -->
+    <update id="update">
+        UPDATE duty_schedule
+        <set>
+            <if test="dutyPerson != null">值班人员 = #{dutyPerson},</if>
+            <if test="leader != null">带班领导 = #{leader},</if>
+            <if test="dutyTime != null">值班时间 = #{dutyTime},</if>
+            <if test="dutyPost != null">值班岗位 = #{dutyPost},</if>
+        </set>
+        WHERE 值班安排ID = #{dutyScheduleId}
+    </update>
+
+    <!-- 根据ID删除值班安排 -->
+    <delete id="deleteById">
+        DELETE FROM duty_schedule WHERE 值班安排ID = #{id}
+    </delete>
+
+    <!-- 批量删除值班安排 -->
+    <delete id="deleteByIds">
+        DELETE FROM duty_schedule
+        WHERE 值班安排ID IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 根据ID查询值班安排 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM duty_schedule
+        WHERE 值班安排ID = #{id}
+    </select>
+
+    <!-- 分页查询值班安排 -->
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM duty_schedule
+        <where>
+            <if test="query.startDate != null and query.startDate != ''">
+                AND DATE(值班时间) &gt;= #{query.startDate}
+            </if>
+            <if test="query.endDate != null and query.endDate != ''">
+                AND DATE(值班时间) &lt;= #{query.endDate}
+            </if>
+        </where>
+        ORDER BY 值班时间 DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <!-- 统计总数 -->
+    <select id="countPage" resultType="long">
+        SELECT COUNT(*) FROM duty_schedule
+        <where>
+            <if test="query.startDate != null and query.startDate != ''">
+                AND DATE(值班时间) &gt;= #{query.startDate}
+            </if>
+            <if test="query.endDate != null and query.endDate != ''">
+                AND DATE(值班时间) &lt;= #{query.endDate}
+            </if>
+        </where>
+    </select>
+
+</mapper>

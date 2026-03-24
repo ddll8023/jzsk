@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzsk.backendv2.mapper.report.DutyLogMapper">
+
+    <!-- 基础结果映射 -->
+    <resultMap id="BaseResultMap" type="com.jzsk.backendv2.pojo.entity.report.DutyLogEntity">
+        <id column="值班日志ID" property="dutyLogId"/>
+        <result column="值班日期" property="dutyDate"/>
+        <result column="天气" property="weather"/>
+        <result column="雨量" property="rainfall"/>
+        <result column="带班领导" property="leader"/>
+        <result column="白班值班人员" property="dayShiftPerson"/>
+        <result column="晚班值班人员" property="nightShiftPerson"/>
+        <result column="日志内容" property="logContent"/>
+        <result column="日志填写时间" property="fillTime"/>
+        <result column="日志状态" property="logStatus"/>
+    </resultMap>
+
+    <!-- 通用查询列 -->
+    <sql id="Base_Column_List">
+        值班日志ID, 值班日期, 天气, 雨量, 带班领导, 白班值班人员, 晚班值班人员, 日志内容, 日志填写时间, 日志状态
+    </sql>
+
+    <!-- 插入值班日志 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="dutyLogId">
+        INSERT INTO duty_log (值班日期, 天气, 雨量, 带班领导, 白班值班人员, 晚班值班人员, 日志内容, 日志填写时间, 日志状态)
+        VALUES (#{dutyDate}, #{weather}, #{rainfall}, #{leader}, #{dayShiftPerson}, #{nightShiftPerson}, #{logContent}, #{fillTime}, #{logStatus})
+    </insert>
+
+    <!-- 更新值班日志 -->
+    <update id="update">
+        UPDATE duty_log
+        <set>
+            <if test="dutyDate != null">值班日期 = #{dutyDate},</if>
+            <if test="weather != null">天气 = #{weather},</if>
+            <if test="rainfall != null">雨量 = #{rainfall},</if>
+            <if test="leader != null">带班领导 = #{leader},</if>
+            <if test="dayShiftPerson != null">白班值班人员 = #{dayShiftPerson},</if>
+            <if test="nightShiftPerson != null">晚班值班人员 = #{nightShiftPerson},</if>
+            <if test="logContent != null">日志内容 = #{logContent},</if>
+            <if test="logStatus != null">日志状态 = #{logStatus},</if>
+        </set>
+        WHERE 值班日志ID = #{dutyLogId}
+    </update>
+
+    <!-- 根据ID删除值班日志 -->
+    <delete id="deleteById">
+        DELETE FROM duty_log WHERE 值班日志ID = #{id}
+    </delete>
+
+    <!-- 批量删除值班日志 -->
+    <delete id="deleteByIds">
+        DELETE FROM duty_log
+        WHERE 值班日志ID IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 根据ID查询值班日志 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM duty_log
+        WHERE 值班日志ID = #{id}
+    </select>
+
+    <!-- 分页查询值班日志 -->
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM duty_log
+        <where>
+            <if test="startDate != null and startDate != ''">
+                AND 值班日期 &gt;= #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                AND 值班日期 &lt;= #{endDate}
+            </if>
+        </where>
+        ORDER BY 值班日期 DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <!-- 统计总数 -->
+    <select id="countPage" resultType="long">
+        SELECT COUNT(*) FROM duty_log
+        <where>
+            <if test="startDate != null and startDate != ''">
+                AND 值班日期 &gt;= #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                AND 值班日期 &lt;= #{endDate}
+            </if>
+        </where>
+    </select>
+
+</mapper>

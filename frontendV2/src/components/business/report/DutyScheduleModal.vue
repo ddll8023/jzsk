@@ -12,7 +12,7 @@
           值班人员 <span class="text-red-500">*</span>
         </label>
         <Input
-          v-model="formData.值班人员"
+          v-model="formData.dutyPerson"
           placeholder="请输入值班人员"
           :disabled="loading"
         />
@@ -24,7 +24,7 @@
           带班领导 <span class="text-red-500">*</span>
         </label>
         <Input
-          v-model="formData.带班领导"
+          v-model="formData.leader"
           placeholder="请输入带班领导"
           :disabled="loading"
         />
@@ -37,7 +37,7 @@
         </label>
         <input
           type="datetime-local"
-          v-model="formData.值班时间"
+          v-model="formData.dutyTime"
           :disabled="loading"
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         />
@@ -49,7 +49,7 @@
           值班岗位 <span class="text-red-500">*</span>
         </label>
         <Input
-          v-model="formData.值班岗位"
+          v-model="formData.dutyPost"
           placeholder="请输入值班岗位"
           :disabled="loading"
         />
@@ -105,15 +105,15 @@ const visible = computed({
 
 // 表单数据
 const formData = ref({
-  值班人员: '',
-  带班领导: '',
-  值班时间: '',
-  值班岗位: ''
+  dutyPerson: '',
+  leader: '',
+  dutyTime: '',
+  dutyPost: ''
 })
 
 // 弹窗标题
 const title = computed(() => {
-  return props.data?.值班安排id ? '编辑值班安排' : '新增值班安排'
+  return props.data?.dutyScheduleId ? '编辑值班安排' : '新增值班安排'
 })
 
 /**
@@ -150,10 +150,10 @@ const formatToDatetimeLocal = (value) => {
  */
 const resetForm = () => {
   formData.value = {
-    值班人员: '',
-    带班领导: '',
-    值班时间: '',
-    值班岗位: ''
+    dutyPerson: '',
+    leader: '',
+    dutyTime: '',
+    dutyPost: ''
   }
 }
 
@@ -163,11 +163,11 @@ const resetForm = () => {
 watch(() => props.data, (newData) => {
   if (newData) {
     formData.value = {
-      值班安排id: newData.值班安排id,
-      值班人员: newData.值班人员 || '',
-      带班领导: newData.带班领导 || '',
-      值班时间: formatToDatetimeLocal(newData.值班时间) || '',
-      值班岗位: newData.值班岗位 || ''
+      dutyScheduleId: newData.dutyScheduleId,
+      dutyPerson: newData.dutyPerson || '',
+      leader: newData.leader || '',
+      dutyTime: formatToDatetimeLocal(newData.dutyTime) || '',
+      dutyPost: newData.dutyPost || ''
     }
   } else {
     resetForm()
@@ -179,19 +179,19 @@ watch(() => props.data, (newData) => {
  * @returns {Boolean}
  */
 const validateForm = () => {
-  if (!formData.value.值班人员?.trim()) {
+  if (!formData.value.dutyPerson?.trim()) {
     alert('请输入值班人员')
     return false
   }
-  if (!formData.value.带班领导?.trim()) {
+  if (!formData.value.leader?.trim()) {
     alert('请输入带班领导')
     return false
   }
-  if (!formData.value.值班时间) {
+  if (!formData.value.dutyTime) {
     alert('请选择值班时间')
     return false
   }
-  if (!formData.value.值班岗位?.trim()) {
+  if (!formData.value.dutyPost?.trim()) {
     alert('请输入值班岗位')
     return false
   }
@@ -207,7 +207,7 @@ const handleSubmit = () => {
   // 转换datetime-local格式为标准格式
   const submitData = {
     ...formData.value,
-    值班时间: formData.value.值班时间.replace('T', ' ') + ':00'
+    dutyTime: formData.value.dutyTime.replace('T', ' ') + ':00'
   }
   
   emit('submit', submitData)

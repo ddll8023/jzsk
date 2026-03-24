@@ -27,17 +27,17 @@
         @update:pageSize="$emit('update:pageSize', $event)"
       >
       <!-- 值班时间列 -->
-      <template #值班时间="{ row }">
-        {{ formatDateTime(row.值班时间) }}
+      <template #dutyTime="{ row }">
+        {{ formatDateTime(row.dutyTime) }}
       </template>
 
       <!-- 创建时间列 -->
-      <template #创建时间="{ row }">
-        {{ formatDateTime(row.创建时间) }}
+      <template #createTime="{ row }">
+        {{ formatDateTime(row.createTime) }}
       </template>
 
       <!-- 操作列 -->
-      <template #操作="{ row }">
+      <template #actions="{ row }">
         <div class="flex items-center justify-center gap-2">
           <Button size="sm" icon="edit" @click="$emit('edit', row)">
             编辑
@@ -92,12 +92,12 @@ defineEmits(['page-change', 'update:pageSize', 'edit', 'delete'])
 
 // 表格列配置
 const columns = [
-  { key: '值班安排id', title: '值班安排ID', width: '100px' },
-  { key: '值班人员', title: '值班人员' },
-  { key: '带班领导', title: '带班领导' },
-  { key: '值班时间', title: '值班时间' },
-  { key: '值班岗位', title: '值班岗位' },
-  { key: '创建时间', title: '创建时间' },
-  { key: '操作', title: '操作', width: '180px' }
+  { key: 'dutyScheduleId', title: '值班安排ID', width: '100px' },
+  { key: 'dutyPerson', title: '值班人员' },
+  { key: 'leader', title: '带班领导' },
+  { key: 'dutyTime', title: '值班时间' },
+  { key: 'dutyPost', title: '值班岗位' },
+  { key: 'createTime', title: '创建时间' },
+  { key: 'actions', title: '操作', width: '180px' }
 ]
 </script>

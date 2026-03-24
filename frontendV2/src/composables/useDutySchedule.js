@@ -45,7 +45,7 @@ export function useDutySchedule() {
       }
 
       const res = await getDutySchedulePage(params)
-      const rawRecords = res.data.data.records || []
+      const rawRecords = res.data.data.list || []
       // 添加序号字段
       tableData.value = rawRecords.map((item, index) => ({
         ...item,
@@ -68,8 +68,8 @@ export function useDutySchedule() {
    */
   const saveData = async (form) => {
     try {
-      if (form.值班安排id) {
-        await updateDutySchedule(form.值班安排id, form)
+      if (form.dutyScheduleId) {
+        await updateDutySchedule(form.dutyScheduleId, form)
       } else {
         await saveDutySchedule(form)
       }
