@@ -126,55 +126,6 @@ export function exportMonitorItemExcel() {
   return request.get('/api/measuring-items/export')
 }
 
-// ==================== 洪水防御预案 ====================
-
-/**
- * 获取洪水防御预案列表
- * @returns {Promise}
- */
-export function getFloodPlanList() {
-  return request.get('/api/flood-plans/list')
-}
-
-/**
- * 获取洪水防御预案详情
- * @param {Number|String} id - 预案步骤ID
- * @returns {Promise}
- */
-export function getFloodPlanInfo(id) {
-  return request.get(`/api/flood-plans/${id}`)
-}
-
-/**
- * 新增洪水防御预案步骤
- * @param {Object} data - 预案步骤数据
- * @param {String} data.time - 阶段/时间点
- * @param {String} data.content - 具体内容
- * @param {Number} data.ordernum - 排序号
- * @returns {Promise}
- */
-export function saveFloodPlan(data) {
-  return request.post('/api/flood-plans/create', data)
-}
-
-/**
- * 更新洪水防御预案步骤
- * @param {Object} data - 预案步骤数据
- * @returns {Promise}
- */
-export function updateFloodPlan(data) {
-  return request.post('/api/flood-plans/update', data)
-}
-
-/**
- * 删除洪水防御预案步骤
- * @param {Number|String} id - 预案步骤ID
- * @returns {Promise}
- */
-export function deleteFloodPlan(id) {
-  return request.post('/api/flood-plans/delete', buildIdPayload(id))
-}
-
 // ==================== 预警设施接口 ====================
 
 /**

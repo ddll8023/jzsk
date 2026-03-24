@@ -2,16 +2,9 @@
  * 洪水防御预案 Composable
  * 功能：封装洪水防御预案的CRUD逻辑
  * 遵循原则：KISS, YAGNI, SOLID
- * 支持本地存储降级方案
+ * 数据存储：使用 localStorage 持久化
  */
 import { ref, reactive } from 'vue'
-import {
-  getFloodPlanList,
-  getFloodPlanInfo,
-  saveFloodPlan,
-  updateFloodPlan,
-  deleteFloodPlan
-} from '@/api/engineering'
 
 // 默认预案数据
 const DEFAULT_PLAN = [
@@ -27,7 +20,6 @@ export function useFloodPlan() {
   // 数据状态
   const loading = ref(false)
   const planList = ref([])
-  const useLocalStorage = ref(false) // 是否使用本地存储
 
   // 表单数据
   const formData = reactive({
@@ -72,16 +64,6 @@ export function useFloodPlan() {
   const loadPlanList = async () => {
     loading.value = true
     try {
-      const res = await getFloodPlanList()
-      if (res.data.code === 200) {
-        planList.value = res.data.data || []
-        useLocalStorage.value = false
-      } else {
-        throw new Error(res.data.message || '获取数据失败')
-      }
-    } catch (error) {
-      console.warn('后端接口调用失败，降级到本地存储:', error)
-      useLocalStorage.value = true
       loadFromLocalStorage()
     } finally {
       loading.value = false
@@ -91,110 +73,53 @@ export function useFloodPlan() {
   /**
    * 加载预案详情
    */
-  const loadPlanInfo = async (id) => {
-    if (useLocalStorage.value) {
-      const item = planList.value.find(p => p.id === id)
-      if (item) {
-        Object.assign(formData, item)
-        return item
-      }
-      throw new Error('未找到该预案步骤')
+  const loadPlanInfo = (id) => {
+    const item = planList.value.find(p => p.id === id)
+    if (item) {
+      Object.assign(formData, item)
+      return item
     }
-
-    loading.value = true
-    try {
-      const res = await getFloodPlanInfo(id)
-      if (res.data.code === 200) {
-        Object.assign(formData, res.data.data)
-        return res.data.data
-      } else {
-        throw new Error(res.data.message || '获取详情失败')
-      }
-    } catch (error) {
-      console.error('加载预案详情失败:', error)
-      throw error
-    } finally {
-      loading.value = false
-    }
+    throw new Error('未找到该预案步骤')
   }
 
   /**
    * 保存预案（新增或更新）
    */
-  const savePlanItem = async (data) => {
-    if (useLocalStorage.value) {
-      // 本地存储模式
-      if (data.id) {
-        // 更新
-        const index = planList.value.findIndex(p => p.id === data.id)
-        if (index !== -1) {
-          planList.value[index] = { ...data }
-        }
-      } else {
-        // 新增
-        const maxId = Math.max(0, ...planList.value.map(p => p.id))
-        planList.value.push({
-          ...data,
-          id: maxId + 1,
-          ordernum: planList.value.length + 1
-        })
+  const savePlanItem = (data) => {
+    if (data.id) {
+      // 更新
+      const index = planList.value.findIndex(p => p.id === data.id)
+      if (index !== -1) {
+        planList.value[index] = { ...data }
       }
-      saveToLocalStorage()
-      return { success: true, message: data.id ? '更新成功' : '新增成功' }
+    } else {
+      // 新增
+      const maxId = Math.max(0, ...planList.value.map(p => p.id))
+      planList.value.push({
+        ...data,
+        id: maxId + 1,
+        ordernum: planList.value.length + 1
+      })
     }
-
-    // 后端接口模式
-    loading.value = true
-    try {
-      const apiFunc = data.id ? updateFloodPlan : saveFloodPlan
-      const res = await apiFunc(data)
-      if (res.data.code === 200) {
-        return { success: true, message: data.id ? '更新成功' : '新增成功' }
-      } else {
-        throw new Error(res.data.message || '保存失败')
-      }
-    } catch (error) {
-      console.error('保存预案失败:', error)
-      return { success: false, message: error.message || '保存失败' }
-    } finally {
-      loading.value = false
-    }
+    saveToLocalStorage()
+    return { success: true, message: data.id ? '更新成功' : '新增成功' }
   }
 
   /**
    * 删除预案步骤
    */
-  const deletePlanItem = async (id) => {
-    if (useLocalStorage.value) {
-      // 本地存储模式
-      const index = planList.value.findIndex(p => p.id === id)
-      if (index !== -1) {
-        planList.value.splice(index, 1)
-        // 重新排序
-        planList.value.forEach((item, idx) => {
-          item.ordernum = idx + 1
-        })
-        saveToLocalStorage()
-        return { success: true, message: '删除成功' }
-      }
-      return { success: false, message: '未找到该预案步骤' }
+  const deletePlanItem = (id) => {
+    const index = planList.value.findIndex(p => p.id === id)
+    if (index !== -1) {
+      planList.value.splice(index, 1)
+      // 重新排序
+      planList.value.forEach((item, idx) => {
+        item.ordernum = idx + 1
+      })
+      saveToLocalStorage()
+      return { success: true, message: '删除成功' }
     }
-
-    // 后端接口模式
-    loading.value = true
-    try {
-      const res = await deleteFloodPlan(id)
-      if (res.data.code === 200) {
-        return { success: true, message: '删除成功' }
-      } else {
-        throw new Error(res.data.message || '删除失败')
-      }
-    } catch (error) {
-      console.error('删除预案失败:', error)
-      return { success: false, message: error.message || '删除失败' }
-    } finally {
-      loading.value = false
-    }
+    return { success: false, message: '未找到该预案步骤' }
   }
 
   /**
@@ -202,9 +127,7 @@ export function useFloodPlan() {
    */
   const resetToDefault = () => {
     planList.value = JSON.parse(JSON.stringify(DEFAULT_PLAN))
-    if (useLocalStorage.value) {
-      saveToLocalStorage()
-    }
+    saveToLocalStorage()
     return { success: true, message: '已重置为默认预案' }
   }
 
@@ -224,7 +147,6 @@ export function useFloodPlan() {
     // 状态
     loading,
     planList,
-    useLocalStorage,
     formData,
 
     // 方法
