@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzsk.backendv2.mapper.engineering.MeasuringItemMapper">
+
+    <resultMap id="BaseResultMap" type="com.jzsk.backendv2.pojo.entity.engineering.MeasuringItemEntity">
+        <id column="id" property="id"/>
+        <result column="number" property="number"/>
+        <result column="name" property="name"/>
+        <result column="unit" property="unit"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, number, name, unit, create_time, update_time
+    </sql>
+
+    <sql id="WhereClause">
+        <where>
+            <if test="query != null">
+                <if test="query.name != null and query.name != ''">
+                    AND name LIKE CONCAT('%', #{query.name}, '%')
+                </if>
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM measuring_item
+        <include refid="WhereClause"/>
+        ORDER BY id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countPage" resultType="long">
+        SELECT COUNT(*)
+        FROM measuring_item
+        <include refid="WhereClause"/>
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM measuring_item
+        WHERE id = #{id}
+    </select>
+
+    <select id="countByNumber" resultType="int">
+        SELECT COUNT(*)
+        FROM measuring_item
+        WHERE number = #{number}
+        <if test="excludeId != null">
+            AND id != #{excludeId}
+        </if>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO measuring_item (number, name, unit, create_time, update_time)
+        VALUES (#{number}, #{name}, #{unit}, NOW(), NOW())
+    </insert>
+
+    <update id="update">
+        UPDATE measuring_item
+        <set>
+            <if test="number != null">number = #{number},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="unit != null">unit = #{unit},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM measuring_item WHERE id = #{id}
+    </delete>
+
+    <select id="selectNames" resultMap="BaseResultMap">
+        SELECT id, name
+        FROM measuring_item
+        ORDER BY name ASC
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM measuring_item
+        ORDER BY id ASC
+    </select>
+
+</mapper>

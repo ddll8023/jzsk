@@ -111,19 +111,11 @@ export function deleteMonitorItem(id) {
 }
 
 /**
- * 获取所有测项名称（用于下拉选择）
- * @returns {Promise}
- */
-export function getMonitorItemNames() {
-  return request.get('/api/measuring-items/options')
-}
-
-/**
  * 导出测项信息Excel
  * @returns {Promise}
  */
 export function exportMonitorItemExcel() {
-  return request.get('/api/measuring-items/export')
+  return request.get('/api/measuring-items/export', { responseType: 'blob' })
 }
 
 // ==================== 预警设施接口 ====================

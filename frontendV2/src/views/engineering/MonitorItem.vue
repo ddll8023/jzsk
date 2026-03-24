@@ -21,12 +21,11 @@
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <!-- 测项名称 -->
             <div>
-              <Select
+              <Input
                 v-model="query.name"
                 label="测项名称"
-                :options="[{ label: '全部', value: '' }, ...itemNames]"
+                placeholder="输入测项名称搜索"
                 :disabled="loading"
-                @change="search"
               />
             </div>
           </div>
@@ -185,7 +184,6 @@ import { useToast } from '@/composables/useToast'
 import Table from '@/components/basic/Table.vue'
 import Modal from '@/components/basic/Modal.vue'
 import Button from '@/components/basic/Button.vue'
-import Select from '@/components/basic/Select.vue'
 import Input from '@/components/basic/Input.vue'
 import Card from '@/components/basic/Card.vue'
 
@@ -193,12 +191,10 @@ import Card from '@/components/basic/Card.vue'
 const {
   loading,
   itemList,
-  itemNames,
   total,
   query,
   formData,
   loadItemList,
-  loadItemNames,
   loadItemInfo,
   saveItem,
   deleteItem,
@@ -303,7 +299,6 @@ const handleExport = async () => {
 
 // 初始化
 onMounted(async () => {
-  await loadItemNames()
   await loadItemList()
 })
 </script>

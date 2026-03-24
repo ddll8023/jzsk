@@ -10,7 +10,6 @@ import {
   saveMonitorItem,
   updateMonitorItem,
   deleteMonitorItem,
-  getMonitorItemNames,
   exportMonitorItemExcel
 } from '@/api/engineering'
 
@@ -18,7 +17,6 @@ export function useMonitorItem() {
   // 数据状态
   const loading = ref(true)
   const itemList = ref([])
-  const itemNames = ref([])
   const total = ref(0)
 
   // 查询参数
@@ -54,23 +52,6 @@ export function useMonitorItem() {
       throw error
     } finally {
       loading.value = false
-    }
-  }
-
-  /**
-   * 加载测项名称列表（用于筛选下拉）
-   */
-  const loadItemNames = async () => {
-    try {
-      const res = await getMonitorItemNames()
-      if (res.data.code === 200) {
-        itemNames.value = (res.data.data || []).map(name => ({
-          label: name,
-          value: name
-        }))
-      }
-    } catch (error) {
-      console.error('加载测项名称失败:', error)
     }
   }
 
@@ -182,41 +163,25 @@ export function useMonitorItem() {
   }
 
   /**
-   * 导出CSV
+   * 导出Excel
    */
   const exportData = async () => {
     try {
       const res = await exportMonitorItemExcel()
-      if (res.data.code === 200) {
-        const data = res.data.data || []
-        
-        if (!data || data.length === 0) {
-          return { success: false, message: '没有数据可导出' }
-        }
 
-        const headers = ['序号', '测项编号', '测项名称', '测项单位']
-        const rows = data.map((item, index) => [
-          index + 1,
-          item.number || '',
-          item.name || '',
-          item.unit || ''
-        ])
-
-        let csvContent = '\ufeff' + headers.join(',') + '\n'
-        rows.forEach(row => {
-          csvContent += row.map(e => `"${e}"`).join(',') + '\n'
-        })
-
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-        const link = document.createElement('a')
-        link.href = URL.createObjectURL(blob)
-        link.download = `测项信息数据_${new Date().getTime()}.csv`
-        link.click()
-
-        return { success: true, message: '导出成功' }
-      } else {
-        throw new Error(res.data.message || '导出失败')
+      const blob = res.data
+      if (!blob || blob.size === 0) {
+        return { success: false, message: '没有数据可导出' }
       }
+
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `测项信息_${new Date().getTime()}.xlsx`
+      link.click()
+      URL.revokeObjectURL(url)
+
+      return { success: true, message: '导出成功' }
     } catch (error) {
       console.error('导出失败:', error)
       return { success: false, message: error.message || '导出失败' }
@@ -227,14 +192,12 @@ export function useMonitorItem() {
     // 状态
     loading,
     itemList,
-    itemNames,
     total,
     query,
     formData,
 
     // 方法
     loadItemList,
-    loadItemNames,
     loadItemInfo,
     saveItem,
     deleteItem,
