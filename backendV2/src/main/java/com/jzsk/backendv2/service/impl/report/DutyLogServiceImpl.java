@@ -68,7 +68,8 @@ public class DutyLogServiceImpl implements DutyLogService {
      */
     @Override
     public DutyLogVO getById(Long id) {
-        DutyLogEntity entity = dutyLogMapper.selectById(id);
+        Integer logId = id == null ? null : Long.valueOf(id).intValue();
+        DutyLogEntity entity = dutyLogMapper.selectById(logId);
         if (entity == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND, "值班日志不存在");
         }
@@ -107,7 +108,8 @@ public class DutyLogServiceImpl implements DutyLogService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public DutyLogVO update(DutyLogUpdateDTO request) {
-        DutyLogEntity existing = dutyLogMapper.selectById(request.getId());
+        Integer logId = request.getId() == null ? null : Long.valueOf(request.getId()).intValue();
+        DutyLogEntity existing = dutyLogMapper.selectById(logId);
         if (existing == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND, "值班日志不存在");
         }
@@ -149,12 +151,13 @@ public class DutyLogServiceImpl implements DutyLogService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
-        DutyLogEntity existing = dutyLogMapper.selectById(id);
+        Integer logId = id == null ? null : Long.valueOf(id).intValue();
+        DutyLogEntity existing = dutyLogMapper.selectById(logId);
         if (existing == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND, "值班日志不存在");
         }
 
-        dutyLogMapper.deleteById(id);
+        dutyLogMapper.deleteById(logId);
         log.info("删除值班日志成功，id={}", id);
     }
 

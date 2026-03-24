@@ -17,7 +17,7 @@ public class DutyScheduleUpdateDTO {
 
     @Schema(description = "值班安排ID", example = "1", required = true)
     @NotNull(message = "值班安排ID不能为空")
-    private Long id;
+    private Integer id;
 
     @Schema(description = "值班人员", example = "张三")
     @Size(max = 50, message = "值班人员长度不能超过50个字符")

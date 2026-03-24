@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,7 +35,6 @@ import java.util.List;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@Slf4j
 @RequestMapping("${jzsk.v2.api-prefix:/api}/duty-schedules")
 @Tag(name = "值班安排管理", description = "提供值班安排查询和管理功能")
 public class DutyScheduleController {

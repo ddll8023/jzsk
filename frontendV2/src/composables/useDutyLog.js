@@ -45,7 +45,7 @@ export function useDutyLog() {
       }
 
       const res = await getDutyLogPage(params)
-      const rawRecords = res.data.data.records || []
+      const rawRecords = res.data.data.list || []
       // 添加序号字段
       tableData.value = rawRecords.map((item, index) => ({
         ...item,
@@ -68,8 +68,8 @@ export function useDutyLog() {
    */
   const saveData = async (form) => {
     try {
-      if (form.值班日志id) {
-        await updateDutyLog(form.值班日志id, form)
+      if (form.dutyLogId) {
+        await updateDutyLog(form.dutyLogId, form)
       } else {
         await saveDutyLog(form)
       }

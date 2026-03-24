@@ -34,21 +34,21 @@ public interface DutyScheduleMapper {
      * @param id 值班安排ID
      * @return 影响行数
      */
-    int deleteById(Long id);
+    int deleteById(Integer id);
 
     /**
      * 批量删除值班安排
      * @param ids ID列表
      * @return 影响行数
      */
-    int deleteByIds(List<Long> ids);
+    int deleteByIds(@Param("ids") List<Long> ids);
 
     /**
      * 根据ID查询值班安排
      * @param id 值班安排ID
      * @return 值班安排实体
      */
-    DutyScheduleEntity selectById(Long id);
+    DutyScheduleEntity selectById(Integer id);
 
     /**
      * 分页查询值班安排

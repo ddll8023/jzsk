@@ -68,7 +68,8 @@ public class DutyScheduleServiceImpl implements DutyScheduleService {
      */
     @Override
     public DutyScheduleVO getById(Long id) {
-        DutyScheduleEntity entity = dutyScheduleMapper.selectById(id);
+        Integer scheduleId = id == null ? null : Long.valueOf(id).intValue();
+        DutyScheduleEntity entity = dutyScheduleMapper.selectById(scheduleId);
         if (entity == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND, "值班安排不存在");
         }
@@ -103,7 +104,8 @@ public class DutyScheduleServiceImpl implements DutyScheduleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public DutyScheduleVO update(DutyScheduleUpdateDTO request) {
-        DutyScheduleEntity existing = dutyScheduleMapper.selectById(request.getId());
+        Integer scheduleId = request.getId() == null ? null : Long.valueOf(request.getId()).intValue();
+        DutyScheduleEntity existing = dutyScheduleMapper.selectById(scheduleId);
         if (existing == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND, "值班安排不存在");
         }
@@ -133,12 +135,13 @@ public class DutyScheduleServiceImpl implements DutyScheduleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void delete(Long id) {
-        DutyScheduleEntity existing = dutyScheduleMapper.selectById(id);
+        Integer scheduleId = id == null ? null : Long.valueOf(id).intValue();
+        DutyScheduleEntity existing = dutyScheduleMapper.selectById(scheduleId);
         if (existing == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND, "值班安排不存在");
         }
 
-        dutyScheduleMapper.deleteById(id);
+        dutyScheduleMapper.deleteById(scheduleId);
         log.info("删除值班安排成功，id={}", id);
     }
 

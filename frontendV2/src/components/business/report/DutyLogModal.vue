@@ -14,7 +14,7 @@
           </label>
           <input
             type="date"
-            v-model="formData.值班日期"
+            v-model="formData.dutyDate"
             :disabled="loading"
             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           />
@@ -26,7 +26,7 @@
             天气 <span class="text-red-500">*</span>
           </label>
           <Input
-            v-model="formData.天气"
+            v-model="formData.weather"
             placeholder="请输入天气"
             :disabled="loading"
           />
@@ -38,7 +38,7 @@
             雨量
           </label>
           <Input
-            v-model="formData.雨量"
+            v-model="formData.rainfall"
             type="number"
             placeholder="请输入雨量"
             :disabled="loading"
@@ -51,7 +51,7 @@
             带班领导 <span class="text-red-500">*</span>
           </label>
           <Input
-            v-model="formData.带班领导"
+            v-model="formData.leader"
             placeholder="请输入带班领导"
             :disabled="loading"
           />
@@ -63,7 +63,7 @@
             白班值班人员 <span class="text-red-500">*</span>
           </label>
           <Input
-            v-model="formData.白班值班人员"
+            v-model="formData.dayShiftPerson"
             placeholder="请输入白班值班人员"
             :disabled="loading"
           />
@@ -75,7 +75,7 @@
             晚班值班人员 <span class="text-red-500">*</span>
           </label>
           <Input
-            v-model="formData.晚班值班人员"
+            v-model="formData.nightShiftPerson"
             placeholder="请输入晚班值班人员"
             :disabled="loading"
           />
@@ -87,7 +87,7 @@
             日志状态
           </label>
           <Input
-            v-model="formData.日志状态"
+            v-model="formData.logStatus"
             placeholder="请输入日志状态"
             :disabled="loading"
           />
@@ -100,7 +100,7 @@
           日志内容 <span class="text-red-500">*</span>
         </label>
         <textarea
-          v-model="formData.日志内容"
+          v-model="formData.logContent"
           rows="4"
           placeholder="请输入日志内容"
           :disabled="loading"
@@ -158,19 +158,19 @@ const visible = computed({
 
 // 表单数据
 const formData = ref({
-  值班日期: '',
-  天气: '',
-  雨量: '',
-  带班领导: '',
-  白班值班人员: '',
-  晚班值班人员: '',
-  日志内容: '',
-  日志状态: ''
+  dutyDate: '',
+  weather: '',
+  rainfall: '',
+  leader: '',
+  dayShiftPerson: '',
+  nightShiftPerson: '',
+  logContent: '',
+  logStatus: ''
 })
 
 // 弹窗标题
 const title = computed(() => {
-  return props.data?.值班日志id ? '编辑值班日志' : '新增值班日志'
+  return props.data?.dutyLogId ? '编辑值班日志' : '新增值班日志'
 })
 
 /**
@@ -205,14 +205,14 @@ const formatToDate = (value) => {
  */
 const resetForm = () => {
   formData.value = {
-    值班日期: '',
-    天气: '',
-    雨量: '',
-    带班领导: '',
-    白班值班人员: '',
-    晚班值班人员: '',
-    日志内容: '',
-    日志状态: ''
+    dutyDate: '',
+    weather: '',
+    rainfall: '',
+    leader: '',
+    dayShiftPerson: '',
+    nightShiftPerson: '',
+    logContent: '',
+    logStatus: ''
   }
 }
 
@@ -222,15 +222,15 @@ const resetForm = () => {
 watch(() => props.data, (newData) => {
   if (newData) {
     formData.value = {
-      值班日志id: newData.值班日志id,
-      值班日期: formatToDate(newData.值班日期) || '',
-      天气: newData.天气 || '',
-      雨量: newData.雨量 || '',
-      带班领导: newData.带班领导 || '',
-      白班值班人员: newData.白班值班人员 || '',
-      晚班值班人员: newData.晚班值班人员 || '',
-      日志内容: newData.日志内容 || '',
-      日志状态: newData.日志状态 || ''
+      dutyLogId: newData.dutyLogId,
+      dutyDate: formatToDate(newData.dutyDate) || '',
+      weather: newData.weather || '',
+      rainfall: newData.rainfall ?? '',
+      leader: newData.leader || '',
+      dayShiftPerson: newData.dayShiftPerson || '',
+      nightShiftPerson: newData.nightShiftPerson || '',
+      logContent: newData.logContent || '',
+      logStatus: newData.logStatus || ''
     }
   } else {
     resetForm()
@@ -242,27 +242,27 @@ watch(() => props.data, (newData) => {
  * @returns {Boolean}
  */
 const validateForm = () => {
-  if (!formData.value.值班日期) {
+  if (!formData.value.dutyDate) {
     alert('请选择值班日期')
     return false
   }
-  if (!formData.value.天气?.trim()) {
+  if (!formData.value.weather?.trim()) {
     alert('请输入天气')
     return false
   }
-  if (!formData.value.带班领导?.trim()) {
+  if (!formData.value.leader?.trim()) {
     alert('请输入带班领导')
     return false
   }
-  if (!formData.value.白班值班人员?.trim()) {
+  if (!formData.value.dayShiftPerson?.trim()) {
     alert('请输入白班值班人员')
     return false
   }
-  if (!formData.value.晚班值班人员?.trim()) {
+  if (!formData.value.nightShiftPerson?.trim()) {
     alert('请输入晚班值班人员')
     return false
   }
-  if (!formData.value.日志内容?.trim()) {
+  if (!formData.value.logContent?.trim()) {
     alert('请输入日志内容')
     return false
   }

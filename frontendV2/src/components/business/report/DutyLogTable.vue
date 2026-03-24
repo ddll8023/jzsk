@@ -27,24 +27,24 @@
         @update:pageSize="$emit('update:pageSize', $event)"
       >
       <!-- 值班日期列 -->
-      <template #值班日期="{ row }">
-        {{ formatDate(row.值班日期) }}
+      <template #dutyDate="{ row }">
+        {{ formatDate(row.dutyDate) }}
       </template>
 
       <!-- 日志填写时间列 -->
-      <template #日志填写时间="{ row }">
-        {{ formatDateTime(row.日志填写时间) }}
+      <template #fillTime="{ row }">
+        {{ formatDateTime(row.fillTime) }}
       </template>
 
       <!-- 日志内容列 -->
-      <template #日志内容="{ row }">
-        <div class="max-w-xs truncate" :title="row.日志内容">
-          {{ row.日志内容 }}
+      <template #logContent="{ row }">
+        <div class="max-w-xs truncate" :title="row.logContent">
+          {{ row.logContent }}
         </div>
       </template>
 
       <!-- 操作列 -->
-      <template #操作="{ row }">
+      <template #actions="{ row }">
         <div class="flex items-center justify-center gap-2">
           <Button size="sm" icon="edit" @click="$emit('edit', row)">
             编辑
@@ -103,16 +103,16 @@ defineEmits(['page-change', 'update:pageSize', 'edit', 'delete'])
 
 // 表格列配置
 const columns = [
-  { key: '值班日志id', title: '值班日志ID', width: '100px' },
-  { key: '值班日期', title: '值班日期' },
-  { key: '天气', title: '天气' },
-  { key: '雨量', title: '雨量' },
-  { key: '带班领导', title: '带班领导' },
-  { key: '白班值班人员', title: '白班值班人员' },
-  { key: '晚班值班人员', title: '晚班值班人员' },
-  { key: '日志内容', title: '日志内容' },
-  { key: '日志填写时间', title: '日志填写时间' },
-  { key: '日志状态', title: '日志状态' },
-  { key: '操作', title: '操作', width: '180px' }
+  { key: 'dutyLogId', title: 'ID', width: '80px' },
+  { key: 'dutyDate', title: '值班日期', width: '120px' },
+  { key: 'weather', title: '天气', width: '100px' },
+  { key: 'rainfall', title: '雨量', width: '100px' },
+  { key: 'leader', title: '带班领导', width: '100px' },
+  { key: 'dayShiftPerson', title: '白班值班人员', width: '120px' },
+  { key: 'nightShiftPerson', title: '晚班值班人员', width: '120px' },
+  { key: 'logContent', title: '日志内容', width: '200px' },
+  { key: 'fillTime', title: '填写时间', width: '150px' },
+  { key: 'logStatus', title: '状态', width: '80px' },
+  { key: 'actions', title: '操作', width: '160px' }
 ]
 </script>

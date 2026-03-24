@@ -3,7 +3,6 @@ package com.jzsk.backendv2.pojo.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
 @Data
@@ -14,8 +13,7 @@ public class BasePageQueryDTO {
     @Min(value = 1L, message = "页码必须大于等于1")
     private long page = 1L;
 
-    @Schema(description = "每页大小", example = "20")
+    @Schema(description = "每页大小（实际上限由各服务定义，建议不超过100）", example = "20")
     @Min(value = 1L, message = "每页大小必须大于等于1")
-    @Max(value = 200L, message = "每页大小不能超过200")
     private long size = 10L;
 }

@@ -44,7 +44,7 @@ public class DutyLogVO {
     @Schema(description = "日志内容", example = "一切正常，无异常情况。")
     private String logContent;
 
-    @Schema(description = "日志填写时间", example = "2025-05-25 15:55:39")
+    @Schema(description = "日志填写时间", example = "2025-06-01 08:00:00")
     private LocalDateTime fillTime;
 
     @Schema(description = "日志状态", example = "已填写")

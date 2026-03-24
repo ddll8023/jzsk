@@ -52,7 +52,7 @@
     <delete id="deleteByIds">
         DELETE FROM duty_log
         WHERE 值班日志ID IN
-        <foreach collection="list" item="id" open="(" separator="," close=")">
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
             #{id}
         </foreach>
     </delete>
@@ -69,11 +69,11 @@
         SELECT <include refid="Base_Column_List"/>
         FROM duty_log
         <where>
-            <if test="startDate != null and startDate != ''">
-                AND 值班日期 &gt;= #{startDate}
+            <if test="query.startDate != null">
+                AND 值班日期 &gt;= #{query.startDate}
             </if>
-            <if test="endDate != null and endDate != ''">
-                AND 值班日期 &lt;= #{endDate}
+            <if test="query.endDate != null">
+                AND 值班日期 &lt;= #{query.endDate}
             </if>
         </where>
         ORDER BY 值班日期 DESC
@@ -84,11 +84,11 @@
     <select id="countPage" resultType="long">
         SELECT COUNT(*) FROM duty_log
         <where>
-            <if test="startDate != null and startDate != ''">
-                AND 值班日期 &gt;= #{startDate}
+            <if test="query.startDate != null">
+                AND 值班日期 &gt;= #{query.startDate}
             </if>
-            <if test="endDate != null and endDate != ''">
-                AND 值班日期 &lt;= #{endDate}
+            <if test="query.endDate != null">
+                AND 值班日期 &lt;= #{query.endDate}
             </if>
         </where>
     </select>
