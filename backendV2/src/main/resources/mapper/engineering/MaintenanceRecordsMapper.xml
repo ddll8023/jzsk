@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzsk.backendv2.mapper.engineering.MaintenanceRecordsMapper">
+
+    <!-- 基础结果映射 -->
+    <resultMap id="BaseResultMap" type="com.jzsk.backendv2.pojo.entity.engineering.MaintenanceRecordsEntity">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <result column="note" property="note"/>
+        <result column="responsible_person" property="responsiblePerson"/>
+        <result column="phone" property="phone"/>
+        <result column="start_time" property="startTime"/>
+        <result column="over_time" property="overTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <!-- 通用查询列 -->
+    <sql id="BaseColumns">
+        id, name, code, note, responsible_person, phone, start_time, over_time, create_time, update_time
+    </sql>
+
+    <!-- 动态查询条件 -->
+    <sql id="WhereClause">
+        <where>
+            <if test="query != null">
+                <if test="query.name != null and query.name != ''">
+                    AND name LIKE CONCAT('%', #{query.name}, '%')
+                </if>
+                <if test="query.startTime != null">
+                    AND start_time &gt;= #{query.startTime}
+                </if>
+                <if test="query.endTime != null">
+                    AND start_time &lt;= #{query.endTime}
+                </if>
+            </if>
+        </where>
+    </sql>
+
+    <!-- 分页查询 -->
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM maintence_record
+        <include refid="WhereClause"/>
+        ORDER BY start_time DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <!-- 统计总数 -->
+    <select id="countPage" resultType="long">
+        SELECT COUNT(*)
+        FROM maintence_record
+        <include refid="WhereClause"/>
+    </select>
+
+    <!-- 根据ID查询 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM maintence_record
+        WHERE id = #{id}
+    </select>
+
+    <!-- 新增 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO maintence_record (
+            name, code, note, responsible_person, phone, start_time, over_time,
+            create_time, update_time
+        ) VALUES (
+            #{name}, #{code}, #{note}, #{responsiblePerson}, #{phone}, #{startTime}, #{overTime},
+            NOW(), NOW()
+        )
+    </insert>
+
+    <!-- 更新 -->
+    <update id="update">
+        UPDATE maintence_record
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="code != null">code = #{code},</if>
+            <if test="note != null">note = #{note},</if>
+            <if test="responsiblePerson != null">responsible_person = #{responsiblePerson},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="overTime != null">over_time = #{overTime},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据ID删除（物理删除） -->
+    <delete id="deleteById">
+        DELETE FROM maintence_record WHERE id = #{id}
+    </delete>
+
+    <!-- 查询全部用于导出 -->
+    <select id="selectAllForExport" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM maintence_record
+        ORDER BY start_time DESC
+    </select>
+
+</mapper>
