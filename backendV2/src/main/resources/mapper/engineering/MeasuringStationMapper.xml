@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzsk.backendv2.mapper.engineering.MeasuringStationMapper">
+
+    <resultMap id="BaseResultMap" type="com.jzsk.backendv2.pojo.entity.engineering.MeasuringStationEntity">
+        <id column="id" property="id"/>
+        <result column="code" property="code"/>
+        <result column="name" property="name"/>
+        <result column="water_name" property="waterName"/>
+        <result column="river_name" property="riverName"/>
+        <result column="monitor_code" property="monitorCode"/>
+        <result column="address_code" property="addressCode"/>
+        <result column="establish_date" property="establishDate"/>
+        <result column="longitude" property="longitude"/>
+        <result column="latitude" property="latitude"/>
+        <result column="note" property="note"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, code, name, water_name, river_name, monitor_code, address_code,
+        establish_date, longitude, latitude, note, create_time, update_time
+    </sql>
+
+    <sql id="WhereClause">
+        <where>
+            <if test="query != null">
+                <if test="query.name != null and query.name != ''">
+                    AND name LIKE CONCAT('%', #{query.name}, '%')
+                </if>
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM measuring_station
+        <include refid="WhereClause"/>
+        ORDER BY id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countPage" resultType="long">
+        SELECT COUNT(*)
+        FROM measuring_station
+        <include refid="WhereClause"/>
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM measuring_station
+        WHERE id = #{id}
+    </select>
+
+    <select id="countByCode" resultType="int">
+        SELECT COUNT(*)
+        FROM measuring_station
+        WHERE code = #{code}
+        <if test="excludeId != null">
+            AND id != #{excludeId}
+        </if>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO measuring_station (
+            code, name, water_name, river_name, monitor_code, address_code,
+            establish_date, longitude, latitude, note, create_time, update_time,
+            point
+        ) VALUES (
+            #{code}, #{name}, #{waterName}, #{riverName}, #{monitorCode}, #{addressCode},
+            #{establishDate}, #{longitude}, #{latitude}, #{note}, NOW(), NOW(),
+            ST_GeomFromText(CONCAT('POINT(', #{latitude}, ' ', #{longitude}, ')'))
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE measuring_station
+        <set>
+            <if test="code != null">code = #{code},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="waterName != null">water_name = #{waterName},</if>
+            <if test="riverName != null">river_name = #{riverName},</if>
+            <if test="monitorCode != null">monitor_code = #{monitorCode},</if>
+            <if test="addressCode != null">address_code = #{addressCode},</if>
+            <if test="establishDate != null">establish_date = #{establishDate},</if>
+            <if test="longitude != null">longitude = #{longitude},</if>
+            <if test="latitude != null">latitude = #{latitude},</if>
+            <if test="note != null">note = #{note},</if>
+            update_time = NOW(),
+            <if test="longitude != null and latitude != null">
+                point = ST_GeomFromText(CONCAT('POINT(', #{latitude}, ' ', #{longitude}, ')')),
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除监测站点：物理删除 -->
+    <delete id="deleteById">
+        DELETE FROM measuring_station WHERE id = #{id}
+    </delete>
+
+    <!-- 查询站点名称（用于下拉选择） -->
+    <select id="selectNames" resultMap="BaseResultMap">
+        SELECT id, name
+        FROM measuring_station
+        ORDER BY name ASC
+    </select>
+
+</mapper>

@@ -1,6 +1,5 @@
 package com.jzsk.backendv2.service.impl.warning;
 
-import com.baomidou.dynamic.datasource.annotation.DS;
 import com.jzsk.backendv2.exception.BusinessException;
 import com.jzsk.backendv2.exception.ErrorCode;
 import com.jzsk.backendv2.mapper.warning.WarningIndicatorMapper;
@@ -34,11 +33,11 @@ import java.util.stream.Collectors;
 /**
  * 预警指标服务实现类
  * 职责：提供预警指标CRUD业务逻辑
+ * 注意：数据源已在 WarningIndicatorMapper 层通过 @DS("yjxx") 指定
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@DS("yjxx")
 public class WarningIndicatorServiceImpl implements WarningIndicatorService {
 
     private final WarningIndicatorMapper warningIndicatorMapper;

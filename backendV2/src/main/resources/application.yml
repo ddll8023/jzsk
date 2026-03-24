@@ -49,6 +49,7 @@ jzsk:
         - /swagger-ui/index.html
         - /v3/api-docs/**
         - /webjars/**
+        - /external-data/**
     task:
       warning-enabled: true
       sync-enabled: false

@@ -76,8 +76,9 @@ export function useMonitorSite() {
     try {
       const res = await getMonitorSiteList(query)
       if (res.data.code === 200) {
-        siteList.value = res.data.data.records || []
-        total.value = res.data.data.total || 0
+        const resData = res.data.data
+        siteList.value = resData.list || resData.records || []
+        total.value = resData.total || 0
       } else {
         throw new Error(res.data.message || '获取数据失败')
       }
