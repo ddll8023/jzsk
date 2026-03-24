@@ -1,5 +1,6 @@
 package com.jzsk.backendv2;
 
+import com.jzsk.backendv2.config.AliOSSProperties;
 import com.jzsk.backendv2.config.CorsProperties;
 import com.jzsk.backendv2.config.LoggingProperties;
 import com.jzsk.backendv2.config.SecurityProperties;
@@ -15,7 +16,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
         TaskProperties.class,
         LoggingProperties.class,
         SecurityProperties.class,
-        CorsProperties.class
+        CorsProperties.class,
+        AliOSSProperties.class
 })
 public class BackendV2Application {
 

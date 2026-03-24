@@ -2,6 +2,7 @@ package com.jzsk.backendv2.pojo.dto.system.user;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.Size;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
  * 用途：更新用户信息的请求参数
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 @Schema(name = "用户更新请求", description = "更新用户信息的请求参数")
 public class UserUpdateDTO extends UserBaseDTO {
 

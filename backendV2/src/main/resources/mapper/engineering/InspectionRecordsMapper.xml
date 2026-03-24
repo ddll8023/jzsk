@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzsk.backendv2.mapper.engineering.InspectionRecordsMapper">
+
+    <resultMap id="BaseResultMap" type="com.jzsk.backendv2.pojo.entity.engineering.InspectionRecordsEntity">
+        <id column="id" property="id"/>
+        <result column="project" property="project"/>
+        <result column="longitude" property="longitude"/>
+        <result column="latitude" property="latitude"/>
+        <result column="type" property="type"/>
+        <result column="abnormal" property="abnormal"/>
+        <result column="situation" property="situation"/>
+        <result column="solve" property="solve"/>
+        <result column="image" property="image"/>
+        <result column="person" property="person"/>
+        <result column="date" property="date"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, project, longitude, latitude, type, abnormal, situation, solve, image, person, date, create_time, update_time
+    </sql>
+
+    <sql id="WhereClause">
+        <where>
+            <if test="query != null">
+                <if test="query.project != null and query.project != ''">
+                    AND project LIKE CONCAT('%', #{query.project}, '%')
+                </if>
+                <if test="query.abnormal != null and query.abnormal != ''">
+                    AND abnormal LIKE CONCAT('%', #{query.abnormal}, '%')
+                </if>
+                <if test="query.person != null and query.person != ''">
+                    AND person LIKE CONCAT('%', #{query.person}, '%')
+                </if>
+                <if test="query.solve != null and query.solve != ''">
+                    AND solve = #{query.solve}
+                </if>
+                <if test="query.startTime != null and query.startTime != ''">
+                    AND date &gt;= #{query.startTime}
+                </if>
+                <if test="query.endTime != null and query.endTime != ''">
+                    AND date &lt;= #{query.endTime}
+                </if>
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM inspection_records
+        <include refid="WhereClause"/>
+        ORDER BY date DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countPage" resultType="long">
+        SELECT COUNT(*)
+        FROM inspection_records
+        <include refid="WhereClause"/>
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM inspection_records
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO inspection_records (
+            project, longitude, latitude, type, abnormal, situation, solve, image, person, date,
+            create_time, update_time, point
+        ) VALUES (
+            #{project}, #{longitude}, #{latitude}, #{type}, #{abnormal}, #{situation},
+            #{solve}, #{image}, #{person}, #{date}, NOW(), NOW(),
+            ST_GeomFromText(CONCAT('Point(', #{longitude}, ' ', #{latitude}, ')'))
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE inspection_records
+        <set>
+            <if test="project != null">project = #{project},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="abnormal != null">abnormal = #{abnormal},</if>
+            <if test="situation != null">situation = #{situation},</if>
+            <if test="solve != null">solve = #{solve},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="person != null">person = #{person},</if>
+            <if test="date != null">date = #{date},</if>
+            update_time = NOW(),
+            <if test="longitude != null and latitude != null">
+                longitude = #{longitude},
+                latitude = #{latitude},
+                point = ST_GeomFromText(CONCAT('Point(', #{longitude}, ' ', #{latitude}, ')')),
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM inspection_records WHERE id = #{id}
+    </delete>
+
+    <select id="selectAllForExport" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM inspection_records
+        ORDER BY date DESC
+    </select>
+
+</mapper>

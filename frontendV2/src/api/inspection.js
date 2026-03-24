@@ -50,16 +50,6 @@ export function updateInspection(data) {
 export function deleteInspection(id) {
   return request.post('/api/inspection-records/delete', buildIdPayload(id))
 }
-
-/**
- * 处理巡检记录
- * @param {Object} data - 处理数据
- * @returns {Promise}
- */
-export function solveInspection(data) {
-  return request.post('/api/inspection-records/solve', data)
-}
-
 /**
  * 导出Excel
  * @returns {Promise}
