@@ -186,6 +186,22 @@ public class WarningIndicatorServiceImpl implements WarningIndicatorService {
         log.info("预警指标删除成功，id={}", id);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<WarningIndicatorEntity> listAll() {
+        log.info("查询所有预警指标");
+        return warningIndicatorMapper.selectAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public WarningIndicatorEntity getByPositionAndType(String position, String type) {
+        if (!StringUtils.hasText(position) || !StringUtils.hasText(type)) {
+            return null;
+        }
+        return warningIndicatorMapper.selectByPositionAndType(position.trim(), type.trim());
+    }
+
     private void validateBinding(String position, String type) {
         LinkedHashMap<String, PositionBindingAccumulator> bindingMap = buildPositionBindingMap();
         PositionBindingAccumulator accumulator = bindingMap.get(position);

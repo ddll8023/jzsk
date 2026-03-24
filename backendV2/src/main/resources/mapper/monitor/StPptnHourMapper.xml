@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzsk.backendv2.mapper.monitor.StPptnHourMapper">
+
+    <resultMap id="BaseResultMap" type="com.jzsk.backendv2.pojo.entity.monitor.StPptnHourEntity">
+        <id column="STCD" property="stcd"/>
+        <result column="TM" property="tm"/>
+        <result column="DRP" property="drp"/>
+        <result column="INTV" property="intv"/>
+        <result column="PDR" property="pdr"/>
+        <result column="DYP" property="dyp"/>
+        <result column="WTH" property="wth"/>
+    </resultMap>
+
+    <select id="selectLatestByStcd" resultMap="BaseResultMap">
+        SELECT TOP 1 STCD, TM, DRP, INTV, PDR, DYP, WTH
+        FROM ST_PPTN_HOUR
+        WHERE STCD = #{stcd}
+        ORDER BY TM DESC
+    </select>
+
+</mapper>

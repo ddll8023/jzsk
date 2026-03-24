@@ -122,4 +122,18 @@
         DELETE FROM warning_information WHERE id = #{id}
     </delete>
 
+    <!-- ===== 去重查询 ===== -->
+
+    <select id="selectUnresolvedByPositionAndType"
+            resultType="com.jzsk.backendv2.pojo.entity.warning.WarningInformationEntity">
+        SELECT id, position, project, content, type, level, status,
+               longitude, latitude, start_time, over_time, stay_time,
+               point, create_time, update_time
+        FROM warning_information
+        WHERE position = #{position}
+          AND type = #{type}
+          AND status = #{status}
+        LIMIT 1
+    </select>
+
 </mapper>

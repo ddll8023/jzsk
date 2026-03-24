@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzsk.backendv2.mapper.mcu.DataNewMapper">
+
+    <resultMap id="BaseResultMap" type="com.jzsk.backendv2.pojo.entity.mcu.DataNewEntity">
+        <id column="id" property="id"/>
+        <result column="time" property="time"/>
+        <result column="point_id" property="pointId"/>
+        <result column="original_data" property="originalData"/>
+        <result column="type" property="type"/>
+        <result column="indexes" property="indexes"/>
+        <result column="project_id" property="projectId"/>
+        <result column="alarm_sign" property="alarmSign"/>
+        <result column="result_data" property="resultData"/>
+        <result column="param_data" property="paramData"/>
+        <result column="state" property="state"/>
+        <result column="alarm_detail" property="alarmDetail"/>
+        <result column="confirm" property="confirm"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <select id="selectLatestForAllPoints" resultMap="BaseResultMap">
+        SELECT DISTINCT ON (point_id)
+            id, time, point_id, original_data, type, indexes,
+            project_id, alarm_sign, result_data, param_data,
+            state, alarm_detail, confirm, create_time
+        FROM data_new
+        ORDER BY point_id, time DESC
+    </select>
+
+    <select id="selectLatestByPointId" resultMap="BaseResultMap">
+        SELECT DISTINCT ON (point_id)
+            id, time, point_id, original_data, type, indexes,
+            project_id, alarm_sign, result_data, param_data,
+            state, alarm_detail, confirm, create_time
+        FROM data_new
+        WHERE point_id = #{pointId}
+        ORDER BY point_id, time DESC
+    </select>
+
+</mapper>

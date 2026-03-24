@@ -50,9 +50,12 @@ jzsk:
         - /v3/api-docs/**
         - /webjars/**
     task:
-      warning-enabled: false
+      warning-enabled: true
       sync-enabled: false
-      task-switches: {}
+      task-switches:
+        warning.water-level-rainfall-check: true
+        warning.gnss-check: true
+        warning.mcu-check: true
       zone: Asia/Shanghai
       pool-size: 4
       thread-name-prefix: jzsk-task-

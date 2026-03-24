@@ -15,7 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -97,6 +96,18 @@ public class WarningServiceImpl implements WarningService {
         }
         warningMapper.deleteById(id);
         log.info("预警信息删除成功，id={}", id);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public WarningInformationEntity create(WarningInformationEntity entity) {
+        if (entity == null) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST, "预警信息不能为空");
+        }
+        warningMapper.insert(entity);
+        log.info("预警信息创建成功，id={}, position={}, type={}, level={}",
+                entity.getId(), entity.getPosition(), entity.getType(), entity.getLevel());
+        return entity;
     }
 
     /**

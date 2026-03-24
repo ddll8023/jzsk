@@ -3,6 +3,7 @@ package com.jzsk.backendv2.service.warning;
 import com.jzsk.backendv2.pojo.dto.warning.WarningIndicatorCreateDTO;
 import com.jzsk.backendv2.pojo.dto.warning.WarningIndicatorPageQueryDTO;
 import com.jzsk.backendv2.pojo.dto.warning.WarningIndicatorUpdateDTO;
+import com.jzsk.backendv2.pojo.entity.warning.WarningIndicatorEntity;
 import com.jzsk.backendv2.pojo.vo.PageResultVO;
 import com.jzsk.backendv2.pojo.vo.warning.WarningIndicatorOptionsVO;
 import com.jzsk.backendv2.pojo.vo.warning.WarningIndicatorVO;
@@ -67,4 +68,20 @@ public interface WarningIndicatorService {
      * @param id 预警指标ID
      */
     void delete(Long id);
+
+    /**
+     * 查询所有预警指标（用于自动预警任务）
+     *
+     * @return 预警指标列表
+     */
+    List<WarningIndicatorEntity> listAll();
+
+    /**
+     * 根据测点和监测类型查询预警指标
+     *
+     * @param position 测点名称
+     * @param type     监测类型
+     * @return 预警指标，若不存在则返回null
+     */
+    WarningIndicatorEntity getByPositionAndType(String position, String type);
 }

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzsk.backendv2.mapper.monitor.StRiversRMapper">
+
+    <resultMap id="BaseResultMap" type="com.jzsk.backendv2.pojo.entity.monitor.StRiversREntity">
+        <id column="STCD" property="stcd"/>
+        <result column="TM" property="tm"/>
+        <result column="Z1" property="z1"/>
+        <result column="Q1" property="q1"/>
+    </resultMap>
+
+    <select id="selectLatestByStcd" resultMap="BaseResultMap">
+        SELECT TOP 1 STCD, TM, Z1, Q1
+        FROM ST_RIVER_R
+        WHERE STCD = #{stcd}
+        ORDER BY TM DESC
+    </select>
+
+</mapper>

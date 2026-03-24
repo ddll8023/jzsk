@@ -67,4 +67,16 @@ public interface WarningMapper {
      * @return 影响行数
      */
     int deleteById(@Param("id") Long id);
+
+    /**
+     * 查询指定位置和类型、且状态为未解除的预警记录（用于自动预警去重）
+     *
+     * @param position 监测位置
+     * @param type     监测类型
+     * @param status   预警状态
+     * @return 符合条件的预警记录，未找到则返回null
+     */
+    WarningInformationEntity selectUnresolvedByPositionAndType(@Param("position") String position,
+                                                               @Param("type") String type,
+                                                               @Param("status") String status);
 }

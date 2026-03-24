@@ -2,9 +2,9 @@ package com.jzsk.backendv2.service.warning;
 
 import com.jzsk.backendv2.pojo.dto.warning.WarningPageQueryDTO;
 import com.jzsk.backendv2.pojo.dto.warning.WarningUpdateDTO;
+import com.jzsk.backendv2.pojo.entity.warning.WarningInformationEntity;
 import com.jzsk.backendv2.pojo.vo.PageResultVO;
 import com.jzsk.backendv2.pojo.vo.warning.WarningVO;
-import io.swagger.v3.oas.annotations.Operation;
 
 /**
  * 预警信息服务接口
@@ -18,7 +18,6 @@ public interface WarningService {
      * @param queryDTO 查询条件
      * @return 分页结果
      */
-    @Operation(summary = "分页查询预警信息", description = "支持按地点、状态、等级、类型、时间范围筛选，支持分页")
     PageResultVO<WarningVO> page(WarningPageQueryDTO queryDTO);
 
     /**
@@ -27,7 +26,6 @@ public interface WarningService {
      * @param dto 更新请求
      * @return 更新后的预警信息
      */
-    @Operation(summary = "更新预警信息", description = "更新预警信息，用于解除预警等操作，若传入overTime则自动计算stayTime")
     WarningVO update(WarningUpdateDTO dto);
 
     /**
@@ -35,6 +33,13 @@ public interface WarningService {
      *
      * @param id 预警信息ID
      */
-    @Operation(summary = "删除预警信息", description = "根据ID物理删除预警信息，删除后不可恢复")
     void delete(Long id);
+
+    /**
+     * 创建预警信息（用于自动预警任务落库）
+     *
+     * @param entity 预警信息实体
+     * @return 生成ID后的预警信息实体
+     */
+    WarningInformationEntity create(WarningInformationEntity entity);
 }

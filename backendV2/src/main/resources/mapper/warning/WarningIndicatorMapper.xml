@@ -64,6 +64,22 @@
         </if>
     </select>
 
+    <select id="selectAll" resultType="com.jzsk.backendv2.pojo.entity.warning.WarningIndicatorEntity">
+        SELECT id, position, type, up_up_limit, up_limit, low_limit, lower_limit,
+               unit, longitude, latitude, create_time, update_time
+        FROM warning_indicator_setting
+        ORDER BY id ASC
+    </select>
+
+    <select id="selectByPositionAndType" resultType="com.jzsk.backendv2.pojo.entity.warning.WarningIndicatorEntity">
+        SELECT id, position, type, up_up_limit, up_limit, low_limit, lower_limit,
+               unit, longitude, latitude, create_time, update_time
+        FROM warning_indicator_setting
+        WHERE position = #{position}
+          AND type = #{type}
+        LIMIT 1
+    </select>
+
     <!-- ===== 新增 ===== -->
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">

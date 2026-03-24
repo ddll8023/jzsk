@@ -93,4 +93,21 @@ public interface WarningIndicatorMapper {
      * @return 类型列表
      */
     List<String> selectAllTypes();
+
+    /**
+     * 查询所有预警指标（用于自动预警任务）
+     *
+     * @return 预警指标列表
+     */
+    List<WarningIndicatorEntity> selectAll();
+
+    /**
+     * 根据测点和监测类型查询预警指标
+     *
+     * @param position 测点名称
+     * @param type     监测类型
+     * @return 预警指标
+     */
+    WarningIndicatorEntity selectByPositionAndType(@Param("position") String position,
+                                                  @Param("type") String type);
 }
