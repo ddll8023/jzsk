@@ -47,7 +47,12 @@
               <button
                 v-for="shortcut in dateShortcuts"
                 :key="shortcut.label"
-                class="px-3 py-1.5 text-xs font-medium rounded-md border transition-all duration-200 active:scale-95 bg-gray-50 border-gray-200 text-gray-600 hover:bg-white hover:text-primary-600 hover:border-primary-200 hover:shadow-sm"
+                :class="[
+                  'px-3 py-1.5 text-xs font-medium rounded-md border transition-all duration-200 active:scale-95',
+                  activeShortcut === shortcut.label
+                    ? 'bg-primary-50 text-primary-700 shadow-md border-primary-500 ring-2 ring-primary-500/20'
+                    : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-white hover:text-primary-600 hover:border-primary-300 hover:shadow-sm'
+                ]"
                 @click="applyShortcut(shortcut)"
               >
                 {{ shortcut.label }}
@@ -154,6 +159,7 @@ const error = ref(null)
 const startDate = ref('')
 const endDate = ref('')
 const dateShortcuts = getDateShortcuts()
+const activeShortcut = ref('') // 当前选中的快速选择按钮
 const chartRef = ref(null)
 let chartInstance = null
 const currentPage = ref(1)
@@ -219,6 +225,7 @@ const initDateRange = () => {
 
 /** 应用快捷日期选项 */
 const applyShortcut = (shortcut) => {
+  activeShortcut.value = shortcut.label
   const [start, end] = shortcut.value()
   startDate.value = formatDate(start, 'datetime').replace(' ', 'T').slice(0, 16)
   endDate.value = formatDate(end, 'datetime').replace(' ', 'T').slice(0, 16)
@@ -238,7 +245,7 @@ const loadData = async () => {
 
     while (accumulated.length < expectedPoints && (currentFetchPage - 1) * fetchSize < total) {
       const res = await getWaterLevelPage({ page: currentFetchPage, size: fetchSize })
-      const pageData = res.data || {}
+      const pageData = res.data.data || {}
       const records = pageData.records || []
       total = Number(pageData.total || 0)
 

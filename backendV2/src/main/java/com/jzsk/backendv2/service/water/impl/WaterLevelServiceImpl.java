@@ -18,8 +18,8 @@ import java.util.stream.Collectors;
 /**
  * 水位服务实现类
  * 职责: 提供水位数据的查询功能
- * 遵循KISS原则: 方法简洁，职责单一
- * 数据源: dbo（SQL Server）- 直接读取实时监测数据
+ * 遵循KISS原则: 方法简洁,职责单一
+ * 数据源: dbo(SQL Server)- 直接读取实时监测数据
  */
 @Slf4j
 @Service
@@ -31,7 +31,7 @@ public class WaterLevelServiceImpl implements WaterLevelService {
 
     @Override
     public PageResultVO<WaterLevelVO> getWaterLevelPage(int page, int size, WaterLevelQueryDTO queryDTO) {
-        log.info("分页查询水位数据，页码: {}, 每页大小: {}, 查询条件: {}", page, size, queryDTO);
+        log.info("分页查询水位数据,页码: {}, 每页大小: {}, 查询条件: {}", page, size, queryDTO);
 
         // 查询总数
         long total = stRiverRMapper.countPage(
@@ -59,13 +59,13 @@ public class WaterLevelServiceImpl implements WaterLevelService {
             .map(this::convertToVO)
             .collect(Collectors.toList());
 
-        log.info("分页查询水位数据成功，总记录数: {}, 当前页记录数: {}", total, voList.size());
+        log.info("分页查询水位数据成功,总记录数: {}, 当前页记录数: {}", total, voList.size());
         return PageUtils.buildPage(voList, total, page, size);
     }
 
     @Override
     public List<WaterLevelVO> getWaterLevelList(WaterLevelQueryDTO queryDTO) {
-        log.info("查询水位数据列表，查询条件: {}", queryDTO);
+        log.info("查询水位数据列表,查询条件: {}", queryDTO);
 
         List<StRiversREntity> entities;
 
@@ -83,7 +83,7 @@ public class WaterLevelServiceImpl implements WaterLevelService {
             .map(this::convertToVO)
             .collect(Collectors.toList());
 
-        log.info("查询水位数据列表成功，返回{}条记录", voList.size());
+        log.info("查询水位数据列表成功,返回{}条记录", voList.size());
         return voList;
     }
 

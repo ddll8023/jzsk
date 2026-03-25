@@ -8,7 +8,9 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 /**
- * 河道水情Mapper
+ * 河道水情Mapper接口
+ * 职责：河道水情表的数据库操作
+ * 遵循KISS原则：只负责数据访问，不包含业务逻辑
  * 数据源：dbo（SQL Server）- 直接读取实时监测数据
  * 遵循纯 MyBatis 风格，不使用 MyBatis-Plus
  */
