@@ -1,6 +1,8 @@
 package com.jzsk.backendv2.pojo.entity.monitor;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -12,6 +14,8 @@ import java.time.LocalDateTime;
  * 用途：水雨情监测雨量数据
  */
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class StPptnHourEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;

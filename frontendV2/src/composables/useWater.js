@@ -6,12 +6,19 @@
 import { ref, computed } from 'vue'
 
 /**
- * 解析时间数组为 Date 对象
- * 后端返回格式：[year, month, day, hour, minute, second?]
- * @param {Array} timeArr - 时间数组
+ * 解析时间数组或字符串为 Date 对象
+ * 后端返回格式：[year, month, day, hour, minute, second?] 或 ISO字符串
+ * @param {Array|string} timeArr - 时间数组或时间字符串
  * @returns {Date} Date 对象
  */
 export function parseTimeArray(timeArr) {
+  // 支持字符串格式（ISO-8601 格式，如 "2026-03-26 00:00:00"）
+  if (typeof timeArr === 'string') {
+    const date = new Date(timeArr)
+    return isNaN(date.getTime()) ? new Date(0) : date
+  }
+
+  // 支持数组格式 [year, month, day, hour, minute, second?]
   if (!Array.isArray(timeArr) || timeArr.length < 5) {
     return new Date(0)
   }
@@ -20,12 +27,34 @@ export function parseTimeArray(timeArr) {
 }
 
 /**
- * 格式化时间数组为字符串
- * @param {Array} timeArr - 时间数组
+ * 格式化时间数组或字符串为字符串
+ * @param {Array|string} timeArr - 时间数组或时间字符串
  * @param {string} format - 格式类型：'datetime' | 'date' | 'time'
  * @returns {string} 格式化后的时间字符串
  */
 export function formatTimeArray(timeArr, format = 'datetime') {
+  // 支持字符串格式（ISO-8601 格式，如 "2026-03-26 00:00:00"）
+  if (typeof timeArr === 'string') {
+    const date = new Date(timeArr)
+    if (isNaN(date.getTime())) {
+      return ''
+    }
+    const pad = (n) => String(n).padStart(2, '0')
+    const year = date.getFullYear()
+    const month = pad(date.getMonth() + 1)
+    const day = pad(date.getDate())
+    const hour = pad(date.getHours())
+    const minute = pad(date.getMinutes())
+
+    const dateStr = `${year}-${month}-${day}`
+    const timeStr = `${hour}:${minute}`
+
+    if (format === 'date') return dateStr
+    if (format === 'time') return timeStr
+    return `${dateStr} ${timeStr}`
+  }
+
+  // 支持数组格式 [year, month, day, hour?, minute?]
   if (!Array.isArray(timeArr) || timeArr.length < 3) {
     return ''
   }

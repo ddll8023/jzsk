@@ -16,4 +16,47 @@
         ORDER BY TM DESC
     </select>
 
+    <!-- 统计水位数据总数（SQL Server语法） -->
+    <select id="countPage" resultType="long">
+        SELECT COUNT(*)
+        FROM ST_RIVER_R
+        <where>
+            <if test="stcd != null and stcd != ''">
+                AND STCD = #{stcd}
+            </if>
+        </where>
+    </select>
+
+    <!-- 查询所有水位数据（SQL Server语法） -->
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT STCD, TM, Z1, Q1
+        FROM ST_RIVER_R
+        ORDER BY TM DESC
+    </select>
+
+    <!-- 根据测站编码查询水位数据（SQL Server语法） -->
+    <select id="selectByStcd" resultMap="BaseResultMap">
+        SELECT STCD, TM, Z1, Q1
+        FROM ST_RIVER_R
+        <where>
+            <if test="stcd != null and stcd != ''">
+                AND STCD = #{stcd}
+            </if>
+        </where>
+        ORDER BY TM DESC
+    </select>
+
+    <!-- 分页查询水位数据（SQL Server语法） -->
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT STCD, TM, Z1, Q1
+        FROM ST_RIVER_R
+        <where>
+            <if test="stcd != null and stcd != ''">
+                AND STCD = #{stcd}
+            </if>
+        </where>
+        ORDER BY TM DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+    </select>
+
 </mapper>
