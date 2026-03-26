@@ -13,4 +13,25 @@
         WHERE id = #{id}
     </select>
 
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT id, name
+        FROM sensor_point
+        ORDER BY id
+    </select>
+
+    <select id="selectByName" resultMap="BaseResultMap">
+        SELECT id, name
+        FROM sensor_point
+        WHERE name = #{name}
+    </select>
+
+    <select id="selectNameByIds" resultMap="BaseResultMap">
+        SELECT id, name
+        FROM sensor_point
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
 </mapper>

@@ -63,7 +63,7 @@ function getPointName(pointId) {
       </template>
 
       <template #pointId="{ row }">
-        {{ getPointName(row.pointId) }}
+        {{ getPointName(row.pointName) }}
       </template>
 
       <template #waterElevation="{ row }">

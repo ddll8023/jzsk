@@ -57,7 +57,7 @@
  * 功能：渗流量统计查询 + 浸润线观测图
  * 依赖组件：SeepageQueryPanel, SeepageChart, SeepageTable, PhreaticLineChart
  */
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useSeepage } from '@/composables/useSeepage'
 import SeepageQueryPanel from '@/components/business/dam/SeepageQueryPanel.vue'
 import SeepageChart from '@/components/business/dam/SeepageChart.vue'
@@ -90,6 +90,8 @@ const {
   fetchChartData,
   onSearch,
   onPageChange,
+  cleanup,
+  resetActive,
   formatMinute,
   parseJsonField
 } = useSeepage()
@@ -122,7 +124,7 @@ function exportData() {
   const headers = ['采集时间', '测站名称', '水位高程', '水位(mm)', '温度(°C)', '水压']
   const rows = tableData.value.map(item => [
     formatMinute(item.time),
-    item.pointId,
+    item.pointName,
     parseJsonField(item.resultData, '水位高程'),
     parseJsonField(item.resultData, '水位'),
     parseJsonField(item.originalData, '温度'),
@@ -143,8 +145,14 @@ function exportData() {
 
 // 初始化
 onMounted(async () => {
+  resetActive()
   setQuickDateRange('24h')
   await fetchPoints()
   fetchTableData()
+})
+
+// 组件卸载时清理，防止异步请求返回后更新已销毁组件
+onUnmounted(() => {
+  cleanup()
 })
 </script>

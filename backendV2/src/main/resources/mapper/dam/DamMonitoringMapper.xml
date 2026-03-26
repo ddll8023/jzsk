@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzsk.backendv2.mapper.dam.DamMonitoringMapper">
+
+	<!-- ==================== wr_mp_fl_r 渗流量数据 ==================== -->
+
+	<resultMap id="WrMpFlRResultMap" type="com.jzsk.backendv2.pojo.entity.dam.WrMpFlREntity">
+		<result column="MP_CD" property="mpCd"/>
+		<result column="TM" property="tm"/>
+		<result column="MP_FL" property="mpFl"/>
+		<result column="FL_COND" property="flCond"/>
+	</resultMap>
+
+	<!-- 统计渗流量数据总数 -->
+	<select id="countSeepageFlowPage" resultType="long">
+		SELECT COUNT(*)
+		FROM wr_mp_fl_r
+		<where>
+			<if test="mpCd != null and mpCd != ''">
+				AND MP_CD = #{mpCd}
+			</if>
+			<if test="startTime != null and startTime != ''">
+				AND TM &gt;= #{startTime}
+			</if>
+			<if test="endTime != null and endTime != ''">
+				AND TM &lt;= #{endTime}
+			</if>
+		</where>
+	</select>
+
+	<!-- 分页查询渗流量数据 -->
+	<select id="selectSeepageFlowPage" resultMap="WrMpFlRResultMap">
+		SELECT MP_CD, TM, MP_FL, FL_COND
+		FROM wr_mp_fl_r
+		<where>
+			<if test="mpCd != null and mpCd != ''">
+				AND MP_CD = #{mpCd}
+			</if>
+			<if test="startTime != null and startTime != ''">
+				AND TM &gt;= #{startTime}
+			</if>
+			<if test="endTime != null and endTime != ''">
+				AND TM &lt;= #{endTime}
+			</if>
+		</where>
+		ORDER BY TM DESC
+		OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+	</select>
+
+	<!-- ==================== data_new MCU传感器数据 ==================== -->
+
+	<resultMap id="DataNewResultMap" type="com.jzsk.backendv2.pojo.entity.dam.DataNewEntity">
+		<id column="id" property="id"/>
+		<result column="time" property="time"/>
+		<result column="point_id" property="pointId"/>
+		<result column="original_data" property="originalData"/>
+		<result column="type" property="type"/>
+		<result column="indexes" property="indexes"/>
+		<result column="project_id" property="projectId"/>
+		<result column="alarm_sign" property="alarmSign"/>
+		<result column="result_data" property="resultData"/>
+		<result column="param_data" property="paramData"/>
+		<result column="state" property="state"/>
+		<result column="alarm_detail" property="alarmDetail"/>
+		<result column="confirm" property="confirm"/>
+		<result column="create_time" property="createTime"/>
+	</resultMap>
+
+	<!-- 查询每个测点最新数据 -->
+	<select id="selectLatestForAllPoints" resultMap="DataNewResultMap">
+		SELECT DISTINCT ON (point_id)
+			   id, time, point_id, original_data, type, indexes, project_id,
+			   alarm_sign, result_data, param_data, state, alarm_detail, confirm, create_time
+		FROM data_new
+		ORDER BY point_id, time DESC
+	</select>
+
+	<!-- 根据测点编号查询最新一条数据 -->
+	<select id="selectLatestByPointId" resultMap="DataNewResultMap">
+		SELECT id, time, point_id, original_data, type, indexes, project_id,
+			   alarm_sign, result_data, param_data, state, alarm_detail, confirm, create_time
+		FROM data_new
+		WHERE point_id = #{pointId}
+		ORDER BY time DESC
+		LIMIT 1
+	</select>
+
+</mapper>

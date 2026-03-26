@@ -34,8 +34,66 @@
             project_id, alarm_sign, result_data, param_data,
             state, alarm_detail, confirm, create_time
         FROM data_new
-        WHERE point_id = #{pointId}
+        WHERE point_id = CAST(#{pointId} AS BIGINT)
         ORDER BY point_id, time DESC
+    </select>
+
+    <!-- 统计渗流数据总数 -->
+    <select id="countPage" resultType="long">
+        SELECT COUNT(*)
+        FROM data_new
+        <where>
+            <if test="pointId != null and pointId != ''">
+                AND point_id = CAST(#{pointId} AS BIGINT)
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND time &gt;= TO_TIMESTAMP(#{startTime}, 'YYYY-MM-DD HH24:MI:SS')
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND time &lt;= TO_TIMESTAMP(#{endTime}, 'YYYY-MM-DD HH24:MI:SS')
+            </if>
+        </where>
+    </select>
+
+    <!-- 按时序查询传感器数据（用于图表展示，升序排列） -->
+    <select id="selectByTimeRange" resultMap="BaseResultMap">
+        SELECT id, time, point_id, original_data, type, indexes,
+               project_id, alarm_sign, result_data, param_data,
+               state, alarm_detail, confirm, create_time
+        FROM data_new
+        <where>
+            <if test="pointId != null and pointId != ''">
+                AND point_id = CAST(#{pointId} AS BIGINT)
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND time &gt;= TO_TIMESTAMP(#{startTime}, 'YYYY-MM-DD HH24:MI:SS')
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND time &lt;= TO_TIMESTAMP(#{endTime}, 'YYYY-MM-DD HH24:MI:SS')
+            </if>
+        </where>
+        ORDER BY time ASC
+    </select>
+
+    <!-- 分页查询渗流数据 -->
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT id, time, point_id, original_data, type, indexes,
+               project_id, alarm_sign, result_data, param_data,
+               state, alarm_detail, confirm, create_time
+        FROM data_new
+        <where>
+            <if test="pointId != null and pointId != ''">
+                AND point_id = CAST(#{pointId} AS BIGINT)
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND time &gt;= TO_TIMESTAMP(#{startTime}, 'YYYY-MM-DD HH24:MI:SS')
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND time &lt;= TO_TIMESTAMP(#{endTime}, 'YYYY-MM-DD HH24:MI:SS')
+            </if>
+        </where>
+        ORDER BY time DESC
+        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
     </select>
 
 </mapper>

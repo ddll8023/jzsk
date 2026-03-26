@@ -146,6 +146,9 @@ export function parseJsonField(data, key) {
  * 渗流数据查询 Composable
  */
 export function useSeepage() {
+  // 活跃状态标志，onMounted重置/onUnmounted清除，防止路由返回后静默失效
+  let isActive = true
+
   // 状态
   const pointList = ref([])
   const loading = ref(false)
@@ -229,8 +232,9 @@ export function useSeepage() {
     try {
       const res = await getPoints()
       console.log('[fetchPoints] API响应:', res)
+      if (!isActive) return
 
-      const raw = Array.isArray(res.data) ? res.data : res.data?.records || []
+      const raw = Array.isArray(res.data) ? res.data : (res.data?.data || res.data?.records || [])
       console.log('[fetchPoints] 原始数据条数:', raw.length)
 
       pointList.value = raw.map(r => {
@@ -277,12 +281,15 @@ export function useSeepage() {
       }
 
       const res = await getSeepagePage(params)
-      tableData.value = res.data?.records || []
-      total.value = res.data?.total || 0
+      if (!isActive) return
+      tableData.value = res.data?.data?.list || res.data?.data?.records || []
+      total.value = res.data?.data?.total || 0
     } catch {
+      if (!isActive) return
       tableData.value = []
       total.value = 0
     } finally {
+      if (!isActive) return
       loading.value = false
     }
   }
@@ -319,12 +326,29 @@ export function useSeepage() {
       }
 
       const res = await apiFn(params)
-      chartData.value = res.data || []
+      if (!isActive) return
+      chartData.value = res.data?.data || []
     } catch {
+      if (!isActive) return
       chartData.value = []
     } finally {
+      if (!isActive) return
       chartLoading.value = false
     }
+  }
+
+  /**
+   * 组件卸载时调用，防止异步更新已销毁组件
+   */
+  function cleanup() {
+    isActive = false
+  }
+
+  /**
+   * 重置活跃状态（组件挂载时调用）
+   */
+  function resetActive() {
+    isActive = true
   }
 
   /**
@@ -363,6 +387,8 @@ export function useSeepage() {
     fetchChartData,
     onSearch,
     onPageChange,
+    cleanup,
+    resetActive,
     // 工具函数
     formatMinute,
     parseBackendTime,
