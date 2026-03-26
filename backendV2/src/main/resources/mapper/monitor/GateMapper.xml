@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzsk.backendv2.mapper.monitor.GateMapper">
+
+    <!-- 东干渠(DGQ)结果映射 -->
+    <resultMap id="DgqResultMap" type="com.jzsk.backendv2.pojo.vo.monitor.GateDataVO">
+        <result column="TM" property="tm"/>
+        <result column="DGQ_M1_IA" property="dgq_M1_Ia"/>
+        <result column="DGQ_M1_IB" property="dgq_M1_Ib"/>
+        <result column="DGQ_M1_IC" property="dgq_M1_Ic"/>
+        <result column="DGQ_M1_UA" property="dgq_M1_Ua"/>
+        <result column="DGQ_M1_UB" property="dgq_M1_Ub"/>
+        <result column="DGQ_M1_UC" property="dgq_M1_Uc"/>
+        <result column="DGQ_M1_UAB" property="dgq_M1_Uab"/>
+        <result column="DGQ_M1_UBC" property="dgq_M1_Ubc"/>
+        <result column="DGQ_M1_UCA" property="dgq_M1_Uca"/>
+        <result column="DGQ_M1_KD" property="dgq_M1_KD"/>
+        <result column="DGQ_M1_KDSD" property="dgq_M1_KDSD"/>
+    </resultMap>
+
+    <!-- 电站蝶阀(DZDF)结果映射 -->
+    <resultMap id="DzdfResultMap" type="com.jzsk.backendv2.pojo.vo.monitor.GateDataVO">
+        <result column="TM" property="tm"/>
+        <result column="DZDF_M1_IA" property="dzdf_M1_Ia"/>
+        <result column="DZDF_M1_IB" property="dzdf_M1_Ib"/>
+        <result column="DZDF_M1_IC" property="dzdf_M1_Ic"/>
+        <result column="DZDF_M1_UA" property="dzdf_M1_Ua"/>
+        <result column="DZDF_M1_UB" property="dzdf_M1_Ub"/>
+        <result column="DZDF_M1_UC" property="dzdf_M1_Uc"/>
+        <result column="DZDF_M1_UAB" property="dzdf_M1_Uab"/>
+        <result column="DZDF_M1_UBC" property="dzdf_M1_Ubc"/>
+        <result column="DZDF_M1_UCA" property="dzdf_M1_Uca"/>
+        <result column="DZDF_M1_YW" property="dzdf_M1_YW"/>
+        <result column="DZDF_M1_FIT" property="dzdf_M1_FIT"/>
+        <result column="DZDF_M1_FIT_TOL" property="dzdf_M1_FIT_TOL"/>
+    </resultMap>
+
+    <!-- 取水塔(QST)结果映射 -->
+    <resultMap id="QstResultMap" type="com.jzsk.backendv2.pojo.vo.monitor.GateDataVO">
+        <result column="TM" property="tm"/>
+        <result column="QST_M1_IA" property="qst_M1_Ia"/>
+        <result column="QST_M1_IB" property="qst_M1_Ib"/>
+        <result column="QST_M1_IC" property="qst_M1_Ic"/>
+        <result column="QST_M1_UA" property="qst_M1_Ua"/>
+        <result column="QST_M1_UB" property="qst_M1_Ub"/>
+        <result column="QST_M1_UC" property="qst_M1_Uc"/>
+        <result column="QST_M1_UAB" property="qst_M1_Uab"/>
+        <result column="QST_M1_KD" property="qst_M1_KD"/>
+        <result column="QST_M1_KDSD" property="qst_M1_KDSD"/>
+        <result column="QST_M2_IA" property="qst_M2_Ia"/>
+        <result column="QST_M2_IB" property="qst_M2_Ib"/>
+        <result column="QST_M2_IC" property="qst_M2_Ic"/>
+        <result column="QST_M2_UA" property="qst_M2_Ua"/>
+        <result column="QST_M2_UB" property="qst_M2_Ub"/>
+        <result column="QST_M2_UC" property="qst_M2_Uc"/>
+        <result column="QST_M2_UAB" property="qst_M2_Uab"/>
+        <result column="QST_M2_KD" property="qst_M2_KD"/>
+        <result column="QST_M2_KDSD" property="qst_M2_KDSD"/>
+    </resultMap>
+
+    <!-- 西干渠(XGQ)结果映射 -->
+    <resultMap id="XgqResultMap" type="com.jzsk.backendv2.pojo.vo.monitor.GateDataVO">
+        <result column="TM" property="tm"/>
+        <result column="XGQ_M1_IA" property="xgq_M1_Ia"/>
+        <result column="XGQ_M1_IB" property="xgq_M1_Ib"/>
+        <result column="XGQ_M1_IC" property="xgq_M1_Ic"/>
+        <result column="XGQ_M1_UA" property="xgq_M1_Ua"/>
+        <result column="XGQ_M1_UB" property="xgq_M1_Ub"/>
+        <result column="XGQ_M1_UC" property="xgq_M1_Uc"/>
+        <result column="XGQ_M1_UAB" property="xgq_M1_Uab"/>
+        <result column="XGQ_M1_UBC" property="xgq_M1_Ubc"/>
+        <result column="XGQ_M1_UCA" property="xgq_M1_Uca"/>
+        <result column="XGQ_M1_KD" property="xgq_M1_KD"/>
+        <result column="XGQ_M1_KDSD" property="xgq_M1_KDSD"/>
+        <result column="XGQ_M2_IA" property="xgq_M2_Ia"/>
+        <result column="XGQ_M2_IB" property="xgq_M2_Ib"/>
+        <result column="XGQ_M2_IC" property="xgq_M2_Ic"/>
+        <result column="XGQ_M2_UA" property="xgq_M2_Ua"/>
+        <result column="XGQ_M2_UB" property="xgq_M2_Ub"/>
+        <result column="XGQ_M2_UC" property="xgq_M2_Uc"/>
+        <result column="XGQ_M2_UAB" property="xgq_M2_Uab"/>
+        <result column="XGQ_M2_KD" property="xgq_M2_KD"/>
+        <result column="XGQ_M2_KDSD" property="xgq_M2_KDSD"/>
+    </resultMap>
+
+    <!-- 溢洪道(YHD)结果映射 -->
+    <resultMap id="YhdResultMap" type="com.jzsk.backendv2.pojo.vo.monitor.GateDataVO">
+        <result column="TM" property="tm"/>
+        <result column="YHD_M1_IA" property="yhd_M1_Ia"/>
+        <result column="YHD_M1_IB" property="yhd_M1_Ib"/>
+        <result column="YHD_M1_IC" property="yhd_M1_Ic"/>
+        <result column="YHD_M1_UA" property="yhd_M1_Ua"/>
+        <result column="YHD_M1_UB" property="yhd_M1_Ub"/>
+        <result column="YHD_M1_UC" property="yhd_M1_Uc"/>
+        <result column="YHD_M1_UAB" property="yhd_M1_Uab"/>
+        <result column="YHD_M1_UBC" property="yhd_M1_Ubc"/>
+        <result column="YHD_M1_UCA" property="yhd_M1_Uca"/>
+        <result column="YHD_M1_KD" property="yhd_M1_KD"/>
+        <result column="YHD_M1_KDSD" property="yhd_M1_KDSD"/>
+        <result column="YHD_M2_IA" property="yhd_M2_Ia"/>
+        <result column="YHD_M2_IB" property="yhd_M2_Ib"/>
+        <result column="YHD_M2_IC" property="yhd_M2_Ic"/>
+        <result column="YHD_M2_UA" property="yhd_M2_Ua"/>
+        <result column="YHD_M2_UB" property="yhd_M2_Ub"/>
+        <result column="YHD_M2_UC" property="yhd_M2_Uc"/>
+        <result column="YHD_M2_UAB" property="yhd_M2_Uab"/>
+        <result column="YHD_M2_UBC" property="yhd_M2_Ubc"/>
+        <result column="YHD_M2_UCA" property="yhd_M2_Uca"/>
+        <result column="YHD_M2_KD" property="yhd_M2_KD"/>
+        <result column="YHD_M2_KDSD" property="yhd_M2_KDSD"/>
+        <result column="YHD_M3_IA" property="yhd_M3_Ia"/>
+        <result column="YHD_M3_IB" property="yhd_M3_Ib"/>
+        <result column="YHD_M3_IC" property="yhd_M3_Ic"/>
+        <result column="YHD_M3_UA" property="yhd_M3_Ua"/>
+        <result column="YHD_M3_UB" property="yhd_M3_Ub"/>
+        <result column="YHD_M3_UC" property="yhd_M3_Uc"/>
+        <result column="YHD_M3_UAB" property="yhd_M3_Uab"/>
+        <result column="YHD_M3_UBC" property="yhd_M3_Ubc"/>
+        <result column="YHD_M3_UCA" property="yhd_M3_Uca"/>
+        <result column="YHD_M3_KD" property="yhd_M3_KD"/>
+        <result column="YHD_M3_KDSD" property="yhd_M3_KDSD"/>
+    </resultMap>
+
+    <!-- 东干渠(DGQ)查询 -->
+    <select id="selectDgq" resultMap="DgqResultMap">
+        SELECT TM, DGQ_M1_IA, DGQ_M1_IB, DGQ_M1_IC, DGQ_M1_UA, DGQ_M1_UB, DGQ_M1_UC,
+               DGQ_M1_UAB, DGQ_M1_UBC, DGQ_M1_UCA, DGQ_M1_KD, DGQ_M1_KDSD
+        FROM DGQ
+        <where>
+            <if test="startTime != null and startTime != ''">
+                AND TM &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND TM &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY TM DESC
+        OFFSET 0 ROWS FETCH NEXT 1000 ROWS ONLY
+    </select>
+
+    <!-- 电站蝶阀(DZDF)查询 -->
+    <select id="selectDzdf" resultMap="DzdfResultMap">
+        SELECT TM, DZDF_M1_IA, DZDF_M1_IB, DZDF_M1_IC, DZDF_M1_UA, DZDF_M1_UB, DZDF_M1_UC,
+               DZDF_M1_UAB, DZDF_M1_UBC, DZDF_M1_UCA, DZDF_M1_YW, DZDF_M1_FIT, DZDF_M1_FIT_TOL
+        FROM DZDF
+        <where>
+            <if test="startTime != null and startTime != ''">
+                AND TM &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND TM &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY TM DESC
+        OFFSET 0 ROWS FETCH NEXT 1000 ROWS ONLY
+    </select>
+
+    <!-- 取水塔(QST)查询 -->
+    <select id="selectQst" resultMap="QstResultMap">
+        SELECT TM, QST_M1_IA, QST_M1_IB, QST_M1_IC, QST_M1_UA, QST_M1_UB, QST_M1_UC, QST_M1_UAB,
+               QST_M1_KD, QST_M1_KDSD, QST_M2_IA, QST_M2_IB, QST_M2_IC, QST_M2_UA, QST_M2_UB,
+               QST_M2_UC, QST_M2_UAB, QST_M2_KD, QST_M2_KDSD
+        FROM QST
+        <where>
+            <if test="startTime != null and startTime != ''">
+                AND TM &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND TM &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY TM DESC
+        OFFSET 0 ROWS FETCH NEXT 1000 ROWS ONLY
+    </select>
+
+    <!-- 西干渠(XGQ)查询 -->
+    <select id="selectXgq" resultMap="XgqResultMap">
+        SELECT TM, XGQ_M1_IA, XGQ_M1_IB, XGQ_M1_IC, XGQ_M1_UA, XGQ_M1_UB, XGQ_M1_UC,
+               XGQ_M1_UAB, XGQ_M1_UBC, XGQ_M1_UCA, XGQ_M1_KD, XGQ_M1_KDSD,
+               XGQ_M2_IA, XGQ_M2_IB, XGQ_M2_IC, XGQ_M2_UA, XGQ_M2_UB, XGQ_M2_UC,
+               XGQ_M2_UAB, XGQ_M2_KD, XGQ_M2_KDSD
+        FROM XGQ
+        <where>
+            <if test="startTime != null and startTime != ''">
+                AND TM &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND TM &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY TM DESC
+        OFFSET 0 ROWS FETCH NEXT 1000 ROWS ONLY
+    </select>
+
+    <!-- 溢洪道(YHD)查询 -->
+    <select id="selectYhd" resultMap="YhdResultMap">
+        SELECT TM, YHD_M1_IA, YHD_M1_IB, YHD_M1_IC, YHD_M1_UA, YHD_M1_UB, YHD_M1_UC,
+               YHD_M1_UAB, YHD_M1_UBC, YHD_M1_UCA, YHD_M1_KD, YHD_M1_KDSD,
+               YHD_M2_IA, YHD_M2_IB, YHD_M2_IC, YHD_M2_UA, YHD_M2_UB, YHD_M2_UC,
+               YHD_M2_UAB, YHD_M2_UBC, YHD_M2_UCA, YHD_M2_KD, YHD_M2_KDSD,
+               YHD_M3_IA, YHD_M3_IB, YHD_M3_IC, YHD_M3_UA, YHD_M3_UB, YHD_M3_UC,
+               YHD_M3_UAB, YHD_M3_UBC, YHD_M3_UCA, YHD_M3_KD, YHD_M3_KDSD
+        FROM YHD
+        <where>
+            <if test="startTime != null and startTime != ''">
+                AND TM &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND TM &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY TM DESC
+        OFFSET 0 ROWS FETCH NEXT 1000 ROWS ONLY
+    </select>
+
+</mapper>

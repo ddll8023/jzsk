@@ -234,7 +234,7 @@ export function useGateStatus(options = {}) {
     loading.value = true
 
     try {
-      const url = `/zkxt/${query.selectedGate}`
+      const url = `/api/gates/${query.selectedGate}`
       console.log('获取闸门数据:', { selectedGate: query.selectedGate, url })
       
       const response = await request.get(url)
