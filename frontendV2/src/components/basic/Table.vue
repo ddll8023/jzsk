@@ -47,7 +47,9 @@
             <td
               v-for="column in columns"
               :key="column.key"
+              :style="{ width: column.width }"
               class="px-4 py-3 text-sm text-gray-900 text-center"
+              :class="{ 'whitespace-nowrap overflow-hidden text-ellipsis': !column.noEllipsis }"
             >
               <slot :name="column.key" :row="row" :index="rowIndex">
                 {{ row[column.key] }}

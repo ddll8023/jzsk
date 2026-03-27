@@ -38,7 +38,7 @@
 
       <!-- 日志内容列 -->
       <template #logContent="{ row }">
-        <div class="max-w-xs truncate" :title="row.logContent">
+        <div class="line-clamp-3 text-left" :title="row.logContent">
           {{ row.logContent }}
         </div>
       </template>
@@ -103,16 +103,15 @@ defineEmits(['page-change', 'update:pageSize', 'edit', 'delete'])
 
 // 表格列配置
 const columns = [
-  { key: 'dutyLogId', title: 'ID', width: '80px' },
-  { key: 'dutyDate', title: '值班日期', width: '120px' },
-  { key: 'weather', title: '天气', width: '100px' },
-  { key: 'rainfall', title: '雨量', width: '100px' },
+  { key: 'dutyDate', title: '值班日期', width: '100px' },
+  { key: 'weather', title: '天气', width: '80px' },
+  { key: 'rainfall', title: '雨量', width: '80px' },
   { key: 'leader', title: '带班领导', width: '100px' },
-  { key: 'dayShiftPerson', title: '白班值班人员', width: '120px' },
-  { key: 'nightShiftPerson', title: '晚班值班人员', width: '120px' },
-  { key: 'logContent', title: '日志内容', width: '200px' },
-  { key: 'fillTime', title: '填写时间', width: '150px' },
+  { key: 'dayShiftPerson', title: '白班值班人员', width: '100px' },
+  { key: 'nightShiftPerson', title: '晚班值班人员', width: '100px' },
+  { key: 'logContent', title: '日志内容', width: '200px', noEllipsis: true },
+  { key: 'fillTime', title: '填写时间', width: '140px' },
   { key: 'logStatus', title: '状态', width: '80px' },
-  { key: 'actions', title: '操作', width: '160px' }
+  { key: 'actions', title: '操作', width: '140px', noEllipsis: true }
 ]
 </script>

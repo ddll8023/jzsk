@@ -92,12 +92,11 @@ defineEmits(['page-change', 'update:pageSize', 'edit', 'delete'])
 
 // 表格列配置
 const columns = [
-  { key: 'dutyScheduleId', title: '值班安排ID', width: '100px' },
-  { key: 'dutyPerson', title: '值班人员' },
-  { key: 'leader', title: '带班领导' },
-  { key: 'dutyTime', title: '值班时间' },
-  { key: 'dutyPost', title: '值班岗位' },
-  { key: 'createTime', title: '创建时间' },
-  { key: 'actions', title: '操作', width: '180px' }
+  { key: 'dutyPerson', title: '值班人员', width: '120px' },
+  { key: 'leader', title: '带班领导', width: '100px' },
+  { key: 'dutyTime', title: '值班时间', width: '180px' },
+  { key: 'dutyPost', title: '值班岗位', width: '100px' },
+  { key: 'createTime', title: '创建时间', width: '180px' },
+  { key: 'actions', title: '操作', width: '140px', noEllipsis: true }
 ]
 </script>
