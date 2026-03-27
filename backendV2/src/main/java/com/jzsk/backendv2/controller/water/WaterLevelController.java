@@ -1,5 +1,6 @@
 package com.jzsk.backendv2.controller.water;
 
+import com.jzsk.backendv2.pojo.dto.water.WaterLevelPageQueryDTO;
 import com.jzsk.backendv2.pojo.dto.water.WaterLevelQueryDTO;
 import com.jzsk.backendv2.pojo.vo.ApiResult;
 import com.jzsk.backendv2.pojo.vo.PageResultVO;
@@ -15,9 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -38,32 +39,30 @@ public class WaterLevelController {
     /**
      * 分页查询水位数据
      * 权限: 需要登录
+     * 与 HourlyRainfallController 保持一致的设计风格
      */
     @Operation(summary = "分页查询水位数据", description = "按条件分页查询水位数据")
     @ApiResponse(responseCode = "200", description = "成功")
     @GetMapping("/page")
     public ResponseEntity<ApiResult<PageResultVO<WaterLevelVO>>> getWaterLevelPage(
-        @Parameter(description = "页码", example = "1")
-        @RequestParam(defaultValue = "1") int page,
-        @Parameter(description = "每页大小", example = "10")
-        @RequestParam(defaultValue = "10") int size,
-        @Parameter(description = "测站编码", example = "50102300")
-        WaterLevelQueryDTO queryDTO) {
+        @Parameter(description = "分页查询条件")
+        @Valid WaterLevelPageQueryDTO queryDTO) {
 
-        PageResultVO<WaterLevelVO> result = waterLevelService.getWaterLevelPage(page, size, queryDTO);
+        PageResultVO<WaterLevelVO> result = waterLevelService.getWaterLevelPage(queryDTO);
         return ResponseEntity.ok(ApiResult.success(result, "查询成功"));
     }
 
     /**
      * 查询水位数据列表
      * 权限: 需要登录
+     * 支持时间区间筛选
      */
-    @Operation(summary = "查询水位数据列表", description = "根据测站编码查询水位数据列表")
+    @Operation(summary = "查询水位数据列表", description = "根据时间区间或测站编码查询水位数据列表")
     @ApiResponse(responseCode = "200", description = "成功")
     @GetMapping("/list")
     public ResponseEntity<ApiResult<List<WaterLevelVO>>> getWaterLevelList(
-        @Parameter(description = "测站编码", example = "50102300")
-        WaterLevelQueryDTO queryDTO) {
+        @Parameter(description = "查询条件")
+        @Valid WaterLevelQueryDTO queryDTO) {
 
         List<WaterLevelVO> list = waterLevelService.getWaterLevelList(queryDTO);
         return ResponseEntity.ok(ApiResult.success(list, "查询成功"));

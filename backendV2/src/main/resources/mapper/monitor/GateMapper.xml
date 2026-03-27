@@ -121,7 +121,7 @@
         <result column="YHD_M3_KDSD" property="yhd_M3_KDSD"/>
     </resultMap>
 
-    <!-- 东干渠(DGQ)查询 -->
+    <!-- 东干渠(DGQ)查询（分页） -->
     <select id="selectDgq" resultMap="DgqResultMap">
         SELECT TM, DGQ_M1_IA, DGQ_M1_IB, DGQ_M1_IC, DGQ_M1_UA, DGQ_M1_UB, DGQ_M1_UC,
                DGQ_M1_UAB, DGQ_M1_UBC, DGQ_M1_UCA, DGQ_M1_KD, DGQ_M1_KDSD
@@ -135,10 +135,24 @@
             </if>
         </where>
         ORDER BY TM DESC
-        OFFSET 0 ROWS FETCH NEXT 1000 ROWS ONLY
+        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
     </select>
 
-    <!-- 电站蝶阀(DZDF)查询 -->
+    <!-- 东干渠(DGQ)总数 -->
+    <select id="countDgq" resultType="long">
+        SELECT COUNT(*)
+        FROM DGQ
+        <where>
+            <if test="startTime != null and startTime != ''">
+                AND TM &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND TM &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <!-- 电站蝶阀(DZDF)查询（分页） -->
     <select id="selectDzdf" resultMap="DzdfResultMap">
         SELECT TM, DZDF_M1_IA, DZDF_M1_IB, DZDF_M1_IC, DZDF_M1_UA, DZDF_M1_UB, DZDF_M1_UC,
                DZDF_M1_UAB, DZDF_M1_UBC, DZDF_M1_UCA, DZDF_M1_YW, DZDF_M1_FIT, DZDF_M1_FIT_TOL
@@ -152,10 +166,24 @@
             </if>
         </where>
         ORDER BY TM DESC
-        OFFSET 0 ROWS FETCH NEXT 1000 ROWS ONLY
+        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
     </select>
 
-    <!-- 取水塔(QST)查询 -->
+    <!-- 电站蝶阀(DZDF)总数 -->
+    <select id="countDzdf" resultType="long">
+        SELECT COUNT(*)
+        FROM DZDF
+        <where>
+            <if test="startTime != null and startTime != ''">
+                AND TM &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND TM &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <!-- 取水塔(QST)查询（分页） -->
     <select id="selectQst" resultMap="QstResultMap">
         SELECT TM, QST_M1_IA, QST_M1_IB, QST_M1_IC, QST_M1_UA, QST_M1_UB, QST_M1_UC, QST_M1_UAB,
                QST_M1_KD, QST_M1_KDSD, QST_M2_IA, QST_M2_IB, QST_M2_IC, QST_M2_UA, QST_M2_UB,
@@ -170,10 +198,24 @@
             </if>
         </where>
         ORDER BY TM DESC
-        OFFSET 0 ROWS FETCH NEXT 1000 ROWS ONLY
+        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
     </select>
 
-    <!-- 西干渠(XGQ)查询 -->
+    <!-- 取水塔(QST)总数 -->
+    <select id="countQst" resultType="long">
+        SELECT COUNT(*)
+        FROM QST
+        <where>
+            <if test="startTime != null and startTime != ''">
+                AND TM &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND TM &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <!-- 西干渠(XGQ)查询（分页） -->
     <select id="selectXgq" resultMap="XgqResultMap">
         SELECT TM, XGQ_M1_IA, XGQ_M1_IB, XGQ_M1_IC, XGQ_M1_UA, XGQ_M1_UB, XGQ_M1_UC,
                XGQ_M1_UAB, XGQ_M1_UBC, XGQ_M1_UCA, XGQ_M1_KD, XGQ_M1_KDSD,
@@ -189,10 +231,24 @@
             </if>
         </where>
         ORDER BY TM DESC
-        OFFSET 0 ROWS FETCH NEXT 1000 ROWS ONLY
+        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
     </select>
 
-    <!-- 溢洪道(YHD)查询 -->
+    <!-- 西干渠(XGQ)总数 -->
+    <select id="countXgq" resultType="long">
+        SELECT COUNT(*)
+        FROM XGQ
+        <where>
+            <if test="startTime != null and startTime != ''">
+                AND TM &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND TM &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <!-- 溢洪道(YHD)查询（分页） -->
     <select id="selectYhd" resultMap="YhdResultMap">
         SELECT TM, YHD_M1_IA, YHD_M1_IB, YHD_M1_IC, YHD_M1_UA, YHD_M1_UB, YHD_M1_UC,
                YHD_M1_UAB, YHD_M1_UBC, YHD_M1_UCA, YHD_M1_KD, YHD_M1_KDSD,
@@ -210,7 +266,21 @@
             </if>
         </where>
         ORDER BY TM DESC
-        OFFSET 0 ROWS FETCH NEXT 1000 ROWS ONLY
+        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
+    </select>
+
+    <!-- 溢洪道(YHD)总数 -->
+    <select id="countYhd" resultType="long">
+        SELECT COUNT(*)
+        FROM YHD
+        <where>
+            <if test="startTime != null and startTime != ''">
+                AND TM &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND TM &lt;= #{endTime}
+            </if>
+        </where>
     </select>
 
 </mapper>

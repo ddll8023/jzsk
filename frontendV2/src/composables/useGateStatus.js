@@ -1,6 +1,6 @@
 /**
  * 闸门实时状态 Composable
- * 功能：封装闸门状态查询、数据处理、导出等业务逻辑
+ * 功能：封装闸门状态查询、数据处理、分页、导出等业务逻辑
  * 遵循 KISS/YAGNI 原则：只实现实际需要的功能
  */
 import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
@@ -67,14 +67,12 @@ const GATE_FIELD_ORDER = {
 }
 
 export function useGateStatus(options = {}) {
-  // 配置选项
-  const { enablePagination = false } = options
-
   // 响应式状态
   const loading = ref(false)
-  const allTableData = ref([])
+  const tableData = ref([])
   const tableColumns = ref([])
   const latestData = ref(null)
+  const hasError = ref(false)  // 区分"无数据"和"请求失败"
   let refreshTimer = null
 
   const query = reactive({
@@ -83,11 +81,12 @@ export function useGateStatus(options = {}) {
     quickType: 'all'  // 默认显示全部数据
   })
 
-  // 分页状态（仅在启用分页时使用）
+  // 分页状态
   const pagination = reactive({
     current: 1,
     size: 10,
-    total: 0
+    total: 0,
+    totalPages: 0
   })
 
   // 计算属性：当前闸门名称
@@ -228,57 +227,68 @@ export function useGateStatus(options = {}) {
     })
   }
 
-  // 获取闸门数据
+  // 获取闸门数据（后端分页）
   async function fetchGateData() {
     if (!query.selectedGate) return
     loading.value = true
+    hasError.value = false  // 重置错误状态
 
     try {
-      const url = `/api/gates/${query.selectedGate}`
-      console.log('获取闸门数据:', { selectedGate: query.selectedGate, url })
-      
-      const response = await request.get(url)
-      // request 拦截器虽然处理了 response，但为了保险起见，这里做完整的防御性编程
-      // 后端返回结构: { code: 200, data: [...], msg: "..." }
-
-      const res = response.data // Axios 的 response.data 是服务器返回的 JSON body
-
-      // 核心修正：获取 Result.data
-      const resultData = res.data
-
-      // 兼容 List (后端当前实现) 和 Page (旧版/通用结构)
-      const records = Array.isArray(resultData) ? resultData : (resultData?.records || [])
-
-      console.log('解析后的记录:', records)
-
-      // 按时间排序（最新在前）
-      const sorted = [...records].sort((a, b) => 
-        parseTime(b.TM || b.tm) - parseTime(a.TM || a.tm)
-      )
-
-      // 保存全量数据（不过滤）
-      allTableData.value = sorted
-      latestData.value = sorted[0] || null
-
-      // 重置分页到第一页
-      if (enablePagination) {
-        pagination.current = 1
+      // 构建查询参数
+      const params = {
+        page: pagination.current,
+        size: pagination.size
       }
 
+      // 如果有日期范围，添加到 time-range 接口
+      let url
+      if (query.dateRange && query.dateRange.length === 2 && query.dateRange[0] && query.dateRange[1]) {
+        url = `/api/gates/${query.selectedGate}/time-range`
+        params.startTime = query.dateRange[0]
+        params.endTime = query.dateRange[1]
+      } else {
+        url = `/api/gates/${query.selectedGate}`
+      }
+
+      console.log('获取闸门数据:', { selectedGate: query.selectedGate, url, params })
+
+      const response = await request.get(url, { params })
+      // request 拦截器虽然处理了 response，但为了保险起见，这里做完整的防御性编程
+      // 后端返回结构: { code: 200, data: { list: [...], total: N, page: N, size: N, totalPages: N }, msg: "..." }
+
+      const res = response.data // Axios 的 response.data 是服务器返回的 JSON body
+      const pageResult = res.data // 分页结果
+
+      // 更新分页信息
+      if (pageResult) {
+        pagination.total = pageResult.total || 0
+        pagination.totalPages = pageResult.totalPages || 0
+        // 后端返回的 list（已按时间倒序）
+        tableData.value = pageResult.list || []
+        latestData.value = tableData.value[0] || null
+      } else {
+        pagination.total = 0
+        pagination.totalPages = 0
+        tableData.value = []
+        latestData.value = null
+      }
+
+      console.log('解析后的记录:', tableData.value)
+
       // 生成表格列配置
-      if (sorted.length > 0) {
-        const has = Object.keys(sorted[0])
+      if (tableData.value.length > 0) {
+        const has = Object.keys(tableData.value[0])
         console.log('数据字段:', has)
-        
+
         const fixedOrder = GATE_FIELD_ORDER[query.selectedGate] || []
         let keys = fixedOrder.filter(k => has.includes(k))
-        
+
         // 如果固定顺序字段不匹配，使用动态字段
         if (keys.length === 0) {
           console.log('固定字段不匹配，使用动态字段')
           keys = has
         }
-        
+
         // 确保时间字段在最左侧
         const timeKey = keys.find(k => k.toLowerCase() === 'tm')
         if (timeKey) {
@@ -296,9 +306,12 @@ export function useGateStatus(options = {}) {
       }
     } catch (error) {
       console.error('获取闸门数据失败:', error)
-      allTableData.value = []
+      hasError.value = true
+      tableData.value = []
       latestData.value = null
       tableColumns.value = []
+      pagination.total = 0
+      pagination.totalPages = 0
     } finally {
       loading.value = false
     }
@@ -306,13 +319,13 @@ export function useGateStatus(options = {}) {
 
   // 导出数据
   function exportData() {
-    if (!allTableData.value?.length) {
+    if (!tableData.value?.length) {
       alert('没有数据可导出！')
       return
     }
 
     const headers = tableColumns.value.map(col => col.title)
-    const rows = allTableData.value.map(item =>
+    const rows = tableData.value.map(item =>
       tableColumns.value.map(col => item[col.key] ?? '')
     )
 
@@ -356,34 +369,44 @@ export function useGateStatus(options = {}) {
     stopAutoRefresh()
   })
 
-  // 计算属性：过滤后的数据
+  // 计算属性：过滤后的数据（用于前端导出/打印时显示全部）
   const filteredData = computed(() => {
-    return filterByDateRange(allTableData.value)
+    // 注意：现在数据由后端分页，前端不再需要前端过滤
+    return tableData.value
   })
 
   // 计算属性：过滤后的总数
   const totalFiltered = computed(() => {
-    return filteredData.value.length
+    return pagination.total
   })
 
-  // 计算属性：分页后的数据
+  // 计算属性：当前页数据（与 tableData 相同，由后端分页）
   const pagedData = computed(() => {
-    if (!enablePagination) {
-      return filteredData.value
-    }
-    const start = (pagination.current - 1) * pagination.size
-    const end = start + pagination.size
-    return filteredData.value.slice(start, end)
+    return tableData.value
   })
+
+  // 切换分页
+  function handlePageChange(page) {
+    pagination.current = page
+    fetchGateData()
+  }
+
+  // 切换每页大小
+  function handleSizeChange(size) {
+    pagination.size = size
+    pagination.current = 1 // 重置到第一页
+    fetchGateData()
+  }
 
   return {
     // 常量
     gateList: GATE_LIST,
     // 状态
     loading,
-    allTableData,
+    tableData,
     tableColumns,
     latestData,
+    hasError,
     query,
     pagination,
     // 计算属性
@@ -400,6 +423,8 @@ export function useGateStatus(options = {}) {
     fieldToLabel,
     setQuickDateRange,
     fetchGateData,
-    exportData
+    exportData,
+    handlePageChange,
+    handleSizeChange
   }
 }

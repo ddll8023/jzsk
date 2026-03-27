@@ -185,7 +185,7 @@ const error = ref(null)
 const startDate = ref('')
 const endDate = ref('')
 const dateShortcuts = getDateShortcuts()
-const activeShortcut = ref('') // 当前选中的快速选择按钮
+const activeShortcut = ref('最近一天') // 当前选中的快速选择按钮，默认"最近一天"
 
 // 图表
 const chartRef = ref(null)

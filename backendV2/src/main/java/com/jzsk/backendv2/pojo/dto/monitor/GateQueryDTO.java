@@ -1,16 +1,19 @@
 package com.jzsk.backendv2.pojo.dto.monitor;
 
+import com.jzsk.backendv2.pojo.dto.BasePageQueryDTO;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * 闸门数据查询DTO
- * 用于查询指定闸门的数据
+ * 用于查询指定闸门的数据，支持分页
  */
 @Schema(name = "闸门数据查询请求", description = "查询闸门数据的请求参数")
 @Data
-public class GateQueryDTO {
+@EqualsAndHashCode(callSuper = true)
+public class GateQueryDTO extends BasePageQueryDTO {
 
     @Schema(description = "闸门编码", example = "dgq",
             allowableValues = {"dgq", "dzdf", "qst", "xgq", "yhd"},

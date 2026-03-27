@@ -159,7 +159,7 @@ const error = ref(null)
 const startDate = ref('')
 const endDate = ref('')
 const dateShortcuts = getDateShortcuts()
-const activeShortcut = ref('') // 当前选中的快速选择按钮
+const activeShortcut = ref('最近一天') // 当前选中的快速选择按钮，默认"最近一天"
 const chartRef = ref(null)
 let chartInstance = null
 const currentPage = ref(1)
@@ -244,7 +244,17 @@ const loadData = async () => {
     const expectedPoints = 49
 
     while (accumulated.length < expectedPoints && (currentFetchPage - 1) * fetchSize < total) {
-      const res = await getWaterLevelPage({ page: currentFetchPage, size: fetchSize })
+      const params = {
+        page: currentFetchPage,
+        size: fetchSize
+      }
+      if (startDate.value) {
+        params.startDate = startDate.value.replace('T', ' ') + ':00'
+      }
+      if (endDate.value) {
+        params.endDate = endDate.value.replace('T', ' ') + ':00'
+      }
+      const res = await getWaterLevelPage(params)
       const pageData = res.data.data || {}
       const records = pageData.records || []
       total = Number(pageData.total || 0)

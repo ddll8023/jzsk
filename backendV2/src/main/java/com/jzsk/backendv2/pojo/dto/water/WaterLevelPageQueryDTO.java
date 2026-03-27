@@ -1,18 +1,22 @@
 package com.jzsk.backendv2.pojo.dto.water;
 
+import com.jzsk.backendv2.pojo.dto.BasePageQueryDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
 /**
- * 水位查询请求DTO
- * 用途: 查询水位数据的筛选条件
+ * 水位分页查询参数
+ * 用途: 分页查询水位数据的筛选条件
+ * 遵循规范: 与 HourlyRainfallPageQueryDTO 保持一致的设计风格
  */
-@Schema(name = "水位查询请求", description = "查询水位数据的筛选条件")
 @Data
-public class WaterLevelQueryDTO {
+@EqualsAndHashCode(callSuper = true)
+@Schema(name = "水位分页查询参数", description = "水位分页查询参数")
+public class WaterLevelPageQueryDTO extends BasePageQueryDTO {
 
     @Schema(description = "测站编码", example = "50102300")
     private String stcd;

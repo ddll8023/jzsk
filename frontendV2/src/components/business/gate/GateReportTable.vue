@@ -88,11 +88,5 @@ function handlePageChange({ page, pageSize }) {
         @change="handlePageChange"
       />
     </div>
-
-    <!-- 空状态 -->
-    <div v-if="!loading && formattedData.length === 0" class="flex flex-col items-center justify-center py-12 text-gray-400">
-      <i class="fa fa-inbox text-4xl mb-3" aria-hidden="true"></i>
-      <p class="text-sm">暂无数据</p>
-    </div>
   </Card>
 </template>

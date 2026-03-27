@@ -2,6 +2,7 @@ package com.jzsk.backendv2.service.water.impl;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.jzsk.backendv2.mapper.monitor.StRiversRMapper;
+import com.jzsk.backendv2.pojo.dto.water.WaterLevelPageQueryDTO;
 import com.jzsk.backendv2.pojo.dto.water.WaterLevelQueryDTO;
 import com.jzsk.backendv2.pojo.entity.monitor.StRiversREntity;
 import com.jzsk.backendv2.pojo.vo.PageResultVO;
@@ -30,7 +31,9 @@ public class WaterLevelServiceImpl implements WaterLevelService {
     private final StRiversRMapper stRiverRMapper;
 
     @Override
-    public PageResultVO<WaterLevelVO> getWaterLevelPage(int page, int size, WaterLevelQueryDTO queryDTO) {
+    public PageResultVO<WaterLevelVO> getWaterLevelPage(WaterLevelPageQueryDTO queryDTO) {
+        int page = (int) queryDTO.getPage();
+        int size = (int) queryDTO.getSize();
         log.info("分页查询水位数据,页码: {}, 每页大小: {}, 查询条件: {}", page, size, queryDTO);
 
         // 查询总数
@@ -70,7 +73,13 @@ public class WaterLevelServiceImpl implements WaterLevelService {
         List<StRiversREntity> entities;
 
         // 根据查询条件选择查询方式
-        if (queryDTO != null && queryDTO.getStcd() != null && !queryDTO.getStcd().isEmpty()) {
+        if (queryDTO != null && (queryDTO.getStartDate() != null || queryDTO.getEndDate() != null)) {
+            // 按时间范围查询
+            entities = stRiverRMapper.selectByTimeRange(
+                queryDTO.getStartDate(),
+                queryDTO.getEndDate()
+            );
+        } else if (queryDTO != null && queryDTO.getStcd() != null && !queryDTO.getStcd().isEmpty()) {
             // 按测站编码查询
             entities = stRiverRMapper.selectByStcd(queryDTO.getStcd());
         } else {

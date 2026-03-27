@@ -15,42 +15,97 @@ import java.util.List;
 public interface GateMapper {
 
     /**
-     * 东干渠数据查询
+     * 东干渠数据查询（分页）
      * @param startTime 开始时间
      * @param endTime 结束时间
+     * @param offset 偏移量
+     * @param size 每页大小
      * @return 闸门数据列表
      */
-    List<GateDataVO> selectDgq(@Param("startTime") String startTime, @Param("endTime") String endTime);
+    List<GateDataVO> selectDgq(@Param("startTime") String startTime, @Param("endTime") String endTime,
+                               @Param("offset") long offset, @Param("size") long size);
 
     /**
-     * 电站蝶阀数据查询
+     * 东干渠数据总数
      * @param startTime 开始时间
      * @param endTime 结束时间
-     * @return 闸门数据列表
+     * @return 数据总数
      */
-    List<GateDataVO> selectDzdf(@Param("startTime") String startTime, @Param("endTime") String endTime);
+    long countDgq(@Param("startTime") String startTime, @Param("endTime") String endTime);
 
     /**
-     * 取水塔数据查询
+     * 电站蝶阀数据查询（分页）
      * @param startTime 开始时间
      * @param endTime 结束时间
+     * @param offset 偏移量
+     * @param size 每页大小
      * @return 闸门数据列表
      */
-    List<GateDataVO> selectQst(@Param("startTime") String startTime, @Param("endTime") String endTime);
+    List<GateDataVO> selectDzdf(@Param("startTime") String startTime, @Param("endTime") String endTime,
+                                 @Param("offset") long offset, @Param("size") long size);
 
     /**
-     * 西干渠数据查询
+     * 电站蝶阀数据总数
      * @param startTime 开始时间
      * @param endTime 结束时间
-     * @return 闸门数据列表
+     * @return 数据总数
      */
-    List<GateDataVO> selectXgq(@Param("startTime") String startTime, @Param("endTime") String endTime);
+    long countDzdf(@Param("startTime") String startTime, @Param("endTime") String endTime);
 
     /**
-     * 溢洪道数据查询
+     * 取水塔数据查询（分页）
      * @param startTime 开始时间
      * @param endTime 结束时间
+     * @param offset 偏移量
+     * @param size 每页大小
      * @return 闸门数据列表
      */
-    List<GateDataVO> selectYhd(@Param("startTime") String startTime, @Param("endTime") String endTime);
+    List<GateDataVO> selectQst(@Param("startTime") String startTime, @Param("endTime") String endTime,
+                                @Param("offset") long offset, @Param("size") long size);
+
+    /**
+     * 取水塔数据总数
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 数据总数
+     */
+    long countQst(@Param("startTime") String startTime, @Param("endTime") String endTime);
+
+    /**
+     * 西干渠数据查询（分页）
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @param offset 偏移量
+     * @param size 每页大小
+     * @return 闸门数据列表
+     */
+    List<GateDataVO> selectXgq(@Param("startTime") String startTime, @Param("endTime") String endTime,
+                                @Param("offset") long offset, @Param("size") long size);
+
+    /**
+     * 西干渠数据总数
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 数据总数
+     */
+    long countXgq(@Param("startTime") String startTime, @Param("endTime") String endTime);
+
+    /**
+     * 溢洪道数据查询（分页）
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @param offset 偏移量
+     * @param size 每页大小
+     * @return 闸门数据列表
+     */
+    List<GateDataVO> selectYhd(@Param("startTime") String startTime, @Param("endTime") String endTime,
+                                @Param("offset") long offset, @Param("size") long size);
+
+    /**
+     * 溢洪道数据总数
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 数据总数
+     */
+    long countYhd(@Param("startTime") String startTime, @Param("endTime") String endTime);
 }

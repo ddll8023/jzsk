@@ -12,7 +12,8 @@ const props = defineProps({
   gateName: { type: String, default: '' },
   latestKD: { type: Number, default: 0 },
   waterPercent: { type: Number, default: 100 },
-  loading: { type: Boolean, default: false }
+  loading: { type: Boolean, default: false },
+  hasError: { type: Boolean, default: false }  // 区分"无数据"和"请求失败"
 })
 
 const emit = defineEmits(['refresh'])
@@ -198,8 +199,8 @@ const scaleTicks = computed(() => {
     <div v-else class="text-center py-12 text-gray-500">
       <i class="fa fa-inbox text-4xl text-gray-300 mb-3"></i>
       <p>暂无数据</p>
-      <p class="text-sm text-gray-400 mt-1">请检查网络连接或稍后重试</p>
-      <button 
+      <p v-if="hasError" class="text-sm text-gray-400 mt-1">请检查网络连接或稍后重试</p>
+      <button
         @click="$emit('refresh')"
         class="mt-4 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors cursor-pointer"
       >

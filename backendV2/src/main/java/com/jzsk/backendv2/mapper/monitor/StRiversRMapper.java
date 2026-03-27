@@ -5,6 +5,7 @@ import com.jzsk.backendv2.pojo.entity.monitor.StRiversREntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -12,7 +13,6 @@ import java.util.List;
  * 职责：河道水情表的数据库操作
  * 遵循KISS原则：只负责数据访问，不包含业务逻辑
  * 数据源：dbo（SQL Server）- 直接读取实时监测数据
- * 遵循纯 MyBatis 风格，不使用 MyBatis-Plus
  */
 @Mapper
 public interface StRiversRMapper {
@@ -54,6 +54,17 @@ public interface StRiversRMapper {
     List<StRiversREntity> selectByStcd(@Param("stcd") String stcd);
 
     /**
+     * 根据时间范围查询水位数据（SQL Server语法）
+     * 数据源：dbo（SQL Server）
+     * @param startDate 开始时间
+     * @param endDate 结束时间
+     * @return 水位数据列表
+     */
+    @DS("dbo")
+    List<StRiversREntity> selectByTimeRange(@Param("startDate") LocalDateTime startDate,
+                                            @Param("endDate") LocalDateTime endDate);
+
+    /**
      * 分页查询水位数据（SQL Server语法）
      * 数据源：dbo（SQL Server）
      * @param stcd 测站编码(可选)
@@ -63,6 +74,6 @@ public interface StRiversRMapper {
      */
     @DS("dbo")
     List<StRiversREntity> selectPage(@Param("stcd") String stcd,
-                                      @Param("offset") long offset,
-                                      @Param("size") long size);
+                                     @Param("offset") long offset,
+                                     @Param("size") long size);
 }

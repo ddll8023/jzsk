@@ -1,6 +1,6 @@
 <template>
   <!-- 渗流数据图表 -->
-  <div class="bg-white rounded-lg shadow">
+  <div class="bg-white rounded-lg shadow p-4">
     <!-- Tab切换 -->
     <Tabs
       :model-value="activeTab"

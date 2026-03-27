@@ -1,5 +1,6 @@
 package com.jzsk.backendv2.service.water;
 
+import com.jzsk.backendv2.pojo.dto.water.WaterLevelPageQueryDTO;
 import com.jzsk.backendv2.pojo.dto.water.WaterLevelQueryDTO;
 import com.jzsk.backendv2.pojo.vo.PageResultVO;
 import com.jzsk.backendv2.pojo.vo.water.WaterLevelVO;
@@ -15,14 +16,12 @@ public interface WaterLevelService {
 
     /**
      * 分页查询水位数据
-     * @param page 页码
-     * @param size 每页大小
-     * @param queryDTO 查询条件
+     * @param queryDTO 查询条件（包含分页参数和时间区间）
      * @return 分页结果
      * @throws RuntimeException 数据库查询异常
      */
     @Operation(summary = "分页查询水位数据", description = "按条件分页查询水位数据")
-    PageResultVO<WaterLevelVO> getWaterLevelPage(int page, int size, WaterLevelQueryDTO queryDTO);
+    PageResultVO<WaterLevelVO> getWaterLevelPage(WaterLevelPageQueryDTO queryDTO);
 
     /**
      * 查询水位数据列表

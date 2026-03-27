@@ -46,6 +46,21 @@
         ORDER BY TM DESC
     </select>
 
+    <!-- 根据时间范围查询水位数据（SQL Server语法） -->
+    <select id="selectByTimeRange" resultMap="BaseResultMap">
+        SELECT STCD, TM, Z1, Q1
+        FROM ST_RIVER_R
+        <where>
+            <if test="startDate != null">
+                AND TM &gt;= #{startDate}
+            </if>
+            <if test="endDate != null">
+                AND TM &lt;= #{endDate}
+            </if>
+        </where>
+        ORDER BY TM DESC
+    </select>
+
     <!-- 分页查询水位数据（SQL Server语法） -->
     <select id="selectPage" resultMap="BaseResultMap">
         SELECT STCD, TM, Z1, Q1

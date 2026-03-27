@@ -40,11 +40,11 @@ import { useGateStatus } from '@/composables/useGateStatus'
 import GateQueryPanel from '@/components/business/gate/GateQueryPanel.vue'
 import GateReportTable from '@/components/business/gate/GateReportTable.vue'
 
-// 使用 Composable（启用分页）
+// 使用 Composable
 const {
   gateList,
   loading,
-  allTableData,
+  tableData,
   tableColumns,
   query,
   pagination,
@@ -54,10 +54,12 @@ const {
   pagedData,
   setQuickDateRange,
   fetchGateData,
-  exportData
-} = useGateStatus({ enablePagination: true })
+  exportData,
+  handlePageChange,
+  handleSizeChange
+} = useGateStatus()
 
-// 动态分页总数（基于过滤后的数据）
+// 动态分页总数（基于后端返回的总数）
 const paginationWithTotal = computed(() => ({
   ...pagination,
   total: totalFiltered.value
@@ -66,6 +68,7 @@ const paginationWithTotal = computed(() => ({
 // 处理闸门变化
 function handleGateChange(gateCode) {
   query.selectedGate = gateCode
+  pagination.current = 1
   fetchGateData()
 }
 
@@ -73,18 +76,30 @@ function handleGateChange(gateCode) {
 function handleDateRangeChange(range) {
   query.dateRange = range
   query.quickType = 'custom'
+  pagination.current = 1
   fetchGateData()
 }
 
 // 处理快捷选择
 function handleQuickSelect(type) {
   setQuickDateRange(type)
+  pagination.current = 1
   fetchGateData()
 }
 
 // 更新分页
 function updatePagination(newPagination) {
-  pagination.current = newPagination.current
-  pagination.size = newPagination.size
+  let needFetch = false
+  if (newPagination.current && newPagination.current !== pagination.current) {
+    pagination.current = newPagination.current
+    needFetch = true
+  }
+  if (newPagination.size && newPagination.size !== pagination.size) {
+    pagination.size = newPagination.size
+    needFetch = true
+  }
+  if (needFetch) {
+    fetchGateData()
+  }
 }
 </script>
