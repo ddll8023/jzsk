@@ -35,21 +35,11 @@ import 'ol/ol.css'
  */
 const initApiConfig = async () => {
   try {
-    console.log('开始智能选择API地址...')
     const apiBaseURL = await getBestApiURL()
-    console.log('✅ 智能选择的API Base URL:', apiBaseURL)
-    console.log('📍 当前访问地址:', window.location.href)
-    console.log('🌐 主机名:', window.location.hostname)
-    
-    // 配置 Axios
     setupAxios(apiBaseURL)
-    
-    console.log('🎉 API配置成功')
   } catch (error) {
-    console.error('❌ API配置失败，使用默认配置:', error)
-    const fallbackURL = getApiBaseURL()
-    console.log('🔄 使用备用API Base URL:', fallbackURL)
-    setupAxios(fallbackURL)
+    console.error('API配置失败，使用默认配置:', error)
+    setupAxios(getApiBaseURL())
   }
 }
 
@@ -59,25 +49,14 @@ const initApiConfig = async () => {
  */
 const bootstrap = async () => {
   try {
-    // 初始化 API 配置（关键：必须等待完成）
     await initApiConfig()
-    console.log('✅ API配置初始化完成，开始挂载应用')
-    
-    // 创建 Vue 应用
     const app = createApp(App)
-    
-    // 注册 Pinia
     const pinia = createPinia()
     app.use(pinia)
-    
-    // 注册路由
     app.use(router)
-    
-    // 挂载应用
     app.mount('#app')
-    console.log('✅ 应用挂载完成')
   } catch (error) {
-    console.error('❌ 应用启动失败:', error)
+    console.error('应用启动失败:', error)
     // 显示错误提示
     document.body.innerHTML = `
       <div style="display: flex; justify-content: center; align-items: center; height: 100vh; font-family: sans-serif;">

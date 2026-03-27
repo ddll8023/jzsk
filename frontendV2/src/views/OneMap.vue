@@ -112,28 +112,18 @@ const warningModalVisible = ref(false)
  * 修复：添加鼠标样式切换（悬浮测站图标时显示手型）
  */
 const handleMapReady = async (mapInstance) => {
-  console.log('[OneMap] 地图初始化完成', mapInstance)
-  
-  // 立即标记地图就绪，让控件可以显示
   mapReady.value = true
-  
-  // 初始化测站标注管理器
   stationMarkerManager = useStationMarkers(map)
-  
-  // 等待 DOM 更新后初始化测站标注
+
   await nextTick()
-  
-  // 异步加载测站数据（不阻塞控件显示）
+
   if (stationPopupRef.value) {
     stationMarkerManager.createStationMarkers(stationPopupRef.value)
-    
-    // 后台加载测站数据
     stationMarkerManager.updateStationData().catch(error => {
       console.error('[OneMap] 测站数据加载失败:', error)
     })
   }
-  
-  // 添加鼠标样式切换：悬浮测站图标时显示手型
+
   if (mapInstance) {
     mapInstance.on('pointermove', (evt) => {
       const pixel = mapInstance.getEventPixel(evt.originalEvent)
@@ -141,8 +131,6 @@ const handleMapReady = async (mapInstance) => {
       mapInstance.getTargetElement().style.cursor = hit ? 'pointer' : ''
     })
   }
-  
-  console.log('[OneMap] 控件已就绪，测站数据加载中...')
 }
 
 /**

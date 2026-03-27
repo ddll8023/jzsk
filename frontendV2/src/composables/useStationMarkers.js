@@ -5,6 +5,7 @@
  * Source: 参照旧项目 frontend/src/components/menu/OneMaps.vue
  * 修复：移除 fromLonLat 转换，直接使用 EPSG:4326 坐标
  * 优化：使用 Vue 组件替代 HTML 字符串拼接
+ * 修复：正确映射后端返回的字段名（z1/drp/tm）
  */
 
 import { ref, reactive, watch, createApp } from 'vue'
@@ -112,7 +113,7 @@ export function useStationMarkers(map) {
 
   // 弹窗实例
   const popup = ref(null)
-  const popupApp = ref(null)  // Vue 应用实例
+  const popupApp = ref(null) // Vue 应用实例
 
   // 数据管理
   const stationData = useStationData()
@@ -214,7 +215,7 @@ export function useStationMarkers(map) {
       popupApp.value.unmount()
       popupApp.value = null
     }
-    
+
     // 创建新的 Vue 应用实例
     popupApp.value = createApp(StationPopup, props)
     popupApp.value.mount(container)
@@ -256,7 +257,7 @@ export function useStationMarkers(map) {
 
     // 渲染 Vue 组件
     renderPopupComponent(container, props)
-    
+
     // 设置弹窗位置
     popup.value.setPosition(coordinate)
   }
@@ -268,7 +269,7 @@ export function useStationMarkers(map) {
     if (popup.value) {
       popup.value.setPosition(undefined)
     }
-    
+
     // 清理 Vue 应用实例
     if (popupApp.value) {
       popupApp.value.unmount()
@@ -279,6 +280,7 @@ export function useStationMarkers(map) {
   /**
    * 处理地图点击事件
    * 优化：传递数据对象而非 HTML 字符串
+   * 修复：正确映射后端返回的字段名
    */
   const handleMapClick = (evt) => {
     if (!map.value) return
@@ -297,6 +299,7 @@ export function useStationMarkers(map) {
         )
       } else if (type === 'rain') {
         // 合并水位和降雨量数据
+        // 修复：正确映射字段名（useStationData 存储时已做映射 z1→waterLevel, drp→rainfall）
         data = {
           waterLevel: stationData.waterLevelData.value?.waterLevel,
           rainfall: stationData.rainfallData.value?.rainfall,
@@ -324,35 +327,23 @@ export function useStationMarkers(map) {
       return
     }
 
-    console.log('[测站标注] 开始初始化，地图实例:', map.value)
-
-    // 创建图层
     const layers = [
       createGnssLayer(),
       createRainLayer(),
       createSeepageLayer()
     ]
 
-    // 添加到地图
-    layers.forEach((layer, index) => {
+    layers.forEach(layer => {
       if (layer) {
         map.value.addLayer(layer)
-        const source = layer.getSource()
-        const featureCount = source.getFeatures().length
-        console.log(`[测站标注] 图层${index + 1}已添加，包含 ${featureCount} 个要素`)
       }
     })
 
-    // 创建弹窗
     if (popupContainer) {
       createPopup(popupContainer)
-      console.log('[测站标注] 弹窗已创建')
     }
 
-    // 绑定点击事件
     map.value.on('click', handleMapClick)
-
-    console.log('[测站标注] 初始化完成')
   }
 
   /**
@@ -361,17 +352,7 @@ export function useStationMarkers(map) {
    * Source: 对齐旧项目 fetchLatestUpbStationData 行为
    */
   const updateStationData = async () => {
-    console.log('[测站标注] 开始加载测站数据')
-    
-    // 传入渗压测站配置，批量加载
     await stationData.fetchAllStationData(SEEPAGE_STATIONS)
-    
-    console.log('[测站标注] 数据加载完成:', {
-      gnss: stationData.gnssData.value.length,
-      waterLevel: stationData.waterLevelData.value ? '有数据' : '无数据',
-      rainfall: stationData.rainfallData.value ? '有数据' : '无数据',
-      seepage: stationData.seepageData.value.length
-    })
   }
 
   /**
@@ -404,7 +385,7 @@ export function useStationMarkers(map) {
       if (seepageLayer.value) map.value.removeLayer(seepageLayer.value)
       if (popup.value) map.value.removeOverlay(popup.value)
     }
-    
+
     // 清理 Vue 应用实例
     if (popupApp.value) {
       popupApp.value.unmount()

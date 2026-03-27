@@ -51,7 +51,6 @@ export function usePrewarning() {
     error.value = null
 
     try {
-      console.log('🔍 开始加载预警列表...')
       const params = {
         currentPage: pagination.currentPage,
         pageSize: pagination.pageSize,
@@ -62,34 +61,22 @@ export function usePrewarning() {
         startTime: filters.dateRange[0] || '',
         endTime: filters.dateRange[1] || ''
       }
-      console.log('   查询参数:', params)
 
       const { data: res } = await getWarningList(params)
-      console.log('   API响应:', res)
 
-      // 修复：响应拦截器返回完整response，实际数据在res中
-      // V2 分页返回结构：list/total/page/size/totalPages
       if (res.code === 200) {
         const rawRecords = res.data.list || []
-        // 添加序号字段
         warningList.value = rawRecords.map((item, index) => ({
           ...item,
           index: index + 1 + (pagination.currentPage - 1) * pagination.pageSize
         }))
         pagination.total = res.data.total || 0
-        console.log(`✅ 加载成功: ${warningList.value.length} 条记录`)
       } else {
         error.value = res.message || '加载失败'
-        console.error('❌ 加载失败:', error.value)
       }
     } catch (e) {
       error.value = e.message || '网络请求失败'
-      console.error('❌ 加载预警列表异常:', e)
-      console.error('   错误详情:', {
-        message: e.message,
-        response: e.response?.data,
-        status: e.response?.status
-      })
+      console.error('加载预警列表异常:', e)
     } finally {
       loading.value = false
     }
@@ -142,18 +129,9 @@ export function usePrewarning() {
    */
   const loadDictData = async () => {
     try {
-      console.log('🔍 开始加载字典数据...')
-
       dictData.statuses = await getDictOptions('预警状态')
-      console.log('   预警状态:', dictData.statuses.length, '项')
-
       dictData.levels = await getDictOptions('预警等级')
-      console.log('   预警等级:', dictData.levels.length, '项')
-
       dictData.types = await getDictOptions('预警类型')
-      console.log('   预警类型:', dictData.types.length, '项')
-
-      // 预警地点（写死）
       dictData.positions = [
         { value: 'LJ1-1', label: 'LJ1-1' },
         { value: 'LJ1-2', label: 'LJ1-2' },
@@ -166,14 +144,8 @@ export function usePrewarning() {
         { value: '坝前雨量水位站（新站）', label: '坝前雨量水位站（新站）' },
         { value: 'mcu测站', label: 'mcu测站' }
       ]
-      console.log('   预警地点:', dictData.positions.length, '项')
-      console.log('✅ 字典数据加载完成')
     } catch (e) {
-      console.error('❌ 加载字典数据失败:', e)
-      console.error('   错误详情:', {
-        message: e.message,
-        response: e.response?.data
-      })
+      console.error('加载字典数据失败:', e)
     }
   }
 
@@ -232,9 +204,6 @@ export function usePrewarning() {
 
   const loadWarningStats = async () => {
     try {
-      console.log('🔍 加载预警统计数据...')
-      
-      // 请求最新20条预警（不分页）
       const params = {
         currentPage: 1,
         pageSize: 20,
@@ -245,25 +214,21 @@ export function usePrewarning() {
         startTime: '',
         endTime: ''
       }
-      
+
       const { data: res } = await getWarningList(params)
-      
+
       if (res.code === 200) {
-        // V2 分页返回结构：list/total/page/size/totalPages
         const records = res.data.list || []
-        
-        // 统计数据
+
         warningStats.value = {
           total: res.data.total || 0,
           unresolved: records.filter(w => w.status === '未解除').length,
           serious: records.filter(w => ['严重', '特别严重'].includes(w.level)).length,
           latest: records.length > 0 ? records[0] : null
         }
-        
-        console.log('✅ 预警统计加载成功:', warningStats.value)
       }
     } catch (e) {
-      console.error('❌ 加载预警统计失败:', e)
+      console.error('加载预警统计失败:', e)
     }
   }
 

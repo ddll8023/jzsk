@@ -19,12 +19,6 @@ const service = axios.create({
  */
 export const setupAxios = (baseURL) => {
   service.defaults.baseURL = baseURL
-  console.log('🔧 Axios baseURL 已配置:', baseURL)
-  
-  // 验证配置是否生效
-  if (service.defaults.baseURL !== baseURL) {
-    console.error('❌ Axios baseURL 配置失败')
-  }
 }
 
 function normalizePageData(pageData) {
@@ -58,8 +52,8 @@ service.interceptors.request.use(
   (config) => {
     // 构建完整URL用于日志
     const fullUrl = config.baseURL ? `${config.baseURL}${config.url}` : config.url
-    console.log('📤 API请求:', (config.method || 'GET').toUpperCase(), fullUrl)
-    console.log('   参数:', config.params || config.data || '无')
+    // console.log('📤 API请求:', (config.method || 'GET').toUpperCase(), fullUrl)
+    // console.log('   参数:', config.params || config.data || '无')
     
     // 验证baseURL是否已配置
     if (!config.baseURL && !config.url.startsWith('http')) {
@@ -85,8 +79,8 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response) => {
     const fullUrl = response.config.baseURL ? `${response.config.baseURL}${response.config.url}` : response.config.url
-    console.log('📥 API响应:', response.status, fullUrl)
-    console.log('   数据:', response.data?.code, response.data?.message || '成功')
+    // console.log('📥 API响应:', response.status, fullUrl)
+    // console.log('   数据:', response.data?.code, response.data?.message || '成功')
 
     if (response.data && typeof response.data === 'object') {
       normalizePageData(response.data)

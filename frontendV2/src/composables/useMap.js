@@ -107,8 +107,6 @@ export function useMap(options = {}) {
       // 简化加载状态：地图实例创建完成即可交互
       // 瓦片加载是异步的，不阻塞地图功能
       loading.value = false
-      console.log('地图实例初始化完成，瓦片加载中...')
-
     } catch (e) {
       console.error('地图初始化失败:', e)
       error.value = '地图初始化失败，请刷新页面重试'
