@@ -73,12 +73,22 @@ const timeAxis = ref([])
 const flowData = ref([])
 
 // 监听时间类型变化
-watch(() => query.dateRangeType, (type) => {
+watch(() => query.dateRangeType, (type, oldType) => {
+  // 跳过初始值设置（oldType 为 undefined）
+  if (oldType === undefined) return
+
   setQuickDateRange(type)
-  if (type !== 'custom') {
+  if (type && type !== 'custom') {
     onSearch()
   }
 })
+
+// 监听自定义日期范围变化，自动触发查询
+watch(() => query.dateRange, (newRange) => {
+  if (query.dateRangeType === 'custom' && newRange && newRange.length === 2 && newRange[0] && newRange[1]) {
+    onSearch()
+  }
+}, { deep: true })
 
 // 监听测站变化
 watch(() => query.stationId, () => {
@@ -123,9 +133,8 @@ function exportData() {
   link.click()
 }
 
-// 初始化
+// 初始化 - 默认显示所有数据，不限制日期范围
 onMounted(async () => {
-  setQuickDateRange('24h')
   await fetchData()
   updateChartDisplay()
 })

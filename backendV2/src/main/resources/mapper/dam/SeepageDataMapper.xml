@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzsk.backendv2.mapper.dam.SeepageDataMapper">
+
+    <!-- 渗流量数据结果映射 -->
+    <resultMap id="SeepageDataResultMap" type="com.jzsk.backendv2.pojo.entity.dam.SeepageDataEntity">
+        <id column="record_id" property="recordId"/>
+        <result column="station_id" property="stationId"/>
+        <result column="record_time" property="recordTime"/>
+        <result column="seepage_flow" property="seepageFlow"/>
+        <result column="remarks" property="remarks"/>
+    </resultMap>
+
+    <!-- 统计渗流量数据总数 -->
+    <select id="countPage" resultType="long">
+        SELECT COUNT(*)
+        FROM seepage_data
+        <where>
+            <if test="stationId != null">
+                AND station_id = #{stationId}
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND record_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND record_time &lt;= #{endTime}
+            </if>
+        </where>
+    </select>
+
+    <!-- 分页查询渗流量数据 -->
+    <select id="selectPage" resultMap="SeepageDataResultMap">
+        SELECT record_id, station_id, record_time, seepage_flow, remarks
+        FROM seepage_data
+        <where>
+            <if test="stationId != null">
+                AND station_id = #{stationId}
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND record_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND record_time &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY record_time DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <!-- 获取所有渗流量数据 -->
+    <select id="selectAll" resultMap="SeepageDataResultMap">
+        SELECT record_id, station_id, record_time, seepage_flow, remarks
+        FROM seepage_data
+        ORDER BY record_time DESC
+    </select>
+
+</mapper>

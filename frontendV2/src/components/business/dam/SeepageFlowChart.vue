@@ -64,36 +64,37 @@ function updateChart() {
         return `${time}<br/><span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:#22c55e;"></span>流量: <strong>${val}</strong> L/s`
       }
     },
-    grid: { 
-      top: 40, 
-      right: 30, 
-      bottom: 20, 
-      left: 50, 
-      containLabel: true 
+    grid: {
+      top: 40,
+      right: 30,
+      bottom: 30,
+      left: 70,
+      containLabel: true
     },
     xAxis: {
       type: 'category',
       data: props.timeAxis || [],
       axisLine: { show: true, lineStyle: { color: '#e5e7eb' } },
       axisTick: { show: false },
-      axisLabel: { 
+      axisLabel: {
         color: '#6b7280',
-        rotate: 0, 
-        fontSize: 12 
+        rotate: 0,
+        fontSize: 12
       },
-      show: true 
+      show: true
     },
     yAxis: {
       type: 'value',
       name: '流量(L/s)',
-      nameTextStyle: { color: '#6b7280', padding: [0, 0, 0, 20] },
+      nameTextStyle: { color: '#6b7280', padding: [0, 10, 0, 0] },
+      axisLine: { show: true, lineStyle: { color: '#e5e7eb' } },
+      axisTick: { show: false },
       axisLabel: { color: '#6b7280', fontSize: 12 },
-      splitLine: { 
-        show: true, 
-        lineStyle: { type: 'dashed', color: '#e5e7eb' } 
+      splitLine: {
+        show: true,
+        lineStyle: { type: 'dashed', color: '#e5e7eb' }
       },
       min: 0,
-      scale: true,
       show: true
     },
     series: [{

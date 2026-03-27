@@ -6,11 +6,11 @@ import { ref, computed, reactive } from 'vue'
 import { getSeepageFlowPage } from '@/api/dam'
 
 /**
- * 测站列表配置
+ * 测站列表配置（对应数据库 seepage_data 表的 station_id 字段）
  */
 const STATION_LIST = [
-  { id: '4211822043', name: '主坝0+400坝脚量水堰' },
-  { id: '4211823043', name: '主坝0+200坝脚量水堰' }
+  { id: '2', name: '主坝0+400坝脚量水堰' },
+  { id: '3', name: '主坝0+200坝脚量水堰' }
 ]
 
 /**
@@ -47,10 +47,19 @@ export function formatMinute(val) {
 }
 
 /**
- * 解析时间数组为Date对象
- * @param {Array} timeArr - [年, 月, 日, 时, 分, 秒]
+ * 解析时间数组或字符串为Date对象
+ * @param {Array|string} timeArr - 时间数组 [年, 月, 日, 时, 分, 秒] 或字符串 "yyyy-MM-dd HH:mm:ss"
  */
 export function parseTimeArrayToDate(timeArr) {
+  // 支持字符串格式 "yyyy-MM-dd HH:mm:ss"
+  if (typeof timeArr === 'string') {
+    const parts = timeArr.match(/\d+/g)
+    if (parts && parts.length >= 5) {
+      return new Date(parts[0], parts[1] - 1, parts[2], parts[3], parts[4], parts[5] || 0)
+    }
+    return new Date(0)
+  }
+  // 支持数组格式 [年, 月, 日, 时, 分, 秒]
   if (Array.isArray(timeArr) && timeArr.length >= 5) {
     return new Date(timeArr[0], timeArr[1] - 1, timeArr[2], timeArr[3], timeArr[4], timeArr.length > 5 ? timeArr[5] : 0)
   }
@@ -58,9 +67,20 @@ export function parseTimeArrayToDate(timeArr) {
 }
 
 /**
- * 格式化时间数组为字符串
+ * 格式化时间数组或字符串为字符串（精确到分钟）
+ * @param {Array|string} timeArr - 时间数组或字符串
  */
 export function formatTimeArray(timeArr) {
+  // 支持字符串格式 "yyyy-MM-dd HH:mm:ss"
+  if (typeof timeArr === 'string') {
+    const parts = timeArr.match(/\d+/g)
+    if (parts && parts.length >= 5) {
+      const [y, m, d, h, min] = parts
+      return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')} ${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`
+    }
+    return ''
+  }
+  // 支持数组格式 [年, 月, 日, 时, 分]
   if (Array.isArray(timeArr) && timeArr.length >= 5) {
     const [y, m, d, h, min] = timeArr
     return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')} ${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`
@@ -81,8 +101,8 @@ export function useSeepageFlow() {
 
   // 查询参数
   const query = reactive({
-    stationId: '4211823043', // 默认选择0+200测站
-    dateRangeType: '24h',
+    stationId: '3', // 默认选择0+200测站（station_id=3）
+    dateRangeType: '', // 空字符串表示未选择时间范围，默认显示全部数据
     dateRange: [],
     current: 1,
     size: 10
@@ -90,8 +110,17 @@ export function useSeepageFlow() {
 
   // 计算属性：筛选后的数据
   const filteredData = computed(() => {
+    console.log('[useSeepageFlow] filteredData计算中...')
+    console.log('[useSeepageFlow] allTableData.value 长度:', allTableData.value.length)
+    console.log('[useSeepageFlow] query.stationId:', query.stationId)
+    console.log('[useSeepageFlow] query.dateRange:', query.dateRange)
+
+    // dateRange 无有效值时显示所有数据
+    const hasValidDateRange = query.dateRange && query.dateRange.length === 2 &&
+                              query.dateRange[0] && query.dateRange[1]
+
     const withinRange = (item) => {
-      if (!query.dateRange || query.dateRange.length === 0) return true
+      if (!hasValidDateRange) return true
       const [startDateStr, endDateStr] = query.dateRange
       const startDate = new Date(startDateStr.replace(/-/g, '/'))
       const endDate = new Date(endDateStr.replace(/-/g, '/'))
@@ -101,22 +130,27 @@ export function useSeepageFlow() {
 
     const matchStation = (item) => {
       if (!query.stationId) return false
-      const itemId = String(item.id || item.stcd || item.stationId || '')
-      return itemId === String(query.stationId)
+      // 优先取 stcd（测站编码），其次是 id
+      const itemId = String(item.stcd || item.stationId || item.id || '')
+      const matched = itemId === String(query.stationId)
+      console.log('[useSeepageFlow] 测站匹配:', itemId, '===', query.stationId, '=', matched)
+      return matched
     }
 
-    return allTableData.value.filter(item => {
+    const filtered = allTableData.value.filter(item => {
       if (!withinRange(item)) return false
       if (!matchStation(item)) return false
       const q1Val = Number(item.q1)
-      const itemId = String(item.id || item.stcd || item.stationId || '')
+      const itemId = String(item.stcd || item.stationId || item.id || '')
       // 0+400测站显示q1>=0，其他测站只显示q1>0
-      if (itemId === '4211822043') {
+      if (itemId === '2') {
         return !isNaN(q1Val) && q1Val >= 0
       } else {
         return !isNaN(q1Val) && q1Val > 0
       }
     })
+    console.log('[useSeepageFlow] filteredData 结果长度:', filtered.length)
+    return filtered
   })
 
   // 计算属性：分页数据
@@ -196,8 +230,13 @@ export function useSeepageFlow() {
       let accumulatedAll = []
       let currentFetchPage = 1
 
+      // 构建API请求参数
+      const hasDateRange = query.dateRange && query.dateRange.length === 2 &&
+                           query.dateRange[0] && query.dateRange[1]
+
+      // 数据过滤函数（在已有时间范围的基础上再过滤一次）
       const withinRange = (item) => {
-        if (!query.dateRange || query.dateRange.length === 0) return true
+        if (!hasDateRange) return true
         const [startDateStr, endDateStr] = query.dateRange
         const startDate = new Date(startDateStr.replace(/-/g, '/'))
         const endDate = new Date(endDateStr.replace(/-/g, '/'))
@@ -206,13 +245,20 @@ export function useSeepageFlow() {
       }
 
       const pushWithFilter = (list) => {
+        console.log('[useSeepageFlow] pushWithFilter 收到记录数:', list.length)
+        if (list.length > 0) {
+          console.log('[useSeepageFlow] 第一条记录字段:', Object.keys(list[0]))
+          console.log('[useSeepageFlow] 第一条记录内容:', JSON.stringify(list[0]))
+        }
         list.forEach(raw => {
           if (!withinRange(raw)) return
           const q1Val = Number(raw.q1)
-          const stationId = String(raw.id || raw.stcd || raw.stationId || '')
+          // 优先取 stcd（测站编码），其次是 id
+          const stationId = String(raw.stcd || raw.stationId || raw.id || '')
+          console.log('[useSeepageFlow] 处理记录 stationId:', stationId, 'q1:', raw.q1, 'q1Val:', q1Val)
 
-          // 根据测站过滤q1值
-          if (stationId === '4211822043') {
+          // 根据测站过滤q1值（station_id=2 对应 0+400测站，q1>=0）
+          if (stationId === '2') {
             if (isNaN(q1Val) || q1Val < 0) return
           } else {
             if (isNaN(q1Val) || q1Val <= 0) return
@@ -229,11 +275,31 @@ export function useSeepageFlow() {
 
       // 循环抓取数据
       while ((currentFetchPage - 1) * fetchSize < total) {
-        const res = await getSeepageFlowPage({ page: currentFetchPage, size: fetchSize })
-        const pageData = res && res.data ? res.data : {}
-        const records = Array.isArray(pageData.records) ? pageData.records : []
-        total = Number(pageData.total || 0)
+        // 构建API请求参数
+        const apiParams = {
+          page: currentFetchPage,
+          size: fetchSize
+        }
+        // 传递测站ID（后端使用 pointId 接收）
+        if (query.stationId) {
+          apiParams.pointId = query.stationId
+        }
+        // 传递时间范围
+        if (hasDateRange) {
+          apiParams.startTime = query.dateRange[0]
+          apiParams.endTime = query.dateRange[1]
+        }
 
+        const res = await getSeepageFlowPage(apiParams)
+        console.log('[useSeepageFlow] 第', currentFetchPage, '页请求参数:', apiParams)
+        console.log('[useSeepageFlow] 第', currentFetchPage, '页响应:', JSON.stringify(res))
+        // API 响应是三层嵌套：res.data.data = { list, total, ... }
+        const pageData = res && res.data && res.data.data ? res.data.data : {}
+        // 支持两种响应格式：records（MyBatis-Plus）和 list（统一响应）
+        const records = Array.isArray(pageData.records) ? pageData.records :
+                        Array.isArray(pageData.list) ? pageData.list : []
+        total = Number(pageData.total || 0)
+        console.log('[useSeepageFlow] records长度:', records.length, 'total:', total, 'pageData keys:', Object.keys(pageData))
         if (records.length === 0) break
 
         pushWithFilter(records)
@@ -244,7 +310,10 @@ export function useSeepageFlow() {
         currentFetchPage += 1
       }
 
+      console.log('[useSeepageFlow] 累计数据条数:', accumulatedAll.length)
+      console.log('[useSeepageFlow] 前3条原始数据:', JSON.stringify(accumulatedAll.slice(0, 3)))
       allTableData.value = accumulatedAll
+      console.log('[useSeepageFlow] allTableData.value 设置后的值:', JSON.stringify(allTableData.value.slice(0, 3)))
       updateChartData()
     } catch (error) {
       console.error('[useSeepageFlow] 数据加载失败:', error)
@@ -271,9 +340,22 @@ export function useSeepageFlow() {
    */
   function generateTimeAxis() {
     let endTime, startTime
-    if (query.dateRange && query.dateRange.length === 2) {
+    const hasDateRange = query.dateRange && query.dateRange.length === 2 &&
+                         query.dateRange[0] && query.dateRange[1]
+
+    if (hasDateRange) {
       startTime = new Date(query.dateRange[0].replace(/-/g, '/'))
       endTime = new Date(query.dateRange[1].replace(/-/g, '/'))
+    } else if (chartData.value.length > 0) {
+      // 无日期范围时，从实际数据中推导时间范围
+      const times = chartData.value.map(item => parseTimeArrayToDate(item.tm)).filter(t => t.getTime() > 0)
+      if (times.length > 0) {
+        startTime = new Date(Math.min(...times))
+        endTime = new Date(Math.max(...times))
+      } else {
+        endTime = new Date()
+        startTime = new Date(endTime.getTime() - 24 * 60 * 60 * 1000)
+      }
     } else {
       endTime = new Date()
       startTime = new Date(endTime.getTime() - 24 * 60 * 60 * 1000)
@@ -311,19 +393,35 @@ export function useSeepageFlow() {
   }
 
   /**
+   * 将时间向下取整到最近的整点或半点
+   * @param {string} formattedTime - 格式化时间字符串 "yyyy-MM-dd HH:mm"
+   */
+  function floorToHalfHour(formattedTime) {
+    if (!formattedTime) return ''
+    const match = formattedTime.match(/^(\d{4}-\d{2}-\d{2}) (\d{2}):(\d{2})$/)
+    if (!match) return formattedTime
+    const [, date, hour, min] = match
+    const minutes = parseInt(min, 10)
+    // 向下取整到最近的半点：0-29 -> 00, 30-59 -> 30
+    const flooredMin = minutes < 30 ? '00' : '30'
+    return `${date} ${hour}:${flooredMin}`
+  }
+
+  /**
    * 生成图表流量数据
    */
   function generateFlowData(timeAxis) {
     if (!chartData.value.length || !timeAxis.length) return []
 
-    // 创建数据映射
+    // 创建数据映射（将时间向下取整到最近的整点或半点）
     const dataMap = {}
     chartData.value.forEach(item => {
-      const timeKey = item.formattedTime
+      // 将 formattedTime 向下取整到最近的半点
+      const timeKey = floorToHalfHour(item.formattedTime)
       const q1 = Number(item.q1)
       const stationId = String(item.stationId || item.id || item.stcd || '')
       if (!isNaN(q1)) {
-        if (stationId === '4211822043') {
+        if (stationId === '2') {
           if (q1 >= 0) dataMap[timeKey] = q1 * 1000
         } else {
           if (q1 > 0) dataMap[timeKey] = q1 * 1000

@@ -2,12 +2,13 @@ package com.jzsk.backendv2.service.dam.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jzsk.backendv2.mapper.dam.DamMonitoringMapper;
+import com.jzsk.backendv2.mapper.dam.SeepageDataMapper;
 import com.jzsk.backendv2.mapper.mcu.DataNewMapper;
 import com.jzsk.backendv2.mapper.mcu.SensorPointMapper;
 import com.jzsk.backendv2.mapper.monitor.StRiversRMapper;
 import com.jzsk.backendv2.pojo.dto.dam.DamTimeQueryDTO;
 import com.jzsk.backendv2.pojo.dto.dam.SeepageQueryDTO;
-import com.jzsk.backendv2.pojo.entity.dam.WrMpFlREntity;
+import com.jzsk.backendv2.pojo.entity.dam.SeepageDataEntity;
 import com.jzsk.backendv2.pojo.entity.mcu.DataNewEntity;
 import com.jzsk.backendv2.pojo.entity.mcu.SensorPointEntity;
 import com.jzsk.backendv2.pojo.entity.monitor.StRiversREntity;
@@ -29,7 +30,7 @@ import java.util.stream.Collectors;
  * 大坝监测服务实现类
  * 职责: 提供大坝监测数据的查询功能
  * 遵循KISS原则: 方法简洁,职责单一
- * 数据源: yjxx(SQL Server) 和 pgsql(PostgreSQL)
+ * 数据源: gcdd(MySQL) 和 pgsql(PostgreSQL)
  */
 @Slf4j
 @Service
@@ -38,6 +39,7 @@ public class DamMonitoringServiceImpl implements DamMonitoringService {
 
     private final SensorPointMapper sensorPointMapper;
     private final DamMonitoringMapper damMonitoringMapper;
+    private final SeepageDataMapper seepageDataMapper;
     private final StRiversRMapper stRiversRMapper;
     private final DataNewMapper dataNewMapper;
     private final ObjectMapper objectMapper;
@@ -334,35 +336,35 @@ public class DamMonitoringServiceImpl implements DamMonitoringService {
     public PageResultVO<SeepageFlowVO> getSeepageFlowPage(int page, int size, SeepageQueryDTO queryDTO) {
         log.info("分页查询渗流量数据,页码: {}, 每页大小: {}, 查询条件: {}", page, size, queryDTO);
 
-        String mpCd = queryDTO != null ? queryDTO.getPointId() : null;
+        Integer stationId = null;
+        if (queryDTO != null && queryDTO.getPointId() != null) {
+            try {
+                stationId = Integer.parseInt(queryDTO.getPointId());
+            } catch (NumberFormatException e) {
+                log.warn("测点编号格式错误: {}", queryDTO.getPointId());
+            }
+        }
         String startTime = formatDateTime(queryDTO != null ? queryDTO.getStartTime() : null);
         String endTime = formatDateTime(queryDTO != null ? queryDTO.getEndTime() : null);
 
-        // 查询总数
-        long total = damMonitoringMapper.countSeepageFlowPage(mpCd, startTime, endTime);
+        // 查询总数（使用 seepage_data 表，gcdd数据源）
+        long total = seepageDataMapper.countPage(stationId, startTime, endTime);
 
         if (total <= 0L) {
             return PageResultVO.empty(page, size);
         }
 
-        // 分页查询
+        // 分页查询（使用 seepage_data 表，gcdd数据源）
         long offset = (page - 1L) * size;
-        List<WrMpFlREntity> entities = damMonitoringMapper.selectSeepageFlowPage(mpCd, startTime, endTime, offset, size);
+        List<SeepageDataEntity> entities = seepageDataMapper.selectPage(stationId, startTime, endTime, offset, size);
 
         if (entities.isEmpty()) {
             return PageResultVO.empty(page, size);
         }
 
-        // 获取测点名称映射
-        Set<String> mpCdSet = entities.stream()
-                .map(WrMpFlREntity::getMpCd)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
-        Map<String, String> nameMap = buildMpCdNameMap(mpCdSet);
-
         // Entity转VO
         List<SeepageFlowVO> voList = entities.stream()
-                .map(entity -> convertToSeepageFlowVO(entity, nameMap))
+                .map(this::convertToSeepageFlowVO)
                 .collect(Collectors.toList());
 
         log.info("分页查询渗流量数据成功,总记录数: {}, 当前页记录数: {}", total, voList.size());
@@ -576,22 +578,21 @@ public class DamMonitoringServiceImpl implements DamMonitoringService {
     }
 
     /**
-     * Entity转SeepageFlowVO
+     * Entity转SeepageFlowVO（用于 seepage_data 表）
      *
      * @param entity 渗流量数据实体
-     * @param nameMap 测点名称映射
      * @return 渗流量数据VO
      */
-    private SeepageFlowVO convertToSeepageFlowVO(WrMpFlREntity entity, Map<String, String> nameMap) {
+    private SeepageFlowVO convertToSeepageFlowVO(SeepageDataEntity entity) {
         if (entity == null) {
             return null;
         }
         return new SeepageFlowVO(
-                entity.getMpCd(),
-                entity.getTm(),
-                entity.getMpFl(),
-                entity.getFlCond(),
-                nameMap.getOrDefault(entity.getMpCd(), entity.getMpCd())
+                entity.getRecordId(),
+                String.valueOf(entity.getStationId()),
+                entity.getRecordTime(),
+                entity.getSeepageFlow(),
+                entity.getRemarks()
         );
     }
 
