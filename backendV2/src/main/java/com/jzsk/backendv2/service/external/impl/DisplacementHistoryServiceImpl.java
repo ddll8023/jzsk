@@ -18,7 +18,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -85,7 +84,7 @@ public class DisplacementHistoryServiceImpl implements DisplacementHistoryServic
     }
 
     /**
-     * 从外部API获取位移历史数据（真实分页）
+     * 从外部API获取位移历史数据（逐站点循环调用，参照旧项目实现）
      */
     private PageResultVO<DisplacementHistoryVO> fetchDisplacementHistoryFromExternal(
             LocalDateTime startTime,
@@ -119,16 +118,6 @@ public class DisplacementHistoryServiceImpl implements DisplacementHistoryServic
         try {
             String url = baseUrl + "/manager/posPlane/allHistoricalMonitoringData";
 
-            // 使用 UriComponentsBuilder 构建URL并进行编码
-            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
-                    .queryParam("statsFreq", statsFreq)
-                    .queryParam("start_time", startTimeStr)
-                    .queryParam("end_time", endTimeStr)
-                    .queryParam("sensor", sensor != null ? sensor : "")
-                    .queryParam("projectId", projectId)
-                    .queryParam("page", page)
-                    .queryParam("size", size);
-
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + token);
             headers.set("Language", "zh-CN");
@@ -137,26 +126,31 @@ public class DisplacementHistoryServiceImpl implements DisplacementHistoryServic
 
             HttpEntity<?> entity = new HttpEntity<>(headers);
 
-            // 改为批量查询：将站点ID列表作为逗号分隔字符串传递
-            String stationIdsParam = stationIds.stream()
-                    .map(String::valueOf)
-                    .collect(Collectors.joining(","));
-            builder.replaceQueryParam("stationId", stationIdsParam);
+            // 参照旧项目实现：逐站点循环调用外部API
+            for (Long stationId : stationIds) {
+                String requestUrl = url + "?statsFreq=" + statsFreq
+                        + "&start_time=" + startTimeStr
+                        + "&end_time=" + endTimeStr
+                        + "&sensor=" + (sensor != null ? sensor : "")
+                        + "&stationId=" + stationId
+                        + "&projectId=" + projectId
+                        + "&page=" + page
+                        + "&size=" + size;
 
-            String requestUrl = builder.build().encode().toUriString();
-            log.debug("调用外部位移API,URL: {}", requestUrl);
+                log.debug("调用外部位移API,站点: {}, URL: {}", stationId, requestUrl);
 
-            ResponseEntity<Map> response = restTemplate.exchange(
-                    requestUrl,
-                    HttpMethod.GET,
-                    entity,
-                    Map.class
-            );
+                ResponseEntity<Map> response = restTemplate.exchange(
+                        requestUrl,
+                        HttpMethod.GET,
+                        entity,
+                        Map.class
+                );
 
-            if (response.getBody() != null) {
-                ExternalApiResult result = parseExternalResponseWithTotal(response.getBody());
-                allData = result.getData();
-                totalCount = result.getTotal();
+                if (response.getBody() != null) {
+                    ExternalApiResult result = parseExternalResponseWithTotal(response.getBody());
+                    allData.addAll(result.getData());
+                    totalCount += result.getTotal();
+                }
             }
         } catch (HttpClientErrorException e) {
             // HTTP 4xx 客户端错误

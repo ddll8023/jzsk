@@ -77,5 +77,5 @@ export function getSeepageFlowPage(params) {
  * @param {Object} params - { startTime, endTime, sensor, stationIds, projectId, page, size }
  */
 export function getDisplacementHistory(params) {
-  return request.get('/api/external/displacement-history/page', { params: normalizePageParams(params) })
+  return request.get('/api/displacement-history/page', { params: normalizePageParams(params) })
 }

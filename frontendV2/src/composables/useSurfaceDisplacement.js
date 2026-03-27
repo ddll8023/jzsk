@@ -161,7 +161,11 @@ export function useSurfaceDisplacement() {
       }
 
       const res = await getDisplacementHistory(params)
-      const records = res.data?.records || []
+      console.log('[Displacement] 原始响应:', res)
+      console.log('[Displacement] res.data:', res.data)
+      console.log('[Displacement] res.data?.list:', res.data?.list)
+      console.log('[Displacement] res.data?.records:', res.data?.records)
+      const records = res.data?.data?.list || []
 
       // 转换数据格式
       tableData.value = records.map(r => {
