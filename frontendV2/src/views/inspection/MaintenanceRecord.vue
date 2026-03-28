@@ -28,7 +28,7 @@
     </Card>
 
     <!-- 数据表格 -->
-    <Card variant="default" shadow="sm" rounded="xl" padding="none" class="overflow-hidden">
+    <Card variant="default" shadow="sm" rounded="xl" padding="none" class="w-full">
       <MaintenanceTable
         :data="tableData"
         :loading="loading"

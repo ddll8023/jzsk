@@ -197,7 +197,9 @@ export function useStationData() {
       }
 
       const res = await request.get('/api/dam-monitoring/seepage/page', { params })
-      const records = Array.isArray(res.data && res.data.records) ? res.data.records : []
+      // 尝试多种可能的路径获取数据
+      const rawData = res.data?.data?.list || res.data?.list || []
+      const records = Array.isArray(rawData) ? rawData : []
 
       // 取最新的一条
       if (records.length > 0) {

@@ -1,8 +1,8 @@
 <template>
-  <div class="w-full overflow-hidden">
+  <div class="w-full">
     <!-- 表格容器 -->
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
+      <table class="min-w-full divide-y divide-gray-200 table-fixed">
         <!-- 表头 -->
         <thead class="bg-gray-50">
           <tr>
@@ -47,9 +47,9 @@
             <td
               v-for="column in columns"
               :key="column.key"
-              :style="{ width: column.width }"
+              :style="{ width: column.width, minWidth: column.minWidth }"
               class="px-4 py-3 text-sm text-gray-900 text-center"
-              :class="{ 'whitespace-nowrap overflow-hidden text-ellipsis': !column.noEllipsis }"
+              :class="{ 'whitespace-nowrap overflow-hidden text-ellipsis': column.noWrap }"
             >
               <slot :name="column.key" :row="row" :index="rowIndex">
                 {{ row[column.key] }}

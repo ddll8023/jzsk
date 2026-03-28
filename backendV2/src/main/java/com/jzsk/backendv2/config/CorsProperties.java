@@ -14,7 +14,8 @@ import java.util.List;
 public class CorsProperties {
 
     private List<String> allowedOrigins = new ArrayList<>(Arrays.asList(
-            "http://localhost:8084"
+            "http://localhost:8084",
+            "http://111.4.68.108:8084"
     ));
 
     private List<String> allowedMethods = new ArrayList<>(Arrays.asList(
