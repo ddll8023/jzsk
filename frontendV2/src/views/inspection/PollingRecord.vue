@@ -165,8 +165,8 @@ const currentImageUrl = computed(() => {
   if (img && (img.startsWith('http://') || img.startsWith('https://'))) {
     return img
   }
-  // 拼接后端静态资源路径
-  const baseUrl = 'http://111.4.68.108:8081/photo/'
+  // 使用环境变量配置的图片基础路径
+  const baseUrl = import.meta.env.VITE_PHOTO_BASE_URL || 'http://localhost:8081/photo/'
   return `${baseUrl}${img}`
 })
 
