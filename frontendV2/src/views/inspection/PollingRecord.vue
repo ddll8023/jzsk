@@ -160,8 +160,14 @@ const previewImages = ref([])
 const currentImageIndex = ref(0)
 const currentImageUrl = computed(() => {
   if (previewImages.value.length === 0) return ''
+  const img = previewImages.value[currentImageIndex.value]
+  // 如果已经是完整URL，直接返回
+  if (img && (img.startsWith('http://') || img.startsWith('https://'))) {
+    return img
+  }
+  // 拼接后端静态资源路径
   const baseUrl = 'http://111.4.68.108:8081/photo/'
-  return `${baseUrl}${previewImages.value[currentImageIndex.value]}`
+  return `${baseUrl}${img}`
 })
 
 /**

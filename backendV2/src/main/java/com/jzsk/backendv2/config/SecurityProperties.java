@@ -30,6 +30,10 @@ public class SecurityProperties {
             "/error",
             "/swagger-ui/**",
             "/v3/api-docs/**",
-            "/webjars/**"
+            "/webjars/**",
+            "/photo/**",
+            "/pic/**",
+            "/shipin/**",
+            "/app/**"
     ));
 }

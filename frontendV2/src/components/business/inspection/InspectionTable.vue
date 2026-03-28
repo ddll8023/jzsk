@@ -99,7 +99,11 @@ const getImageList = (imageStr) => {
  * @param {String} img - 图片路径
  */
 const getImageUrl = (img) => {
-  // 根据实际情况调整图片URL前缀
+  // 如果已经是完整URL，直接返回
+  if (img && (img.startsWith('http://') || img.startsWith('https://'))) {
+    return img
+  }
+  // 拼接后端静态资源路径
   const baseUrl = 'http://111.4.68.108:8081/photo/'
   return `${baseUrl}${img}`
 }
