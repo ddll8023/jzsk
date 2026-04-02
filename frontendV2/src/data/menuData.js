@@ -57,7 +57,7 @@ export const staticMenuData = [
     subsystemid: 0,
     children: [
       { id: generateId(), name: '渗流压力监测分析', code: 'dam_seepage_pressure', path: '/home/dam/seepage', ordernum: 1, status: '启用', subsystemid: 104, children: [] },
-      { id: generateId(), name: '渗流量监测分析', code: 'dam_seepage_flow', path: '/home/dam/seepage-flow', ordernum: 2, status: '启用', subsystemid: 104, children: [] },
+      // { id: generateId(), name: '渗流量监测分析', code: 'dam_seepage_flow', path: '/home/dam/seepage-flow', ordernum: 2, status: '启用', subsystemid: 104, children: [] },
       { id: generateId(), name: '地表位移', code: 'dam_displacement', path: '/home/dam/surface-displacement', ordernum: 3, status: '启用', subsystemid: 104, children: [] }
     ]
   },

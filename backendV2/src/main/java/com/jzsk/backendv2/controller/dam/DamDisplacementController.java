@@ -17,6 +17,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 大坝位移控制器
@@ -74,6 +75,31 @@ public class DamDisplacementController {
 
         PageResultVO<DisplacementHistoryVO> result = displacementHistoryService.getDisplacementHistoryPageRaw(
                 page, size, startTime, endTime, sensor, stationIds, projectId, statsFreq);
+        return ResponseEntity.ok(ApiResult.success(result, "查询成功"));
+    }
+
+    /**
+     * 获取所有测站最新位移数据（一张图专用）
+     * 权限：需要登录认证
+     *
+     * @param sensor 传感器类型
+     * @param stationIds 站点ID列表（逗号分隔）
+     * @param projectId 项目ID
+     * @return 各测站最新数据列表
+     */
+    @Operation(summary = "获取所有测站最新位移数据", description = "一张图模块专用，获取所有GNSS测站的最新数据")
+    @ApiResponse(responseCode = "200", description = "成功")
+    @GetMapping("/latest")
+    public ResponseEntity<ApiResult<List<DisplacementHistoryVO>>> getDisplacementLatest(
+            @Parameter(description = "传感器类型", example = "L1_GP")
+            @RequestParam(required = false) String sensor,
+            @Parameter(description = "站点ID列表(逗号分隔)", example = "33210,33214")
+            @RequestParam(required = false) String stationIds,
+            @Parameter(description = "项目ID", example = "1681")
+            @RequestParam(required = false) Integer projectId) {
+
+        List<DisplacementHistoryVO> result = displacementHistoryService.getDisplacementLatest(
+                stationIds, sensor, projectId);
         return ResponseEntity.ok(ApiResult.success(result, "查询成功"));
     }
 }

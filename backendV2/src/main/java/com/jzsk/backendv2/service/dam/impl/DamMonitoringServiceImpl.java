@@ -371,6 +371,69 @@ public class DamMonitoringServiceImpl implements DamMonitoringService {
         return PageUtils.buildPage(voList, total, page, size);
     }
 
+    @Override
+    public List<SeepageVO> getSeepageLatestAll() {
+        log.info("批量查询所有渗压测站最新数据");
+
+        // 查询所有测点最新数据
+        List<DataNewEntity> entities = dataNewMapper.selectLatestForAllPoints();
+
+        if (entities.isEmpty()) {
+            log.info("未查询到渗压测站数据");
+            return Collections.emptyList();
+        }
+
+        // 获取测点名称映射（用于将数字ID转换为名称）
+        Map<String, String> idToNameMap = new HashMap<>();
+        Set<String> pointIdSet = entities.stream()
+                .map(DataNewEntity::getPointId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        if (!pointIdSet.isEmpty()) {
+            // 收集所有有效的数字ID
+            List<Long> ids = new ArrayList<>();
+            for (String pid : pointIdSet) {
+                try {
+                    ids.add(Long.parseLong(pid));
+                } catch (NumberFormatException e) {
+                    // 不是数字，跳过
+                }
+            }
+
+            // 批量查询测点信息
+            if (!ids.isEmpty()) {
+                List<SensorPointEntity> sensorPoints = sensorPointMapper.selectNameByIds(ids);
+                for (SensorPointEntity sp : sensorPoints) {
+                    String numId = String.valueOf(sp.getId());
+                    String name = sp.getName();
+                    idToNameMap.put(numId, name);
+                }
+            }
+        }
+
+        // Entity转VO，使用测点名称作为pointId以匹配前端
+        final Map<String, String> finalIdToNameMap = idToNameMap;
+        List<SeepageVO> voList = entities.stream()
+                .map(entity -> {
+                    // 优先使用名称，如果没有则使用数字ID
+                    String pointId = finalIdToNameMap.getOrDefault(entity.getPointId(), entity.getPointId());
+                    // 转换时间类型
+                    LocalDateTime localTime = convertToLocalDateTime(entity.getTime());
+                    return new SeepageVO(
+                            pointId,  // 使用测点名称
+                            localTime,
+                            entity.getOriginalData(),
+                            entity.getResultData(),
+                            pointId   // pointName 也用名称
+                    );
+                })
+                .collect(Collectors.toList());
+
+        log.info("批量查询渗压测站最新数据成功,返回{}条记录", voList.size());
+        return voList;
+    }
+
     // ==================== 私有辅助方法 ====================
 
     /**

@@ -98,4 +98,13 @@ public interface DamMonitoringService {
      */
     @Operation(summary = "分页查询渗流量数据", description = "按条件分页查询渗流量监测数据")
     PageResultVO<SeepageFlowVO> getSeepageFlowPage(int page, int size, SeepageQueryDTO queryDTO);
+
+    /**
+     * 获取所有渗压测站最新数据（批量接口）
+     * 用于一张图模块一次性获取所有测站数据，减少请求数量
+     *
+     * @return 所有测点最新渗压数据列表
+     */
+    @Operation(summary = "获取所有渗压测站最新数据", description = "一次性获取所有渗压测站的最新数据")
+    List<SeepageVO> getSeepageLatestAll();
 }

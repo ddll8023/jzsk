@@ -1,11 +1,11 @@
 <template>
-  <div 
+  <div
     class="absolute top-20 left-4 z-10 transition-all duration-300 ease-in-out"
-    :class="[isCollapsed ? 'w-10' : 'w-48']"
+    :class="[isCollapsed ? 'w-10' : 'w-56']"
   >
     <div class="bg-white/90 backdrop-blur-md shadow-lg rounded-lg overflow-hidden border border-white/50">
       <!-- 标题栏 / 折叠按钮 -->
-      <div 
+      <div
         class="flex items-center justify-between p-2 cursor-pointer hover:bg-gray-50/80 transition-colors"
         @click="toggleCollapse"
         :title="isCollapsed ? '展开图例' : '收起图例'"
@@ -21,13 +21,13 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </div>
-        
-        <svg 
+
+        <svg
           v-if="!isCollapsed"
           class="w-3 h-3 text-gray-400 transition-transform duration-300"
           :class="{'rotate-180': isCollapsed}"
-          fill="none" 
-          stroke="currentColor" 
+          fill="none"
+          stroke="currentColor"
           viewBox="0 0 24 24"
         >
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -38,14 +38,15 @@
       <transition
         enter-active-class="transition-all duration-300 ease-out"
         enter-from-class="max-h-0 opacity-0"
-        enter-to-class="max-h-64 opacity-100"
+        enter-to-class="max-h-96 opacity-100"
         leave-active-class="transition-all duration-200 ease-in"
-        leave-from-class="max-h-64 opacity-100"
+        leave-from-class="max-h-96 opacity-100"
         leave-to-class="max-h-0 opacity-0"
       >
-        <div v-show="!isCollapsed" class="p-3 pt-0 space-y-2 border-t border-gray-100">
-          <label 
-            v-for="item in legendItems" 
+        <div v-show="!isCollapsed" class="p-3 pt-0 space-y-3 border-t border-gray-100">
+          <!-- 测站类型列表 -->
+          <label
+            v-for="item in legendItems"
             :key="item.key"
             class="flex items-center gap-3 cursor-pointer group hover:bg-gray-50/80 rounded p-1.5 -mx-1 transition-colors"
           >
@@ -56,10 +57,64 @@
               class="w-3.5 h-3.5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
             />
             <div class="flex items-center gap-2">
-              <span class="text-xl leading-none filter drop-shadow-sm">{{ item.icon }}</span>
+              <!-- GNSS测站 - 使用地图实际图标（在线状态） -->
+              <img v-if="item.key === 'gnss'" src="https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png" class="w-5 h-5 object-contain" alt="GNSS" />
+              <!-- 雨量水位站 - 使用地图实际图标（在线状态） -->
+              <img v-else-if="item.key === 'rain'" src="/icons/流量站点.png" class="w-5 h-5 object-contain" alt="雨量水位站" />
+              <!-- 渗压测站 - 使用地图实际图标（在线状态） -->
+              <img v-else-if="item.key === 'seepage'" src="/icons/水厂.png" class="w-5 h-5 object-contain" alt="渗压测站" />
               <span class="text-xs text-gray-600 font-medium group-hover:text-gray-800">{{ item.label }}</span>
             </div>
           </label>
+
+          <!-- 图标示例说明 -->
+          <div class="space-y-2 pt-2 border-t border-gray-100">
+            <div class="text-xs font-medium text-gray-600">测站状态示例：</div>
+
+            <!-- GNSS测站 -->
+            <div class="flex items-center gap-4">
+              <div class="flex items-center gap-2">
+                <img src="https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png" class="w-5 h-5 object-contain" alt="GNSS在线" />
+                <span class="text-xs text-gray-500">在线</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <img src="https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png" class="w-5 h-5 object-contain grayscale opacity-50" alt="GNSS离线" />
+                <span class="text-xs text-gray-500">离线</span>
+              </div>
+              <span class="text-xs text-gray-400 ml-auto">GNSS</span>
+            </div>
+
+            <!-- 雨量水位站 -->
+            <div class="flex items-center gap-4">
+              <div class="flex items-center gap-2">
+                <img src="/icons/流量站点.png" class="w-5 h-5 object-contain" alt="雨量水位站在线" />
+                <span class="text-xs text-gray-500">在线</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <img src="/icons/流量站点.png" class="w-5 h-5 object-contain grayscale opacity-50" alt="雨量水位站离线" />
+                <span class="text-xs text-gray-500">离线</span>
+              </div>
+              <span class="text-xs text-gray-400 ml-auto">雨量水位</span>
+            </div>
+
+            <!-- 渗压测站 -->
+            <div class="flex items-center gap-4">
+              <div class="flex items-center gap-2">
+                <img src="/icons/水厂.png" class="w-5 h-5 object-contain" alt="渗压在线" />
+                <span class="text-xs text-gray-500">在线</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <img src="/icons/水厂.png" class="w-5 h-5 object-contain grayscale opacity-50" alt="渗压离线" />
+                <span class="text-xs text-gray-500">离线</span>
+              </div>
+              <span class="text-xs text-gray-400 ml-auto">渗压测站</span>
+            </div>
+          </div>
+
+          <!-- 超时阈值说明 -->
+          <div class="text-xs text-gray-400 pt-1 border-t border-gray-100 space-y-0.5">
+            <div>超时阈值：GNSS 60min | 雨量水位 5min | 渗压 10min</div>
+          </div>
         </div>
       </transition>
     </div>
@@ -71,7 +126,7 @@
  * 地图图例组件
  * 功能：测站图层显示/隐藏控制
  * 优化：
- * 1. 使用SVG图标替代emoji（更专业）
+ * 1. 使用地图实际图片作为图标（保持一致性）
  * 2. 支持折叠/展开
  * 3. 立即可用，不依赖数据加载
  * Source: 基于旧版本优化
@@ -90,9 +145,9 @@ const emit = defineEmits(['update:modelValue', 'change'])
 const isCollapsed = ref(false)
 
 const legendItems = [
-  { key: 'gnss', label: 'GNSS测站', icon: '📍' },
-  { key: 'rain', label: '雨量水位站', icon: '💧' },
-  { key: 'seepage', label: '渗压测站', icon: '🏭' }
+  { key: 'gnss', label: 'GNSS测站' },
+  { key: 'rain', label: '雨量水位站' },
+  { key: 'seepage', label: '渗压测站' }
 ]
 
 /**

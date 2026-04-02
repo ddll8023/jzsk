@@ -43,4 +43,16 @@ public interface DisplacementHistoryService {
     PageResultVO<DisplacementHistoryVO> getDisplacementHistoryPageRaw(int page, int size,
             LocalDateTime startTime, LocalDateTime endTime,
             String sensor, String stationIds, Integer projectId, Integer statsFreq);
+
+    /**
+     * 获取所有测站最新位移数据（一张图专用接口）
+     * 优化：并行调用 + size=1，大幅减少响应时间
+     *
+     * @param stationIds 站点ID列表（逗号分隔）
+     * @param sensor 传感器类型
+     * @param projectId 项目ID
+     * @return 各测站最新数据列表
+     */
+    @Operation(summary = "获取所有测站最新位移数据", description = "一张图模块专用，获取所有GNSS测站的最新数据")
+    java.util.List<DisplacementHistoryVO> getDisplacementLatest(String stationIds, String sensor, Integer projectId);
 }

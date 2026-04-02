@@ -79,3 +79,11 @@ export function getSeepageFlowPage(params) {
 export function getDisplacementHistory(params) {
   return request.get('/api/displacement-history/page', { params: normalizePageParams(params) })
 }
+
+/**
+ * 获取所有测站最新位移数据（一张图专用）
+ * @param {Object} params - { sensor, stationIds, projectId }
+ */
+export function getDisplacementLatest(params) {
+  return request.get('/api/displacement-history/latest', { params: normalizePageParams(params) })
+}

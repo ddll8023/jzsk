@@ -181,4 +181,17 @@ public class DamMonitoringController {
         PageResultVO<SeepageFlowVO> result = damMonitoringService.getSeepageFlowPage(page, size, queryDTO);
         return ResponseEntity.ok(ApiResult.success(result, "查询成功"));
     }
+
+    /**
+     * 获取所有渗压测站最新数据（批量接口）
+     * 用于一张图模块一次性获取所有测站数据，减少请求数量
+     * 权限: 需要登录
+     */
+    @Operation(summary = "获取所有渗压测站最新数据", description = "一次性获取所有渗压测站的最新数据，用于一张图模块")
+    @ApiResponse(responseCode = "200", description = "成功")
+    @GetMapping("/seepage/latest-all")
+    public ResponseEntity<ApiResult<List<SeepageVO>>> getSeepageLatestAll() {
+        List<SeepageVO> list = damMonitoringService.getSeepageLatestAll();
+        return ResponseEntity.ok(ApiResult.success(list, "查询成功"));
+    }
 }

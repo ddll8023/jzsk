@@ -3,6 +3,7 @@
  * 功能：管理渗流数据查询、图表、表格的状态和逻辑
  */
 import { ref, computed, reactive } from 'vue'
+import { formatMinute as formatMinuteUtil } from '@/utils/time'
 import {
   getPoints,
   getSeepagePage,
@@ -95,23 +96,11 @@ export function formatDateForPicker(date) {
 }
 
 /**
- * 格式化时间显示（精确到分钟）
+ * 格式化时间显示（精确到分钟，分钟个位数四舍五入）
+ * @deprecated 请从 '@/utils/time' 导入 formatMinute
  */
 export function formatMinute(val) {
-  if (!val) return ''
-  let d
-  if (typeof val === 'number') {
-    d = new Date(val < 1e12 ? val * 1000 : val)
-  } else {
-    d = new Date(String(val).replace(/-/g, '/'))
-  }
-  if (isNaN(d.getTime())) return ''
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const dd = String(d.getDate()).padStart(2, '0')
-  const h = String(d.getHours()).padStart(2, '0')
-  const min = String(d.getMinutes()).padStart(2, '0')
-  return `${y}-${m}-${dd} ${h}:${min}`
+  return formatMinuteUtil(val)
 }
 
 /**

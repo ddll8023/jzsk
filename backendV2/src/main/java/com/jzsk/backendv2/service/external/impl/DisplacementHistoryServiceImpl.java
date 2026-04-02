@@ -22,6 +22,10 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 /**
@@ -273,6 +277,115 @@ public class DisplacementHistoryServiceImpl implements DisplacementHistoryServic
         }
 
         return result;
+    }
+
+    @Override
+    public List<DisplacementHistoryVO> getDisplacementLatest(String stationIds, String sensor, Integer projectId) {
+        log.info("获取所有测站最新位移数据, 站点IDs: {}", stationIds);
+
+        // 解析站点ID列表
+        List<Long> stationIdList = parseStationIds(stationIds);
+        if (stationIdList == null || stationIdList.isEmpty()) {
+            log.warn("站点ID列表为空, 返回空结果");
+            return Collections.emptyList();
+        }
+
+        // 近1小时时间范围，减少外部API数据量
+        LocalDateTime endTime = LocalDateTime.now();
+        LocalDateTime startTime = endTime.minusHours(1);
+        String startTimeStr = startTime.format(DATE_TIME_FORMATTER);
+        String endTimeStr = endTime.format(DATE_TIME_FORMATTER);
+
+        // 如果外部API配置为空，返回空结果
+        if (!StringUtils.hasText(baseUrl)) {
+            log.warn("外部API配置为空, 返回空结果");
+            return Collections.emptyList();
+        }
+
+        // 并行调用所有站点（优化：8次调用并行执行）
+        List<CompletableFuture<List<DisplacementHistoryVO>>> futures = new ArrayList<>();
+        for (Long stationId : stationIdList) {
+            CompletableFuture<List<DisplacementHistoryVO>> future = CompletableFuture.supplyAsync(() -> {
+                return fetchSingleStationLatest(
+                        stationId,
+                        startTimeStr,
+                        endTimeStr,
+                        sensor,
+                        projectId != null ? projectId : 0
+                );
+            });
+            futures.add(future);
+        }
+
+        // 等待所有并行任务完成（最多等待30秒）
+        try {
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get(30, TimeUnit.SECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            log.warn("并行获取测站数据超时或中断: {}", e.getMessage());
+        }
+
+        // 收集所有结果
+        List<DisplacementHistoryVO> result = new ArrayList<>();
+        for (CompletableFuture<List<DisplacementHistoryVO>> future : futures) {
+            try {
+                List<DisplacementHistoryVO> data = future.get();
+                if (data != null && !data.isEmpty()) {
+                    result.addAll(data);
+                }
+            } catch (Exception e) {
+                log.warn("获取测站数据失败: {}", e.getMessage());
+            }
+        }
+
+        log.info("获取所有测站最新位移数据成功, 返回{}条记录", result.size());
+        return result;
+    }
+
+    /**
+     * 获取单个站点的最新数据
+     */
+    private List<DisplacementHistoryVO> fetchSingleStationLatest(
+            Long stationId,
+            String startTimeStr,
+            String endTimeStr,
+            String sensor,
+            int projectId) {
+
+        try {
+            String url = baseUrl + "/manager/posPlane/allHistoricalMonitoringData";
+            String requestUrl = url + "?statsFreq=0"
+                    + "&start_time=" + startTimeStr
+                    + "&end_time=" + endTimeStr
+                    + "&sensor=" + (sensor != null ? sensor : "")
+                    + "&stationId=" + stationId
+                    + "&projectId=" + projectId
+                    + "&page=1"
+                    + "&size=1";  // 只取最新一条
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + token);
+            headers.set("Language", "zh-CN");
+            headers.set("Industry-Code", "DZ");
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<?> entity = new HttpEntity<>(headers);
+
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    requestUrl,
+                    HttpMethod.GET,
+                    entity,
+                    Map.class
+            );
+
+            if (response.getBody() != null) {
+                ExternalApiResult result = parseExternalResponseWithTotal(response.getBody());
+                return result.getData();
+            }
+        } catch (Exception e) {
+            log.warn("获取站点 {} 最新数据失败: {}", stationId, e.getMessage());
+        }
+
+        return Collections.emptyList();
     }
 
     /**

@@ -122,6 +122,8 @@ const handleMapReady = async (mapInstance) => {
     stationMarkerManager.updateStationData().catch(error => {
       console.error('[OneMap] 测站数据加载失败:', error)
     })
+    // 启动定时刷新测站状态（每分钟检查一次）
+    stationMarkerManager.startStatusRefresh()
   }
 
   if (mapInstance) {

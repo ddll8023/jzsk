@@ -9,6 +9,7 @@
 
 import { ref, computed } from 'vue'
 import request from '@/utils/request'
+import { getDisplacementLatest } from '@/api/dam'
 
 /**
  * GNSS测站配置
@@ -57,31 +58,23 @@ export function useStationData() {
   })
 
   /**
-   * 获取GNSS位移数据
-   * API: /api/displacement-history/page
-   * 修复：使用V2接口路径
+   * 获取GNSS位移数据（一张图专用接口）
+   * 优化：使用 /latest 接口，并行获取所有测站最新数据
+   * API: /api/displacement-history/latest
    */
   const fetchGnssData = async () => {
     try {
-      const end = new Date()
-      const start = new Date(end.getTime() - 7 * 24 * 60 * 60 * 1000) // 最近7天
-
       const params = {
-        startTime: formatDateTime(start),
-        endTime: formatDateTime(end),
         sensor: 'L1_GP', // GNSS传感器类型（固定值）
         stationIds: GNSS_STATIONS.map(s => s.stationId).join(','), // 测站ID列表（逗号分隔）
-        projectId: 1681, // 项目ID（固定值）
-        page: 1, // 分页参数
-        size: 2000
+        projectId: 1681 // 项目ID（固定值）
       }
 
-      const res = await request.get('/api/displacement-history/page', { params })
-      // 修复：API返回的是 res.data.data.list（嵌套了两层data）
-      const records = (res && res.data && res.data.data && res.data.data.list) ? res.data.data.list : []
+      const res = await getDisplacementLatest(params)
+      const records = Array.isArray(res.data?.data) ? res.data.data : []
 
       // 转换数据结构：从 keyValues 数组提取位移值
-      const transformedRecords = records.map(record => {
+      gnssData.value = records.map(record => {
         const keyValuesMap = {}
         if (record.keyValues && Array.isArray(record.keyValues)) {
           record.keyValues.forEach(kv => {
@@ -100,16 +93,6 @@ export function useStationData() {
         }
       })
 
-      // 聚合：每个stationId取最新的一条
-      const stationMap = {}
-      transformedRecords.forEach(r => {
-        const sid = r.stationId
-        if (!stationMap[sid] || new Date(r.collectTime) > new Date(stationMap[sid].collectTime)) {
-          stationMap[sid] = r
-        }
-      })
-
-      gnssData.value = Object.values(stationMap)
       return gnssData.value
     } catch (e) {
       console.error('获取GNSS数据失败:', e)
@@ -121,11 +104,20 @@ export function useStationData() {
   /**
    * 获取水位数据
    * API: /api/water-levels/list
-   * 修复：使用V2接口路径
+   * 修复：使用V2接口路径，添加近24小时时间筛选
    */
   const fetchWaterLevelData = async () => {
     try {
-      const res = await request.get('/api/water-levels/list')
+      // 近24小时时间范围
+      const endDate = new Date()
+      const startDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000)
+
+      const params = {
+        startDate: formatDateTime(startDate),
+        endDate: formatDateTime(endDate)
+      }
+
+      const res = await request.get('/api/water-levels/list', { params })
       const arr = Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []
       const valid = arr.filter(it => Number(it.z1) > 0)
 
@@ -149,12 +141,21 @@ export function useStationData() {
   /**
    * 获取雨量数据
    * API: /api/hourly-rainfalls/list
-   * 修复：使用V2接口路径
+   * 修复：使用V2接口路径，添加近24小时时间筛选
    * 响应格式：{code, message, data: []}
    */
   const fetchRainfallData = async () => {
     try {
-      const res = await request.get('/api/hourly-rainfalls/list')
+      // 近24小时时间范围
+      const endDate = new Date()
+      const startDate = new Date(endDate.getTime() - 24 * 60 * 60 * 1000)
+
+      const params = {
+        startDate: formatDateTime(startDate),
+        endDate: formatDateTime(endDate)
+      }
+
+      const res = await request.get('/api/hourly-rainfalls/list', { params })
       const lst = Array.isArray(res.data?.data) ? res.data.data : Array.isArray(res.data) ? res.data : []
 
       if (lst.length > 0) {
@@ -240,16 +241,46 @@ export function useStationData() {
 
   /**
    * 批量获取渗流量数据
-   * 修复：批量加载所有渗压测站数据（对齐旧项目 fetchLatestUpbStationData）
+   * 优化：使用批量接口一次性获取所有测站数据，减少请求数量
+   * API: /api/dam-monitoring/seepage/latest-all
    * Source: 参照旧项目 OneMaps.vue 第980行
    */
   const fetchSeepageData = async (seepageStations = []) => {
     try {
-      const promises = seepageStations.map(station =>
-        fetchSingleSeepageData(station.piezometerId)
-      )
-      const results = await Promise.all(promises)
-      seepageData.value = results.filter(data => data !== null)
+      // 使用批量接口，一次获取所有测站最新数据
+      const res = await request.get('/api/dam-monitoring/seepage/latest-all')
+      const rawData = res.data?.data || []
+      const records = Array.isArray(rawData) ? rawData : []
+
+      // 解析并转换数据
+      const results = records.map(record => {
+        // 解析 resultData（水位高程、水位、水压）
+        let resultData = {}
+        try {
+          resultData = JSON.parse(record.resultData || '{}')
+        } catch (e) {
+          console.warn(`解析 ${record.pointId} resultData失败:`, e)
+        }
+
+        // 解析 originalData（温度）
+        let originalData = {}
+        try {
+          originalData = JSON.parse(record.originalData || '{}')
+        } catch (e) {
+          console.warn(`解析 ${record.pointId} originalData失败:`, e)
+        }
+
+        return {
+          piezometerId: record.pointId,
+          waterLevelElevation: resultData['水位高程'],
+          waterLevel: resultData['水位'],
+          pressure: resultData['水压'],
+          temperature: originalData['温度'],
+          time: record.time
+        }
+      })
+
+      seepageData.value = results
       return seepageData.value
     } catch (e) {
       console.error('批量获取渗流量数据失败:', e)

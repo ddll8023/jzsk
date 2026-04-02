@@ -29,7 +29,7 @@ export function usePrewarning() {
   // 筛选条件
   const filters = reactive({
     position: '',
-    status: '',
+    status: '未解除',
     level: '',
     type: '',
     dateRange: ['', '']
@@ -162,7 +162,7 @@ export function usePrewarning() {
    */
   const resetFilters = () => {
     filters.position = ''
-    filters.status = ''
+    filters.status = '未解除'
     filters.level = ''
     filters.type = ''
     filters.dateRange = ['', '']
@@ -208,7 +208,7 @@ export function usePrewarning() {
         currentPage: 1,
         pageSize: 20,
         position: '',
-        status: '',
+        status: '未解除',
         level: '',
         type: '',
         startTime: '',

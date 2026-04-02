@@ -1,5 +1,6 @@
 package com.jzsk.backendv2.mapper.warning;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.jzsk.backendv2.pojo.dto.warning.WarningIndicatorPageQueryDTO;
 import com.jzsk.backendv2.pojo.entity.warning.WarningIndicatorEntity;
 import org.apache.ibatis.annotations.Mapper;
@@ -9,9 +10,10 @@ import java.util.List;
 
 /**
  * 预警指标Mapper
- * 数据源切换在 Service 层通过 @DS 注解实现
+ * 数据源：yjxx
  */
 @Mapper
+@DS("yjxx")
 public interface WarningIndicatorMapper {
 
     /**

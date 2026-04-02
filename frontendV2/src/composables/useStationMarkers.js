@@ -16,6 +16,7 @@ import Point from 'ol/geom/Point'
 import { Style, Icon } from 'ol/style'
 import Overlay from 'ol/Overlay'
 import { useStationData } from './useStationData'
+import { useStationStatus, STATION_STATUS } from './useStationStatus'
 import StationPopup from '@/components/business/map/StationPopup.vue'
 
 /**
@@ -85,11 +86,16 @@ const SEEPAGE_STATIONS = [
 
 /**
  * 图标路径配置
+ * 在线：正常颜色
+ * 离线：使用 CSS filter 实现灰度效果（所有类型统一用灰度）
  */
 const ICON_PATHS = {
-  gnss: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png', // 蓝色标记
+  gnss: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png', // 蓝色标记（在线）
+  gnssOffline: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png', // 蓝色标记（离线用灰度滤镜）
   rain: '/icons/流量站点.png',
+  rainOffline: '/icons/流量站点.png', // 使用CSS滤镜实现灰度
   seepage: '/icons/水厂.png',
+  seepageOffline: '/icons/水厂.png',   // 使用CSS滤镜实现灰度
   benchmark: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png'
 }
 
@@ -118,38 +124,98 @@ export function useStationMarkers(map) {
   // 数据管理
   const stationData = useStationData()
 
+  // 状态管理（在线/离线）
+  const stationStatus = useStationStatus()
+
   /**
    * 创建图标样式
    * @param {string} iconUrl - 图标URL
    * @param {number} scale - 缩放比例
+   * @param {string} status - 状态：online/offline/hidden
    */
-  const createIconStyle = (iconUrl, scale = 0.8) => {
+  const createIconStyle = (iconUrl, scale = 0.8, status = 'online') => {
     return new Style({
       image: new Icon({
         src: iconUrl,
         scale,
-        anchor: [0.5, 1] // 底部中心对齐
+        anchor: [0.5, 1], // 底部中心对齐
+        color: status === 'offline' ? 'gray' : undefined,
+        opacity: status === 'offline' ? 0.5 : (status === 'hidden' ? 0 : 1) // hidden时完全透明
       })
     })
   }
 
   /**
+   * 获取测站当前状态（online/offline/hidden）
+   * @param {Object} station - 测站配置
+   * @returns {string} 状态
+   */
+  const getStationDisplayStatus = (station) => {
+    // 基准点始终在线
+    if (station.type === 'benchmark') return STATION_STATUS.ONLINE
+
+    // 从已有状态中获取状态
+    const status = stationStatus.getStationStatus(station.type, station.stationId || station.piezometerId)
+
+    // 隐藏状态直接返回（无数据）
+    if (status.status === STATION_STATUS.HIDDEN) {
+      return STATION_STATUS.HIDDEN
+    }
+
+    // 根据采集时间判断是否在线
+    const now = Date.now()
+    const thresholds = {
+      gnss: 61 * 60 * 1000,   // 61分钟
+      rain: 6 * 60 * 1000,   // 6分钟
+      upb: 11 * 60 * 1000     // 11分钟
+    }
+    const threshold = thresholds[station.type] || thresholds.gnss
+
+    if (status.lastCollectTime) {
+      const collectTime = new Date(status.lastCollectTime).getTime()
+      return (now - collectTime) <= threshold ? STATION_STATUS.ONLINE : STATION_STATUS.OFFLINE
+    }
+
+    return STATION_STATUS.HIDDEN
+  }
+
+  /**
+   * 获取测站对应的图标路径
+   * @param {string} type - 测站类型
+   * @param {string} status - 状态
+   * @returns {string} 图标URL
+   */
+  const getIconPath = (type, status) => {
+    const iconMap = {
+      gnss: { online: ICON_PATHS.gnss, offline: ICON_PATHS.gnssOffline, hidden: ICON_PATHS.gnss },
+      rain: { online: ICON_PATHS.rain, offline: ICON_PATHS.rainOffline, hidden: ICON_PATHS.rain },
+      upb: { online: ICON_PATHS.seepage, offline: ICON_PATHS.seepageOffline, hidden: ICON_PATHS.seepage },
+      benchmark: { online: ICON_PATHS.benchmark, offline: ICON_PATHS.benchmark, hidden: ICON_PATHS.benchmark }
+    }
+    return iconMap[type]?.[status] || ICON_PATHS.gnss
+  }
+
+  /**
    * 创建测站 Feature
    * @param {Object} station - 测站配置
-   * @param {string} iconUrl - 图标URL
-   * 修复：直接使用 EPSG:4326 坐标，不进行投影转换
+   * 优化：创建时使用 loading 状态，数据加载后逐步更新
    */
-  const createStationFeature = (station, iconUrl) => {
+  const createStationFeature = (station) => {
+    // 创建时默认使用 loading 状态
+    const status = getStationDisplayStatus(station)
+    const iconUrl = getIconPath(station.type, status)
+
     const feature = new Feature({
       geometry: new Point(station.position), // 直接使用原始坐标（EPSG:4326）
       name: station.name,
       type: station.type,
       stationId: station.stationId,
       piezometerId: station.piezometerId,
-      stationData: station
+      stationData: station,
+      status: status
     })
 
-    feature.setStyle(createIconStyle(iconUrl))
+    feature.setStyle(createIconStyle(iconUrl, 0.8, status))
     return feature
   }
 
@@ -158,7 +224,7 @@ export function useStationMarkers(map) {
    */
   const createGnssLayer = () => {
     const features = [...GNSS_STATIONS, ...BENCHMARKS].map(station =>
-      createStationFeature(station, ICON_PATHS.gnss)
+      createStationFeature(station)
     )
 
     const source = new VectorSource({ features })
@@ -175,7 +241,7 @@ export function useStationMarkers(map) {
    * 创建雨量水位站图层
    */
   const createRainLayer = () => {
-    const feature = createStationFeature(RAIN_STATION, ICON_PATHS.rain)
+    const feature = createStationFeature(RAIN_STATION)
 
     const source = new VectorSource({ features: [feature] })
     rainLayer.value = new VectorLayer({
@@ -192,7 +258,7 @@ export function useStationMarkers(map) {
    */
   const createSeepageLayer = () => {
     const features = SEEPAGE_STATIONS.map(station =>
-      createStationFeature(station, ICON_PATHS.seepage)
+      createStationFeature(station)
     )
 
     const source = new VectorSource({ features })
@@ -349,10 +415,109 @@ export function useStationMarkers(map) {
   /**
    * 更新测站数据
    * 修复：传入渗压测站配置，批量加载所有测站数据
+   * 优化：改为渐进式加载，收到数据后立即显示对应测站图标
    * Source: 对齐旧项目 fetchLatestUpbStationData 行为
    */
   const updateStationData = async () => {
-    await stationData.fetchAllStationData(SEEPAGE_STATIONS)
+    // 1. 首先初始化所有测站为隐藏状态（不显示）
+    stationStatus.initLoadingStatus()
+    updateMarkerStyles()
+
+    // 2. 渐进式加载数据，每个请求完成后立即显示对应测站
+    // GNSS 数据
+    stationData.fetchGnssData().then(gnssData => {
+      stationStatus.updateGnssStatus(gnssData)
+      updateMarkerStyles()
+    }).catch(err => {
+      console.warn('[测站标注] GNSS数据加载失败:', err)
+    })
+
+    // 水位数据
+    stationData.fetchWaterLevelData().then(data => {
+      stationStatus.updateRainStatus(data, stationData.rainfallData.value)
+      updateMarkerStyles()
+    }).catch(err => {
+      console.warn('[测站标注] 水位数据加载失败:', err)
+    })
+
+    // 雨量数据
+    stationData.fetchRainfallData().then(data => {
+      stationStatus.updateRainStatus(stationData.waterLevelData.value, data)
+      updateMarkerStyles()
+    }).catch(err => {
+      console.warn('[测站标注] 雨量数据加载失败:', err)
+    })
+
+    // 渗压数据
+    stationData.fetchSeepageData(SEEPAGE_STATIONS).then(seepageData => {
+      stationStatus.updateSeepageStatus(seepageData)
+      updateMarkerStyles()
+    }).catch(err => {
+      console.warn('[测站标注] 渗压数据加载失败:', err)
+    })
+  }
+
+  /**
+   * 更新所有测站图标的样式（根据状态）
+   * online: 正常颜色和透明度
+   * offline: 灰色 + 50%透明度
+   * hidden: 完全透明（不显示）
+   */
+  const updateMarkerStyles = () => {
+    const updateLayerStyles = (layer, stationType) => {
+      if (!layer) return
+
+      const source = layer.getSource()
+      if (!source) return
+
+      source.getFeatures().forEach(feature => {
+        const type = feature.get('type')
+        if (type !== stationType) return
+
+        let stationId = feature.get('stationId')
+        const piezometerId = feature.get('piezometerId')
+        const id = piezometerId || stationId
+
+        // 获取当前状态
+        const displayStatus = getStationDisplayStatus({
+          type,
+          stationId,
+          piezometerId
+        })
+
+        // 获取对应的图标
+        const iconUrl = getIconPath(type, displayStatus)
+
+        // 更新 feature 的样式和状态
+        feature.setStyle(createIconStyle(iconUrl, 0.8, displayStatus))
+        feature.set('status', displayStatus)
+      })
+    }
+
+    // 更新 GNSS 图层
+    updateLayerStyles(gnssLayer.value, 'gnss')
+    // 更新雨量水位图层
+    updateLayerStyles(rainLayer.value, 'rain')
+    // 更新渗压测站图层
+    updateLayerStyles(seepageLayer.value, 'upb')
+  }
+
+  /**
+   * 启动定时刷新测站状态
+   * 每分钟检查一次在线状态
+   */
+  const startStatusRefresh = () => {
+    stationStatus.startAutoRefresh(() => {
+      // 只更新样式，不重新请求数据
+      updateMarkerStyles()
+    }, 60000) // 1分钟
+  }
+
+  /**
+   * 停止定时刷新
+   */
+  const stopStatusRefresh = () => {
+    stationStatus.stopAutoRefresh()
   }
 
   /**
@@ -377,6 +542,9 @@ export function useStationMarkers(map) {
    * 清理资源
    */
   const cleanup = () => {
+    // 停止定时刷新
+    stopStatusRefresh()
+
     if (map.value) {
       map.value.un('click', handleMapClick)
 
@@ -399,6 +567,9 @@ export function useStationMarkers(map) {
     updateStationData,
     toggleLayer,
     hidePopup,
-    cleanup
+    cleanup,
+    startStatusRefresh,
+    stopStatusRefresh,
+    stationStatus
   }
 }

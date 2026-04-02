@@ -72,6 +72,7 @@
  * Source: 重构自 useStationMarkers.js 的 HTML 字符串
  */
 import { computed } from 'vue'
+import { formatMinute } from '@/utils/time'
 
 const props = defineProps({
   stationType: {
@@ -123,32 +124,25 @@ const formatValue = (value, decimals = 2) => {
 
 /**
  * 格式化时间显示
+ * - GNSS、渗压测站：分钟个位数四舍五入（与 seepage 模块一致）
+ * - 雨量水位站：直接显示原始时间
  */
 const formatTime = (time) => {
   if (!time) return '暂无数据'
-  
-  // 处理数组格式
-  if (Array.isArray(time)) {
-    const [y, m, d, h = 0, min = 0, sec = 0] = time
-    return `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')} ${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
+
+  // 雨量水位站不做四舍五入
+  if (props.stationType === 'rain') {
+    const d = new Date(String(time).replace(/-/g, '/'))
+    if (isNaN(d.getTime())) return '暂无数据'
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const dd = String(d.getDate()).padStart(2, '0')
+    const h = String(d.getHours()).padStart(2, '0')
+    const min = String(d.getMinutes()).padStart(2, '0')
+    return `${y}-${m}-${dd} ${h}:${min}`
   }
-  
-  // 处理字符串格式
-  if (typeof time === 'string') {
-    const date = new Date(time.replace(/-/g, '/'))
-    if (!isNaN(date.getTime())) {
-      return date.toLocaleString('zh-CN', { hour12: false })
-    }
-    return time
-  }
-  
-  // 处理时间戳
-  if (typeof time === 'number') {
-    const timestamp = time.toString().length === 10 ? time * 1000 : time
-    return new Date(timestamp).toLocaleString('zh-CN', { hour12: false })
-  }
-  
-  return time.toString()
+
+  return formatMinute(time) || '暂无数据'
 }
 </script>
 
