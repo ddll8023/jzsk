@@ -50,6 +50,10 @@ jzsk:
         - /v3/api-docs/**
         - /webjars/**
         - /external-data/**
+        - /photo/**
+        - /pic/**
+        - /shipin/**
+        - /app/**
     task:
       warning-enabled: true
       sync-enabled: false
