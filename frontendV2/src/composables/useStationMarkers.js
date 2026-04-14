@@ -139,8 +139,8 @@ export function useStationMarkers(map) {
         src: iconUrl,
         scale,
         anchor: [0.5, 1], // 底部中心对齐
-        color: status === 'offline' ? 'gray' : undefined,
-        opacity: status === 'offline' ? 0.5 : (status === 'hidden' ? 0 : 1) // hidden时完全透明
+        color: status === 'offline' || status === 'hidden' ? 'gray' : undefined,
+        opacity: status === 'offline' || status === 'hidden' ? 0.5 : 1
       })
     })
   }
