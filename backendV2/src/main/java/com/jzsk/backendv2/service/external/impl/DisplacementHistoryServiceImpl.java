@@ -51,7 +51,8 @@ public class DisplacementHistoryServiceImpl implements DisplacementHistoryServic
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
-    public PageResultVO<DisplacementHistoryVO> getDisplacementHistoryPage(int page, int size, DisplacementQueryDTO queryDTO) {
+    public PageResultVO<DisplacementHistoryVO> getDisplacementHistoryPage(int page, int size,
+            DisplacementQueryDTO queryDTO) {
         return getDisplacementHistoryPageRaw(page, size,
                 queryDTO.getStartTime(),
                 queryDTO.getEndTime(),
@@ -79,8 +80,7 @@ public class DisplacementHistoryServiceImpl implements DisplacementHistoryServic
                 projectId != null ? projectId : 0,
                 statsFreq != null ? statsFreq : 0,
                 page,
-                size
-        );
+                size);
 
         log.info("分页查询位移历史数据成功,总记录数: {}, 当前页记录数: {}",
                 pageResult.getTotal(), pageResult.getList().size());
@@ -147,8 +147,7 @@ public class DisplacementHistoryServiceImpl implements DisplacementHistoryServic
                         requestUrl,
                         HttpMethod.GET,
                         entity,
-                        Map.class
-                );
+                        Map.class);
 
                 if (response.getBody() != null) {
                     ExternalApiResult result = parseExternalResponseWithTotal(response.getBody());
@@ -311,8 +310,7 @@ public class DisplacementHistoryServiceImpl implements DisplacementHistoryServic
                         startTimeStr,
                         endTimeStr,
                         sensor,
-                        projectId != null ? projectId : 0
-                );
+                        projectId != null ? projectId : 0);
             });
             futures.add(future);
         }
@@ -360,7 +358,7 @@ public class DisplacementHistoryServiceImpl implements DisplacementHistoryServic
                     + "&stationId=" + stationId
                     + "&projectId=" + projectId
                     + "&page=1"
-                    + "&size=1";  // 只取最新一条
+                    + "&size=1"; // 只取最新一条
 
             HttpHeaders headers = new HttpHeaders();
             headers.set("Authorization", "Bearer " + token);
@@ -374,8 +372,7 @@ public class DisplacementHistoryServiceImpl implements DisplacementHistoryServic
                     requestUrl,
                     HttpMethod.GET,
                     entity,
-                    Map.class
-            );
+                    Map.class);
 
             if (response.getBody() != null) {
                 ExternalApiResult result = parseExternalResponseWithTotal(response.getBody());
