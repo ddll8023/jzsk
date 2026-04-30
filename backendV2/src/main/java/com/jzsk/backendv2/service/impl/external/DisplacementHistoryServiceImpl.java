@@ -1,4 +1,4 @@
-package com.jzsk.backendv2.service.external.impl;
+package com.jzsk.backendv2.service.impl.external;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jzsk.backendv2.exception.BusinessException;

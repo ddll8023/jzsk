@@ -1,6 +1,5 @@
 package com.jzsk.backendv2.service.impl;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.jzsk.backendv2.mapper.mcu.DataNewMapper;
 import com.jzsk.backendv2.mapper.mcu.SensorPointMapper;
 import com.jzsk.backendv2.mapper.monitor.StPptnHourMapper;
@@ -13,7 +12,6 @@ import com.jzsk.backendv2.service.MonitorDataService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 
@@ -26,13 +24,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MonitorDataServiceImpl implements MonitorDataService {
 
-    private static final String GNSS_API_BASE = "http://localhost:8081/external-data/latestMonitor?projectId=1681&stationId=";
-
     private final DataNewMapper dataNewMapper;
     private final SensorPointMapper sensorPointMapper;
     private final StRiversRMapper stRiversRMapper;
     private final StPptnHourMapper stPptnHourMapper;
-    private final RestTemplate restTemplate;
 
     @Override
     public List<DataNewEntity> getAllLatestMcuData() {
@@ -58,16 +53,5 @@ public class MonitorDataServiceImpl implements MonitorDataService {
     @Override
     public StPptnHourEntity getLatestRainfall(String stcd) {
         return stPptnHourMapper.selectLatestByStcd(stcd);
-    }
-
-    @Override
-    public JsonNode getGnssLatestData(Long stationId) {
-        String url = GNSS_API_BASE + stationId;
-        try {
-            return restTemplate.getForObject(url, JsonNode.class);
-        } catch (Exception e) {
-            log.warn("[MonitorDataService] GNSS API调用失败 stationId={}: {}", stationId, e.getMessage());
-            return null;
-        }
     }
 }

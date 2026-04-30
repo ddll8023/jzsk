@@ -1,4 +1,4 @@
-package com.jzsk.backendv2.service.dam.impl;
+package com.jzsk.backendv2.service.impl.dam;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jzsk.backendv2.mapper.dam.DamMonitoringMapper;

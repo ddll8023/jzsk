@@ -1,12 +1,13 @@
 package com.jzsk.backendv2.task.warning;
 
-import com.jzsk.backendv2.mapper.warning.WarningIndicatorMapper;
 import com.jzsk.backendv2.pojo.entity.monitor.StPptnHourEntity;
 import com.jzsk.backendv2.pojo.entity.monitor.StRiversREntity;
 import com.jzsk.backendv2.pojo.entity.warning.WarningIndicatorEntity;
-import com.jzsk.backendv2.pojo.enums.WarningLevel;
 import com.jzsk.backendv2.service.MonitorDataService;
 import com.jzsk.backendv2.service.warning.WarningAutoCheckService;
+import com.jzsk.backendv2.service.warning.WarningIndicatorService;
+import com.jzsk.backendv2.service.warning.WarningThresholdEvaluator;
+import com.jzsk.backendv2.service.warning.WarningThresholdEvaluator.WarningThresholdResult;
 import com.jzsk.backendv2.task.AbstractManagedTask;
 import com.jzsk.backendv2.task.ManagedTaskDefinition;
 import com.jzsk.backendv2.task.TaskModule;
@@ -36,17 +37,20 @@ public class WaterLevelRainfallCheckTask extends AbstractManagedTask {
             ManagedTaskDefinition.of(TaskModule.WARNING, WarningTaskCode.WATER_LEVEL_RAINFALL_CHECK);
 
     private final MonitorDataService monitorDataService;
-    private final WarningIndicatorMapper warningIndicatorMapper;
+    private final WarningIndicatorService warningIndicatorService;
     private final WarningAutoCheckService warningAutoCheckService;
+    private final WarningThresholdEvaluator warningThresholdEvaluator;
 
     public WaterLevelRainfallCheckTask(TaskSwitchDecider taskSwitchDecider,
-                                       MonitorDataService monitorDataService,
-                                       WarningIndicatorMapper warningIndicatorMapper,
-                                       WarningAutoCheckService warningAutoCheckService) {
+                                        MonitorDataService monitorDataService,
+                                        WarningIndicatorService warningIndicatorService,
+                                        WarningAutoCheckService warningAutoCheckService,
+                                        WarningThresholdEvaluator warningThresholdEvaluator) {
         super(taskSwitchDecider);
         this.monitorDataService = monitorDataService;
-        this.warningIndicatorMapper = warningIndicatorMapper;
+        this.warningIndicatorService = warningIndicatorService;
         this.warningAutoCheckService = warningAutoCheckService;
+        this.warningThresholdEvaluator = warningThresholdEvaluator;
     }
 
     /**
@@ -60,7 +64,7 @@ public class WaterLevelRainfallCheckTask extends AbstractManagedTask {
 
     private void doCheck() {
         log.info("[WaterLevelRainfallCheckTask] 定时任务开始执行");
-        List<WarningIndicatorEntity> settings = warningIndicatorMapper.selectAll();
+        List<WarningIndicatorEntity> settings = warningIndicatorService.listAll();
         for (WarningIndicatorEntity setting : settings) {
             String position = setting.getPosition();
             String type = setting.getType();
@@ -100,27 +104,13 @@ public class WaterLevelRainfallCheckTask extends AbstractManagedTask {
     }
 
     private void evaluateAndInsert(WarningIndicatorEntity setting, BigDecimal value,
-                                  LocalDateTime time, String type) {
+                                   LocalDateTime time, String type) {
         double v = value.doubleValue();
-        String level = null;
-        String content = null;
-        if (setting.getUpUpLimit() != null && v > setting.getUpUpLimit()) {
-            level = WarningLevel.SERIOUS.getDescription();
-            content = type + "超上上限，当前值：" + v;
-        } else if (setting.getUpLimit() != null && v > setting.getUpLimit()) {
-            level = WarningLevel.GENERAL.getDescription();
-            content = type + "超上限，当前值：" + v;
-        } else if (setting.getLowerLimit() != null && v < setting.getLowerLimit()) {
-            level = WarningLevel.SERIOUS.getDescription();
-            content = type + "低于下下限，当前值：" + v;
-        } else if (setting.getLowLimit() != null && v < setting.getLowLimit()) {
-            level = WarningLevel.GENERAL.getDescription();
-            content = type + "低于下限，当前值：" + v;
-        }
-        log.info("[WaterLevelRainfallCheckTask] 检查值: {}, 结果level={}, content={}", v, level, content);
-        if (level != null) {
+        WarningThresholdResult result = warningThresholdEvaluator.evaluate(setting, v, type);
+        log.info("[WaterLevelRainfallCheckTask] 检查值: {}, 结果={}", v, result == null ? null : result.getLevel());
+        if (result != null) {
             warningAutoCheckService.checkAndInsertWarning(
-                    setting.getPosition(), type, value, time, level, content,
+                    setting.getPosition(), type, value, time, result.getLevel(), result.getContent(),
                     setting.getLongitude(), setting.getLatitude());
         }
     }

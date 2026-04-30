@@ -1,12 +1,13 @@
 package com.jzsk.backendv2.task.warning;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jzsk.backendv2.mapper.warning.WarningIndicatorMapper;
 import com.jzsk.backendv2.pojo.entity.mcu.DataNewEntity;
 import com.jzsk.backendv2.pojo.entity.warning.WarningIndicatorEntity;
-import com.jzsk.backendv2.pojo.enums.WarningLevel;
 import com.jzsk.backendv2.service.MonitorDataService;
 import com.jzsk.backendv2.service.warning.WarningAutoCheckService;
+import com.jzsk.backendv2.service.warning.WarningIndicatorService;
+import com.jzsk.backendv2.service.warning.WarningThresholdEvaluator;
+import com.jzsk.backendv2.service.warning.WarningThresholdEvaluator.WarningThresholdResult;
 import com.jzsk.backendv2.task.AbstractManagedTask;
 import com.jzsk.backendv2.task.ManagedTaskDefinition;
 import com.jzsk.backendv2.task.TaskModule;
@@ -18,7 +19,6 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -39,18 +39,21 @@ public class McuCheckTask extends AbstractManagedTask {
             ManagedTaskDefinition.of(TaskModule.WARNING, WarningTaskCode.MCU_CHECK);
 
     private final MonitorDataService monitorDataService;
-    private final WarningIndicatorMapper warningIndicatorMapper;
+    private final WarningIndicatorService warningIndicatorService;
     private final WarningAutoCheckService warningAutoCheckService;
+    private final WarningThresholdEvaluator warningThresholdEvaluator;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public McuCheckTask(TaskSwitchDecider taskSwitchDecider,
                         MonitorDataService monitorDataService,
-                        WarningIndicatorMapper warningIndicatorMapper,
-                        WarningAutoCheckService warningAutoCheckService) {
+                        WarningIndicatorService warningIndicatorService,
+                        WarningAutoCheckService warningAutoCheckService,
+                        WarningThresholdEvaluator warningThresholdEvaluator) {
         super(taskSwitchDecider);
         this.monitorDataService = monitorDataService;
-        this.warningIndicatorMapper = warningIndicatorMapper;
+        this.warningIndicatorService = warningIndicatorService;
         this.warningAutoCheckService = warningAutoCheckService;
+        this.warningThresholdEvaluator = warningThresholdEvaluator;
     }
 
     /**
@@ -65,7 +68,7 @@ public class McuCheckTask extends AbstractManagedTask {
     private void doCheck() {
         log.info("[McuCheckTask] 定时任务开始执行");
         try {
-            WarningIndicatorEntity setting = warningIndicatorMapper.selectByPositionAndType(MCU_STATION_NAME, MODULUS_TYPE);
+            WarningIndicatorEntity setting = warningIndicatorService.getByPositionAndType(MCU_STATION_NAME, MODULUS_TYPE);
             if (setting == null) {
                 log.info("[McuCheckTask] 未找到mcu测试站模数预警指标配置");
                 return;
@@ -82,9 +85,6 @@ public class McuCheckTask extends AbstractManagedTask {
                 if (resultData == null) {
                     continue;
                 }
-                Date collectTime = data.getTime() != null
-                        ? Date.from(data.getTime().toInstant())
-                        : new Date();
                 LocalDateTime collectLdt = data.getTime() != null
                         ? data.getTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
                         : LocalDateTime.now();
@@ -108,6 +108,7 @@ public class McuCheckTask extends AbstractManagedTask {
             }
         } catch (Exception e) {
             log.error("[McuCheckTask] 定时任务异常: {}", e.getMessage(), e);
+            throw new IllegalStateException("MCU自动预警任务执行失败", e);
         }
         log.info("[McuCheckTask] 定时任务执行结束");
     }
@@ -123,27 +124,14 @@ public class McuCheckTask extends AbstractManagedTask {
     }
 
     private void evaluateAndInsert(WarningIndicatorEntity setting, String pointId,
-                                   double value, LocalDateTime collectTime) {
-        String level = null;
-        String content = null;
-        if (setting.getUpUpLimit() != null && value > setting.getUpUpLimit()) {
-            level = WarningLevel.SERIOUS.getDescription();
-            content = "模数超上上限，当前值：" + value;
-        } else if (setting.getUpLimit() != null && value > setting.getUpLimit()) {
-            level = WarningLevel.GENERAL.getDescription();
-            content = "模数超上限，当前值：" + value;
-        } else if (setting.getLowerLimit() != null && value < setting.getLowerLimit()) {
-            level = WarningLevel.SERIOUS.getDescription();
-            content = "模数低于下下限，当前值：" + value;
-        } else if (setting.getLowLimit() != null && value < setting.getLowLimit()) {
-            level = WarningLevel.GENERAL.getDescription();
-            content = "模数低于下限，当前值：" + value;
-        }
-        log.info("[McuCheckTask] 检查point_id={}, type={}, value={}, level={}", pointId, MODULUS_TYPE, value, level);
-        if (level != null) {
+                                    double value, LocalDateTime collectTime) {
+        WarningThresholdResult result = warningThresholdEvaluator.evaluate(setting, value, MODULUS_TYPE);
+        log.info("[McuCheckTask] 检查point_id={}, type={}, value={}, level={}",
+                pointId, MODULUS_TYPE, value, result == null ? null : result.getLevel());
+        if (result != null) {
             warningAutoCheckService.checkAndInsertWarning(
-                    pointId, MODULUS_TYPE,
-                    BigDecimal.valueOf(value), collectTime, level, content,
+                    setting.getPosition(), MODULUS_TYPE,
+                    BigDecimal.valueOf(value), collectTime, result.getLevel(), result.getContent(),
                     setting.getLongitude(), setting.getLatitude());
         }
     }

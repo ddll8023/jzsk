@@ -34,3 +34,6 @@ export * from './maintenance'
 
 // 基础工程信息相关接口
 export * from './engineering'
+
+// 设备监控相关接口
+export * from './deviceMonitor'

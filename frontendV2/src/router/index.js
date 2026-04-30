@@ -92,6 +92,13 @@ const routes = [
         component: () => import('@/views/video/VideoMonitor.vue'),
         meta: { title: '视频实时监测' }
       },
+      // 设备监控
+      {
+        path: 'monitor/device',
+        name: 'DeviceMonitor',
+        component: () => import('@/views/monitor/DeviceMonitor.vue'),
+        meta: { title: '设备监控' }
+      },
       // 大坝安全监测
       {
         path: 'dam/seepage',

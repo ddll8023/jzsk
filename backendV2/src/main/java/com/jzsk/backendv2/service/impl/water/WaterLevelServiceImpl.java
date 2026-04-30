@@ -1,4 +1,4 @@
-package com.jzsk.backendv2.service.water.impl;
+package com.jzsk.backendv2.service.impl.water;
 
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.jzsk.backendv2.mapper.monitor.StRiversRMapper;

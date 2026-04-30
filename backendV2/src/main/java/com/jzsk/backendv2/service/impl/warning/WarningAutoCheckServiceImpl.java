@@ -1,10 +1,10 @@
 package com.jzsk.backendv2.service.impl.warning;
 
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.jzsk.backendv2.constant.WarningConstants;
 import com.jzsk.backendv2.mapper.warning.WarningMapper;
 import com.jzsk.backendv2.pojo.entity.warning.WarningInformationEntity;
 import com.jzsk.backendv2.service.warning.WarningAutoCheckService;
-import com.jzsk.backendv2.service.warning.WarningService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,15 +17,14 @@ import java.util.Date;
 
 /**
  * 自动预警检查服务实现类
- * 职责：封装阈值判断和预警生成通用逻辑，供WaterLevelRainfallCheckTask、
- *      GnssCheckTask、McuCheckTask三个任务类调用
+ * 职责：封装自动预警去重和预警生成落库逻辑
  */
 @Slf4j
 @Service
+@DS("yjxx")
 @RequiredArgsConstructor
 public class WarningAutoCheckServiceImpl implements WarningAutoCheckService {
 
-    private final WarningService warningService;
     private final WarningMapper warningMapper;
 
     @Override
@@ -60,7 +59,7 @@ public class WarningAutoCheckServiceImpl implements WarningAutoCheckService {
         entity.setCreateTime(new Date());
         entity.setUpdateTime(new Date());
 
-        warningService.create(entity);
+        warningMapper.insert(entity);
         log.info("自动预警生成成功: position={}, type={}, level={}, content={}, startTime={}",
                 position, type, level, content, entity.getStartTime());
     }

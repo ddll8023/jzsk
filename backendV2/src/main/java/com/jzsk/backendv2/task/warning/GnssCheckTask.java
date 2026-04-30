@@ -2,11 +2,13 @@ package com.jzsk.backendv2.task.warning;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jzsk.backendv2.mapper.warning.WarningIndicatorMapper;
+import com.jzsk.backendv2.pojo.dto.external.latestmonitor.LatestMonitorStationDto;
 import com.jzsk.backendv2.pojo.entity.warning.WarningIndicatorEntity;
-import com.jzsk.backendv2.pojo.enums.WarningLevel;
-import com.jzsk.backendv2.service.MonitorDataService;
+import com.jzsk.backendv2.service.external.ExternalApiService;
 import com.jzsk.backendv2.service.warning.WarningAutoCheckService;
+import com.jzsk.backendv2.service.warning.WarningIndicatorService;
+import com.jzsk.backendv2.service.warning.WarningThresholdEvaluator;
+import com.jzsk.backendv2.service.warning.WarningThresholdEvaluator.WarningThresholdResult;
 import com.jzsk.backendv2.task.AbstractManagedTask;
 import com.jzsk.backendv2.task.ManagedTaskDefinition;
 import com.jzsk.backendv2.task.TaskModule;
@@ -34,6 +36,7 @@ import java.util.Map;
 @Component
 public class GnssCheckTask extends AbstractManagedTask {
 
+    private static final String PROJECT_ID = "1681";
     private static final List<Long> GNSS_STATION_IDS = Arrays.asList(
             33210L, 33214L, 33216L, 33212L, 33215L, 33211L, 33217L, 33213L);
 
@@ -51,19 +54,22 @@ public class GnssCheckTask extends AbstractManagedTask {
     private static final ManagedTaskDefinition TASK_DEFINITION =
             ManagedTaskDefinition.of(TaskModule.WARNING, WarningTaskCode.GNSS_CHECK);
 
-    private final MonitorDataService monitorDataService;
-    private final WarningIndicatorMapper warningIndicatorMapper;
+    private final ExternalApiService externalApiService;
+    private final WarningIndicatorService warningIndicatorService;
     private final WarningAutoCheckService warningAutoCheckService;
+    private final WarningThresholdEvaluator warningThresholdEvaluator;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public GnssCheckTask(TaskSwitchDecider taskSwitchDecider,
-                         MonitorDataService monitorDataService,
-                         WarningIndicatorMapper warningIndicatorMapper,
-                         WarningAutoCheckService warningAutoCheckService) {
+                         ExternalApiService externalApiService,
+                         WarningIndicatorService warningIndicatorService,
+                         WarningAutoCheckService warningAutoCheckService,
+                         WarningThresholdEvaluator warningThresholdEvaluator) {
         super(taskSwitchDecider);
-        this.monitorDataService = monitorDataService;
-        this.warningIndicatorMapper = warningIndicatorMapper;
+        this.externalApiService = externalApiService;
+        this.warningIndicatorService = warningIndicatorService;
         this.warningAutoCheckService = warningAutoCheckService;
+        this.warningThresholdEvaluator = warningThresholdEvaluator;
     }
 
     /**
@@ -84,28 +90,17 @@ public class GnssCheckTask extends AbstractManagedTask {
     }
 
     private void checkStation(Long stationId) {
-        JsonNode resp = monitorDataService.getGnssLatestData(stationId);
-        if (resp == null) {
+        LatestMonitorStationDto data = externalApiService.getLatestMonitoringData(PROJECT_ID, String.valueOf(stationId));
+        if (data == null) {
             log.warn("[GnssCheckTask] GNSS API调用失败或返回空 stationId={}", stationId);
             return;
         }
-        if (!resp.has("code") || resp.get("code").asInt() != 200) {
-            log.warn("[GnssCheckTask] GNSS API返回异常 stationId={}", stationId);
-            return;
-        }
-        JsonNode data = resp.get("data");
-        if (data == null) {
-            log.warn("[GnssCheckTask] GNSS API无data stationId={}", stationId);
-            return;
-        }
-        JsonNode stationNameNode = data.get("stationName");
-        JsonNode monDateNodeRaw = data.get("monDate");
-        if (stationNameNode == null || monDateNodeRaw == null) {
+        String stationName = data.getStationName();
+        String monDate = data.getMonDate();
+        if (stationName == null || monDate == null) {
             log.warn("[GnssCheckTask] GNSS API数据字段缺失 stationId={}", stationId);
             return;
         }
-        String stationName = stationNameNode.asText();
-        String monDate = monDateNodeRaw.asText();
         JsonNode monDateNode;
         try {
             monDateNode = objectMapper.readTree(monDate);
@@ -125,7 +120,7 @@ public class GnssCheckTask extends AbstractManagedTask {
                     continue;
                 }
                 double value = l1gp.get(key).asDouble();
-                WarningIndicatorEntity setting = warningIndicatorMapper.selectByPositionAndType(stationName, type);
+                WarningIndicatorEntity setting = warningIndicatorService.getByPositionAndType(stationName, type);
                 if (setting == null) {
                     continue;
                 }
@@ -135,27 +130,13 @@ public class GnssCheckTask extends AbstractManagedTask {
     }
 
     private void evaluateAndInsert(WarningIndicatorEntity setting, double value, String type) {
-        String level = null;
-        String content = null;
-        if (setting.getUpUpLimit() != null && value > setting.getUpUpLimit()) {
-            level = WarningLevel.EXTRAORDINARY.getDescription();
-            content = type + "超上上限，当前值: " + value;
-        } else if (setting.getUpLimit() != null && value > setting.getUpLimit()) {
-            level = WarningLevel.SERIOUS.getDescription();
-            content = type + "超上限，当前值: " + value;
-        } else if (setting.getLowLimit() != null && value < setting.getLowLimit()) {
-            level = WarningLevel.GENERAL.getDescription();
-            content = type + "低于下限，当前值: " + value;
-        } else if (setting.getLowerLimit() != null && value < setting.getLowerLimit()) {
-            level = WarningLevel.EXTRAORDINARY.getDescription();
-            content = type + "低于下下限，当前值: " + value;
-        }
+        WarningThresholdResult result = warningThresholdEvaluator.evaluate(setting, value, type);
         log.info("[GnssCheckTask] 检查station={}, type={}, value={}, level={}",
-                setting.getPosition(), type, value, level);
-        if (level != null) {
+                setting.getPosition(), type, value, result == null ? null : result.getLevel());
+        if (result != null) {
             warningAutoCheckService.checkAndInsertWarning(
                     setting.getPosition(), type,
-                    BigDecimal.valueOf(value), LocalDateTime.now(), level, content,
+                    BigDecimal.valueOf(value), LocalDateTime.now(), result.getLevel(), result.getContent(),
                     setting.getLongitude(), setting.getLatitude());
         }
     }

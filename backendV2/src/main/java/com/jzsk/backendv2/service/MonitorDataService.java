@@ -1,8 +1,6 @@
 package com.jzsk.backendv2.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.jzsk.backendv2.pojo.entity.mcu.DataNewEntity;
-import com.jzsk.backendv2.pojo.entity.mcu.SensorPointEntity;
 import com.jzsk.backendv2.pojo.entity.monitor.StPptnHourEntity;
 import com.jzsk.backendv2.pojo.entity.monitor.StRiversREntity;
 
@@ -46,11 +44,4 @@ public interface MonitorDataService {
      */
     StPptnHourEntity getLatestRainfall(String stcd);
 
-    /**
-     * 调用外部GNSS监测API获取指定站点的最新位移数据
-     *
-     * @param stationId 站点ID
-     * @return API返回的JSON数据
-     */
-    JsonNode getGnssLatestData(Long stationId);
 }
