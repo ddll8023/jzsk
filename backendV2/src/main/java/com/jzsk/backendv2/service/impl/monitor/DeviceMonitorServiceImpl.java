@@ -11,6 +11,7 @@ import com.jzsk.backendv2.pojo.vo.dam.DisplacementHistoryVO;
 import com.jzsk.backendv2.pojo.vo.dam.DisplacementKeyValueVO;
 import com.jzsk.backendv2.pojo.vo.monitor.DeviceMonitorOverviewVO;
 import com.jzsk.backendv2.pojo.vo.monitor.DeviceStatusVO;
+import com.jzsk.backendv2.pojo.vo.monitor.DeviceTypeStatusVO;
 import com.jzsk.backendv2.service.external.DisplacementHistoryService;
 import com.jzsk.backendv2.service.monitor.DeviceMonitorService;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +29,8 @@ import java.util.stream.Collectors;
 
 /**
  * 设备监控服务实现类
- * 职责: 聚合GNSS、雨水情、渗流渗压三种设备的数据源，检测设备状态
- * 遵循KISS原则: 每个检测方法职责单一
+ * 职责: 分别检测GNSS、雨水情、渗流渗压设备状态
+ * 遵循KISS原则: 每个检测方法职责单一，独立返回
  */
 @Slf4j
 @Service
@@ -66,19 +67,21 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
     }
 
     @Override
-    public DeviceMonitorOverviewVO getDeviceMonitorStatus() {
-        List<DeviceStatusVO> allDevices = new ArrayList<>();
+    public DeviceTypeStatusVO getGnssStatus() {
+        List<DeviceStatusVO> devices = checkGnssDevices();
+        return buildTypeResult(devices);
+    }
 
-        allDevices.addAll(checkGnssDevices());
-        allDevices.addAll(checkRainDevices());
-        allDevices.addAll(checkSeepageDevices());
+    @Override
+    public DeviceTypeStatusVO getRainStatus() {
+        List<DeviceStatusVO> devices = checkRainDevices();
+        return buildTypeResult(devices);
+    }
 
-        DeviceMonitorOverviewVO.TypeStats overview = buildTypeStats(allDevices);
-
-        DeviceMonitorOverviewVO result = new DeviceMonitorOverviewVO();
-        result.setOverview(overview);
-        result.setDevices(allDevices);
-        return result;
+    @Override
+    public DeviceTypeStatusVO getSeepageStatus() {
+        List<DeviceStatusVO> devices = checkSeepageDevices();
+        return buildTypeResult(devices);
     }
 
     /**
@@ -224,6 +227,20 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
     }
 
     /**
+     * 构建单类型返回结果（stats + devices）
+     */
+    private DeviceTypeStatusVO buildTypeResult(List<DeviceStatusVO> devices) {
+        int total = devices.size();
+        int online = (int) devices.stream().filter(d -> "online".equals(d.getStatus())).count();
+        int offline = (int) devices.stream().filter(d -> "offline".equals(d.getStatus())).count();
+        int abnormal = (int) devices.stream().filter(d -> "abnormal".equals(d.getStatus())).count();
+        return new DeviceTypeStatusVO(
+                new DeviceMonitorOverviewVO.Stats(total, online, offline, abnormal),
+                devices
+        );
+    }
+
+    /**
      * 判断设备状态
      * online: 采集时间在阈值内
      * abnormal: 采集时间超过阈值（采集异常）
@@ -235,28 +252,6 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
         }
         long minutesDiff = ChronoUnit.MINUTES.between(lastCollectTime, LocalDateTime.now());
         return minutesDiff <= timeoutMinutes ? "online" : "abnormal";
-    }
-
-    /**
-     * 构建类型统计
-     */
-    private DeviceMonitorOverviewVO.TypeStats buildTypeStats(List<DeviceStatusVO> devices) {
-        Map<String, List<DeviceStatusVO>> grouped = devices.stream()
-                .collect(Collectors.groupingBy(DeviceStatusVO::getType));
-
-        return new DeviceMonitorOverviewVO.TypeStats(
-                buildStats(grouped.getOrDefault("gnss", new ArrayList<>())),
-                buildStats(grouped.getOrDefault("rain", new ArrayList<>())),
-                buildStats(grouped.getOrDefault("seepage", new ArrayList<>()))
-        );
-    }
-
-    private DeviceMonitorOverviewVO.Stats buildStats(List<DeviceStatusVO> list) {
-        int total = list.size();
-        int online = (int) list.stream().filter(d -> "online".equals(d.getStatus())).count();
-        int offline = (int) list.stream().filter(d -> "offline".equals(d.getStatus())).count();
-        int abnormal = (int) list.stream().filter(d -> "abnormal".equals(d.getStatus())).count();
-        return new DeviceMonitorOverviewVO.Stats(total, online, offline, abnormal);
     }
 
     private DeviceStatusVO buildDevice(String name, String type, String status,

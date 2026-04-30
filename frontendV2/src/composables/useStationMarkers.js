@@ -504,12 +504,13 @@ export function useStationMarkers(map) {
 
   /**
    * 启动定时刷新测站状态
-   * 每分钟检查一次在线状态
+   * 每分钟重新请求数据并更新样式
    */
   const startStatusRefresh = () => {
     stationStatus.startAutoRefresh(() => {
-      // 只更新样式，不重新请求数据
-      updateMarkerStyles()
+      updateStationData().catch(err => {
+        console.warn('[测站标注] 定时刷新数据失败:', err)
+      })
     }, 60000) // 1分钟
   }
 
