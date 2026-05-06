@@ -1,0 +1,42 @@
+[
+  {
+    "key": "health",
+    "name": "API 健康检查",
+    "method": "GET",
+    "path": "/actuator/health",
+    "auth_required": false,
+    "category": "基础检查"
+  },
+  {
+    "key": "login",
+    "name": "登录检查",
+    "method": "POST",
+    "path": "/api/auth/login",
+    "auth_required": false,
+    "category": "基础检查"
+  },
+  {
+    "key": "device_gnss",
+    "name": "GNSS 地表位移",
+    "method": "GET",
+    "path": "/api/device-monitor/gnss",
+    "auth_required": true,
+    "category": "设备监测"
+  },
+  {
+    "key": "device_rain",
+    "name": "雨水情",
+    "method": "GET",
+    "path": "/api/device-monitor/rain",
+    "auth_required": true,
+    "category": "设备监测"
+  },
+  {
+    "key": "device_seepage",
+    "name": "渗流渗压",
+    "method": "GET",
+    "path": "/api/device-monitor/seepage",
+    "auth_required": true,
+    "category": "设备监测"
+  }
+]

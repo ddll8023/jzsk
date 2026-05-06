@@ -89,7 +89,7 @@ defineEmits(['click'])
 
 const TYPE_CONFIG = {
   gnss: { label: 'GNSS 地表位移', icon: 'fa-satellite', color: 'blue' },
-  rain: { label: '雨水情设备', icon: 'fa-cloud-rain', color: 'cyan' },
+  rain: { label: '水雨情设备', icon: 'fa-cloud-rain', color: 'cyan' },
   seepage: { label: '渗流渗压设备', icon: 'fa-water', color: 'teal' }
 }
 

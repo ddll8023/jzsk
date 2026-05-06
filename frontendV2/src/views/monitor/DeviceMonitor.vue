@@ -6,7 +6,7 @@
         <div>
           <h1 class="text-xl font-semibold text-gray-900">设备监控</h1>
           <p class="mt-1 text-sm text-gray-500">
-            实时监控 GNSS 地表位移、雨水情、渗流渗压设备的运行状态
+            实时监控 GNSS 地表位移、水雨情、渗流渗压设备的运行状态
           </p>
         </div>
         <div v-if="loading" class="flex items-center gap-2 text-sm text-gray-400">
@@ -133,7 +133,7 @@
 <script setup>
 /**
  * 设备监控页面
- * 功能：展示三种设备类型（GNSS/雨水情/渗流渗压）的实时运行状态
+ * 功能：展示三种设备类型（GNSS/水雨情/渗流渗压）的实时运行状态
  * 依赖：DeviceTypeCard, DeviceStatusTable, useDeviceMonitor
  * 特性：三路接口并发加载、渐进式渲染
  */

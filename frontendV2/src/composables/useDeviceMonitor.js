@@ -20,7 +20,7 @@ export const DEVICE_STATUS = {
  */
 export const DEVICE_TYPES = {
   gnss: { label: 'GNSS 地表位移', icon: 'fa-satellite', color: 'blue' },
-  rain: { label: '雨水情', icon: 'fa-cloud-rain', color: 'cyan' },
+  rain: { label: '水雨情', icon: 'fa-cloud-rain', color: 'cyan' },
   seepage: { label: '渗流渗压', icon: 'fa-water', color: 'teal' }
 }
 
