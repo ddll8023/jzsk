@@ -1,4 +1,5 @@
 """本地 API 检测工具桌面应用入口"""
+
 import sys
 
 from PySide6.QtWidgets import QApplication

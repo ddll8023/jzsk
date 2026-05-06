@@ -1,4 +1,5 @@
 """PySide6 主窗口，负责界面展示与用户交互"""
+
 import json
 
 from PySide6.QtCore import Qt, QThread, Signal
@@ -108,7 +109,7 @@ class MainWindow(QMainWindow):
         layout.addWidget(self._username_input, 1, 1)
 
         layout.addWidget(QLabel("密码"), 1, 2)
-        self._password_input = QLineEdit()
+        self._password_input = QLineEdit(settings.default_password)
         self._password_input.setEchoMode(QLineEdit.Password)
         self._password_input.setPlaceholderText("请输入密码")
         layout.addWidget(self._password_input, 1, 3)
@@ -140,13 +141,24 @@ class MainWindow(QMainWindow):
 
         self._result_table = QTableWidget(0, 8)
         self._result_table.setHorizontalHeaderLabels(
-            ["接口名称", "请求方法", "状态", "HTTP", "后端消息", "耗时(ms)", "设备摘要", "错误原因"]
+            [
+                "接口名称",
+                "请求方法",
+                "状态",
+                "HTTP",
+                "后端消息",
+                "耗时(ms)",
+                "设备摘要",
+                "错误原因",
+            ]
         )
         header = self._result_table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         for col in range(1, 8):
             header.setSectionResizeMode(col, QHeaderView.ResizeMode.ResizeToContents)
-        self._result_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
+        self._result_table.setSelectionBehavior(
+            QTableWidget.SelectionBehavior.SelectRows
+        )
         self._result_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
         self._result_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
         self._result_table.itemSelectionChanged.connect(self._on_result_row_selected)
@@ -200,7 +212,9 @@ class MainWindow(QMainWindow):
             if api_def.category != current_category:
                 current_category = api_def.category
                 cat_label = QLabel(f"── {current_category} ──")
-                cat_label.setStyleSheet("color: gray; font-weight: bold; margin-top: 6px;")
+                cat_label.setStyleSheet(
+                    "color: gray; font-weight: bold; margin-top: 6px;"
+                )
                 self._api_list_container.addWidget(cat_label)
 
             cb = QCheckBox(f"{api_def.name}  ({api_def.method} {api_def.path})")
@@ -219,7 +233,9 @@ class MainWindow(QMainWindow):
             cb.setChecked(not cb.isChecked())
 
     def _on_start_test(self):
-        selected_keys = [cb.property("api_key") for cb in self._checkboxes if cb.isChecked()]
+        selected_keys = [
+            cb.property("api_key") for cb in self._checkboxes if cb.isChecked()
+        ]
         if not selected_keys:
             QMessageBox.warning(self, "提示", "请至少勾选一个接口")
             return
@@ -230,15 +246,15 @@ class MainWindow(QMainWindow):
             return
 
         needs_auth = any(
-            d.auth_required
-            for d in self._api_defs
-            if d.key in selected_keys
+            d.auth_required for d in self._api_defs if d.key in selected_keys
         )
         if needs_auth or "login" in selected_keys:
             username = self._username_input.text().strip()
             password = self._password_input.text().strip()
             if not username or not password:
-                QMessageBox.warning(self, "提示", "选中的接口需要登录，请填写用户名和密码")
+                QMessageBox.warning(
+                    self, "提示", "选中的接口需要登录，请填写用户名和密码"
+                )
                 return
         else:
             username = ""
@@ -328,10 +344,14 @@ class MainWindow(QMainWindow):
             parts.append(f"<b style='color:red;'>错误:</b> {result.error_message}")
 
         if result.request_body:
-            parts.append(f"<b>请求体:</b><pre>{_format_json(result.request_body)}</pre>")
+            parts.append(
+                f"<b>请求体:</b><pre>{_format_json(result.request_body)}</pre>"
+            )
 
         if result.response_body:
-            parts.append(f"<b>响应 JSON:</b><pre>{_format_json(result.response_body)}</pre>")
+            parts.append(
+                f"<b>响应 JSON:</b><pre>{_format_json(result.response_body)}</pre>"
+            )
 
         self._detail_view.setHtml("<br>".join(parts))
 
@@ -343,7 +363,9 @@ class MainWindow(QMainWindow):
             self._result_table.setItem(row, 0, _item(r.api_name))
             self._result_table.setItem(row, 1, _item(r.method))
             self._result_table.setItem(row, 2, _status_item(r.success))
-            self._result_table.setItem(row, 3, _item(str(r.http_status) if r.http_status else "-"))
+            self._result_table.setItem(
+                row, 3, _item(str(r.http_status) if r.http_status else "-")
+            )
             self._result_table.setItem(row, 4, _item(r.response_message or "-"))
             self._result_table.setItem(row, 5, _item(str(r.cost_ms)))
             self._result_table.setItem(row, 6, _item(_format_summary(r.summary)))
@@ -412,7 +434,9 @@ class HistoryDialog(QDialog):
         run_header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
         run_header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         for col in range(3, 7):
-            run_header.setSectionResizeMode(col, QHeaderView.ResizeMode.ResizeToContents)
+            run_header.setSectionResizeMode(
+                col, QHeaderView.ResizeMode.ResizeToContents
+            )
         self._run_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self._run_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
         self._run_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
@@ -427,12 +451,23 @@ class HistoryDialog(QDialog):
 
         self._log_table = QTableWidget(0, 8)
         self._log_table.setHorizontalHeaderLabels(
-            ["接口名称", "请求方法", "状态", "HTTP", "后端消息", "耗时(ms)", "设备摘要", "错误原因"]
+            [
+                "接口名称",
+                "请求方法",
+                "状态",
+                "HTTP",
+                "后端消息",
+                "耗时(ms)",
+                "设备摘要",
+                "错误原因",
+            ]
         )
         log_header = self._log_table.horizontalHeader()
         log_header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         for col in range(1, 8):
-            log_header.setSectionResizeMode(col, QHeaderView.ResizeMode.ResizeToContents)
+            log_header.setSectionResizeMode(
+                col, QHeaderView.ResizeMode.ResizeToContents
+            )
         self._log_table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self._log_table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
         self._log_table.setEditTriggers(QTableWidget.EditTrigger.NoEditTriggers)
@@ -496,7 +531,9 @@ class HistoryDialog(QDialog):
             self._log_table.setItem(i, 0, _item(r.api_name))
             self._log_table.setItem(i, 1, _item(r.method))
             self._log_table.setItem(i, 2, _status_item(r.success))
-            self._log_table.setItem(i, 3, _item(str(r.http_status) if r.http_status else "-"))
+            self._log_table.setItem(
+                i, 3, _item(str(r.http_status) if r.http_status else "-")
+            )
             self._log_table.setItem(i, 4, _item(r.response_message or "-"))
             self._log_table.setItem(i, 5, _item(str(r.cost_ms)))
             self._log_table.setItem(i, 6, _item(_format_summary(r.summary)))
@@ -532,6 +569,8 @@ class HistoryDialog(QDialog):
             parts.append(f"<b style='color:red;'>错误:</b> {result.error_message}")
 
         if result.response_body:
-            parts.append(f"<b>响应 JSON:</b><pre>{_format_json(result.response_body)}</pre>")
+            parts.append(
+                f"<b>响应 JSON:</b><pre>{_format_json(result.response_body)}</pre>"
+            )
 
         self._detail_view.setHtml("<br>".join(parts))

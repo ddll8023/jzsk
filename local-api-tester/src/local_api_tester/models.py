@@ -1,5 +1,5 @@
 """SQLAlchemy 数据库模型定义"""
-from sqlalchemy import BigInteger, Column, Integer, SmallInteger, String, Text, ForeignKey
+from sqlalchemy import Column, Integer, SmallInteger, String, Text, ForeignKey
 from sqlalchemy.sql import func
 from sqlalchemy.orm import DeclarativeBase
 
@@ -13,7 +13,7 @@ class TestRun(Base):
 
     __tablename__ = "test_runs"
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True, comment="主键 ID")
+    id = Column(Integer, primary_key=True, autoincrement=True, comment="主键 ID")
     started_at = Column(Text, nullable=False, comment="测试开始时间")
     finished_at = Column(Text, comment="测试结束时间")
     base_url = Column(Text, nullable=False, comment="后端服务地址")
@@ -30,8 +30,8 @@ class ApiTestLog(Base):
 
     __tablename__ = "api_test_logs"
 
-    id = Column(BigInteger, primary_key=True, autoincrement=True, comment="主键 ID")
-    run_id = Column(BigInteger, ForeignKey("test_runs.id"), nullable=False, index=True, comment="关联测试批次 ID")
+    id = Column(Integer, primary_key=True, autoincrement=True, comment="主键 ID")
+    run_id = Column(Integer, ForeignKey("test_runs.id"), nullable=False, index=True, comment="关联测试批次 ID")
     api_key = Column(String(64), nullable=False, comment="接口唯一标识")
     api_name = Column(String(128), nullable=False, comment="接口显示名称")
     method = Column(String(16), nullable=False, comment="请求方法")

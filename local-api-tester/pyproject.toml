@@ -18,5 +18,8 @@ build-backend = "setuptools.backends._legacy:_Backend"
 [project.scripts]
 local-api-tester = "local_api_tester.main:main"
 
+[project.optional-dependencies]
+packaging = ["pyinstaller>=6.0"]
+
 [tool.setuptools.packages.find]
 where = ["src"]

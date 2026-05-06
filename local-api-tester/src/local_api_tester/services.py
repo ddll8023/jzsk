@@ -1,4 +1,5 @@
 """业务流程编排，负责 API 测试执行与日志记录"""
+
 import json
 from datetime import datetime
 from pathlib import Path
@@ -12,6 +13,7 @@ from local_api_tester.schemas import (
     ApiTestRequest,
     ApiTestResultResponse,
     DeviceStats,
+    TestRunSummaryResponse,
 )
 from local_api_tester.settings import settings
 
@@ -81,21 +83,23 @@ def query_test_log_list(run_id: int) -> list[ApiTestResultResponse]:
                     offline=log.summary_offline or 0,
                     abnormal=log.summary_abnormal or 0,
                 )
-            results.append(ApiTestResultResponse(
-                api_key=log.api_key,
-                api_name=log.api_name,
-                method=log.method,
-                url=log.url,
-                success=log.success == 1,
-                http_status=log.http_status,
-                response_code=log.response_code,
-                response_message=log.response_message,
-                cost_ms=log.cost_ms,
-                error_message=log.error_message,
-                summary=summary,
-                request_body=log.request_body,
-                response_body=log.response_body,
-            ))
+            results.append(
+                ApiTestResultResponse(
+                    api_key=log.api_key,
+                    api_name=log.api_name,
+                    method=log.method,
+                    url=log.url,
+                    success=log.success == 1,
+                    http_status=log.http_status,
+                    response_code=log.response_code,
+                    response_message=log.response_message,
+                    cost_ms=log.cost_ms,
+                    error_message=log.error_message,
+                    summary=summary,
+                    request_body=log.request_body,
+                    response_body=log.response_body,
+                )
+            )
         return results
     except ServiceException:
         raise
@@ -138,7 +142,9 @@ def execute_selected_apis(request: ApiTestRequest) -> list[ApiTestResultResponse
         login_failed = False
 
         if needs_auth or "login" in request.selected_api_keys:
-            token, login_failed = _do_login(base_url, request.username, request.password)
+            token, login_failed = _do_login(
+                base_url, request.username, request.password
+            )
             login_result = _build_login_result(base_url, token, login_failed)
             results.append(login_result)
             _write_test_log(session, run.id, login_result)
@@ -177,7 +183,11 @@ def execute_selected_apis(request: ApiTestRequest) -> list[ApiTestResultResponse
 
 
 def _execute_single_api(
-    session, run_id: int, api_def: ApiDefinitionResponse, base_url: str, token: str | None
+    session,
+    run_id: int,
+    api_def: ApiDefinitionResponse,
+    base_url: str,
+    token: str | None,
 ) -> ApiTestResultResponse:
     """执行单个 API 请求并写入日志"""
     url = base_url.rstrip("/") + api_def.path
@@ -289,7 +299,11 @@ def _parse_response(
 
 
 def _parse_health_response(
-    api_def: ApiDefinitionResponse, url: str, http_status: int, cost_ms: int, response_body: str
+    api_def: ApiDefinitionResponse,
+    url: str,
+    http_status: int,
+    cost_ms: int,
+    response_body: str,
 ) -> ApiTestResultResponse:
     """解析健康检查响应"""
     if http_status != 200:
@@ -338,7 +352,11 @@ def _parse_health_response(
 
 
 def _parse_device_response(
-    api_def: ApiDefinitionResponse, url: str, http_status: int, cost_ms: int, response_body: str
+    api_def: ApiDefinitionResponse,
+    url: str,
+    http_status: int,
+    cost_ms: int,
+    response_body: str,
 ) -> ApiTestResultResponse:
     """解析设备监测接口响应，从 data.stats 提取设备摘要"""
     if http_status != 200:
@@ -427,7 +445,9 @@ def _parse_device_response(
     )
 
 
-def _build_login_result(base_url: str, token: str | None, login_failed: bool) -> ApiTestResultResponse:
+def _build_login_result(
+    base_url: str, token: str | None, login_failed: bool
+) -> ApiTestResultResponse:
     """构造登录接口测试结果"""
     url = base_url.rstrip("/") + "/api/auth/login"
     if login_failed:
@@ -449,7 +469,9 @@ def _build_login_result(base_url: str, token: str | None, login_failed: bool) ->
     )
 
 
-def _build_skipped_result(api_def: ApiDefinitionResponse, base_url: str, reason: str) -> ApiTestResultResponse:
+def _build_skipped_result(
+    api_def: ApiDefinitionResponse, base_url: str, reason: str
+) -> ApiTestResultResponse:
     """构造跳过执行的接口结果"""
     return ApiTestResultResponse(
         api_key=api_def.key,

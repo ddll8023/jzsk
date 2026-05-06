@@ -1,10 +1,10 @@
 """SQLite 数据库连接与会话管理"""
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from local_api_tester.settings import settings
 from local_api_tester.models import Base
-
 
 engine = create_engine(
     settings.database_url,
@@ -36,7 +36,8 @@ def commit_or_rollback(session) -> None:
     """统一事务提交辅助函数"""
     try:
         session.commit()
-    except Exception:
+    except Exception as e:
         session.rollback()
         from local_api_tester.exceptions import ErrorCode, ServiceException
-        raise ServiceException(ErrorCode.INTERNAL_ERROR, "操作失败")
+
+        raise ServiceException(ErrorCode.INTERNAL_ERROR, f"数据库操作失败: {e}") from e
