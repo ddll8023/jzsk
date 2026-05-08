@@ -13,6 +13,7 @@ import com.jzsk.backendv2.pojo.vo.monitor.DeviceMonitorOverviewVO;
 import com.jzsk.backendv2.pojo.vo.monitor.DeviceStatusVO;
 import com.jzsk.backendv2.pojo.vo.monitor.DeviceTypeStatusVO;
 import com.jzsk.backendv2.service.external.DisplacementHistoryService;
+import com.jzsk.backendv2.service.monitor.DeviceFaultRecordService;
 import com.jzsk.backendv2.service.monitor.DeviceMonitorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +43,7 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
     private final StRiversRMapper stRiversRMapper;
     private final StPptnHourMapper stPptnHourMapper;
     private final ObjectMapper objectMapper;
+    private final DeviceFaultRecordService deviceFaultRecordService;
 
     /** GNSS超时阈值（分钟）: 60分钟采集周期 + 1分钟缓冲 */
     private static final long GNSS_TIMEOUT_MINUTES = 61;
@@ -69,18 +71,21 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
     @Override
     public DeviceTypeStatusVO getGnssStatus() {
         List<DeviceStatusVO> devices = checkGnssDevices();
+        processFaultRecords(devices);
         return buildTypeResult(devices);
     }
 
     @Override
     public DeviceTypeStatusVO getRainStatus() {
         List<DeviceStatusVO> devices = checkRainDevices();
+        processFaultRecords(devices);
         return buildTypeResult(devices);
     }
 
     @Override
     public DeviceTypeStatusVO getSeepageStatus() {
         List<DeviceStatusVO> devices = checkSeepageDevices();
+        processFaultRecords(devices);
         return buildTypeResult(devices);
     }
 
@@ -98,14 +103,14 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
         } catch (Exception e) {
             log.error("[DeviceMonitor] GNSS接口调用失败，所有GNSS设备标记为离线", e);
             GNSS_NAME_MAP.forEach((id, name) ->
-                    devices.add(buildDevice(name, "gnss", "offline", null, "接口连接失败")));
+                    devices.add(buildDevice(String.valueOf(id), name, "gnss", "offline", null, "接口连接失败")));
             return devices;
         }
 
         if (gnssData == null || gnssData.isEmpty()) {
             log.warn("[DeviceMonitor] GNSS接口返回空数据，所有GNSS设备标记为离线");
             GNSS_NAME_MAP.forEach((id, name) ->
-                    devices.add(buildDevice(name, "gnss", "offline", null, "无数据返回")));
+                    devices.add(buildDevice(String.valueOf(id), name, "gnss", "offline", null, "无数据返回")));
             return devices;
         }
 
@@ -119,7 +124,7 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
             DisplacementHistoryVO data = dataMap.get(stationId);
 
             if (data == null || data.getCollectTime() == null) {
-                devices.add(buildDevice(name, "gnss", "offline", null, "无采集数据"));
+                devices.add(buildDevice(String.valueOf(stationId), name, "gnss", "offline", null, "无采集数据"));
                 continue;
             }
 
@@ -127,7 +132,7 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
             String status = determineStatus(collectTime, GNSS_TIMEOUT_MINUTES);
             String detail = extractGnssDetail(data);
 
-            devices.add(buildDevice(name, "gnss", status, collectTime, detail));
+            devices.add(buildDevice(String.valueOf(stationId), name, "gnss", status, collectTime, detail));
         }
 
         return devices;
@@ -139,6 +144,7 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
      */
     private List<DeviceStatusVO> checkRainDevices() {
         List<DeviceStatusVO> devices = new ArrayList<>();
+        String deviceCode = "RAIN_WATER_MAIN";
         String deviceName = "坝前雨量水位站";
 
         StRiversREntity latestWater;
@@ -163,7 +169,7 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
         }
 
         if (latestWater == null && latestRain == null) {
-            devices.add(buildDevice(deviceName, "rain", "offline", null, "水位和雨量接口均无数据"));
+            devices.add(buildDevice(deviceCode, deviceName, "rain", "offline", null, "水位和雨量接口均无数据"));
             return devices;
         }
 
@@ -184,7 +190,7 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
             detail.append("雨量: ").append(latestRain.getDrp()).append("mm");
         }
 
-        devices.add(buildDevice(deviceName, "rain", status, lastTime,
+        devices.add(buildDevice(deviceCode, deviceName, "rain", status, lastTime,
                 detail.length() > 0 ? detail.toString() : null));
         return devices;
     }
@@ -201,12 +207,12 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
             seepageData = dataNewMapper.selectLatestForAllPoints();
         } catch (Exception e) {
             log.error("[DeviceMonitor] 渗压数据查询失败，所有渗压设备标记为离线", e);
-            devices.add(buildDevice("渗压设备(全部)", "seepage", "offline", null, "数据库连接失败"));
+            devices.add(buildDevice("SEEPAGE_ALL", "渗压设备(全部)", "seepage", "offline", null, "数据库连接失败"));
             return devices;
         }
 
         if (seepageData == null || seepageData.isEmpty()) {
-            devices.add(buildDevice("渗压设备(全部)", "seepage", "offline", null, "无数据"));
+            devices.add(buildDevice("SEEPAGE_ALL", "渗压设备(全部)", "seepage", "offline", null, "无数据"));
             return devices;
         }
 
@@ -220,7 +226,7 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
             String status = determineStatus(collectTime, SEEPAGE_TIMEOUT_MINUTES);
             String detail = extractSeepageDetail(entity);
 
-            devices.add(buildDevice(pointId, "seepage", status, collectTime, detail));
+            devices.add(buildDevice(pointId, pointId, "seepage", status, collectTime, detail));
         }
 
         return devices;
@@ -254,9 +260,22 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
         return minutesDiff <= timeoutMinutes ? "online" : "abnormal";
     }
 
-    private DeviceStatusVO buildDevice(String name, String type, String status,
+    private DeviceStatusVO buildDevice(String code, String name, String type, String status,
                                         LocalDateTime lastCollectTime, String detail) {
-        return new DeviceStatusVO(name, type, status, lastCollectTime, detail);
+        return new DeviceStatusVO(code, name, type, status, lastCollectTime, detail);
+    }
+
+    /**
+     * 遍历设备列表，将状态变化同步到故障记录
+     */
+    private void processFaultRecords(List<DeviceStatusVO> devices) {
+        for (DeviceStatusVO device : devices) {
+            try {
+                deviceFaultRecordService.processDeviceStatus(device);
+            } catch (Exception e) {
+                log.error("[DeviceMonitor] 故障记录处理失败: {}/{}", device.getType(), device.getCode(), e);
+            }
+        }
     }
 
     /**

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzsk.backendv2.mapper.monitor.DeviceFaultEventLogMapper">
+
+    <resultMap id="BaseResultMap" type="com.jzsk.backendv2.pojo.entity.monitor.DeviceFaultEventLogEntity">
+        <id column="id" property="id"/>
+        <result column="fault_record_id" property="faultRecordId"/>
+        <result column="device_type" property="deviceType"/>
+        <result column="device_code" property="deviceCode"/>
+        <result column="event_status" property="eventStatus"/>
+        <result column="event_type" property="eventType"/>
+        <result column="event_detail" property="eventDetail"/>
+        <result column="last_collect_time" property="lastCollectTime"/>
+        <result column="event_time" property="eventTime"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, fault_record_id, device_type, device_code, event_status, event_type,
+        event_detail, last_collect_time, event_time, create_time
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO device_fault_event_log (
+            fault_record_id, device_type, device_code, event_status, event_type,
+            event_detail, last_collect_time, event_time, create_time
+        ) VALUES (
+            #{faultRecordId}, #{deviceType}, #{deviceCode}, #{eventStatus}, #{eventType},
+            #{eventDetail}, #{lastCollectTime}, #{eventTime}, #{createTime}
+        )
+    </insert>
+
+    <select id="selectByFaultRecordId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM device_fault_event_log
+        WHERE fault_record_id = #{faultRecordId}
+        ORDER BY event_time ASC
+    </select>
+
+    <delete id="deleteByFaultRecordId">
+        DELETE FROM device_fault_event_log WHERE fault_record_id = #{faultRecordId}
+    </delete>
+
+</mapper>

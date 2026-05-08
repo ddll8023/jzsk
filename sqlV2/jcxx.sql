@@ -18,6 +18,8 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
+
+-- ----------------------------
 -- Table structure for authority
 -- ----------------------------
 DROP TABLE IF EXISTS `authority`;
@@ -383,7 +385,7 @@ CREATE TABLE `user`  (
 -- ----------------------------
 -- Records of user
 -- ----------------------------
-INSERT INTO `user` VALUES (1, 1, '张三', '系统管理员', 'admin01', '$2a$10$4c4vp1wD4eKV5cbf5rx88u7zPAGTPL4BI7VmMlCJj8ZNua5NdBC3K', '2022-01-18 16:46:01', '2025-11-18 23:40:15', '管理部门', '女', '431423198512127036', '管理部门组长', '略', '博士研究生', '2025-12-28', '18627659538', '2024-05-16', NULL, '水利', 'XX省XX市XX县XX镇XX村XX地方', '湖北', '汉族', '777888999@qq.com', '1985-07', '中共党员', NULL, 1);
+INSERT INTO `user` VALUES (1, 1, '张三', '系统管理员', 'admin01', '$2a$10$.cSnXJDtWWa/7FiLp81aKOcR3tNsz8QABj.p.lgbXqcUHRbl4dD1e', '2022-01-18 16:46:01', '2025-11-18 23:40:15', '管理部门', '女', '431423198512127036', '管理部门组长', '略', '博士研究生', '2025-12-28', '18627659538', '2024-05-16', NULL, '水利', 'XX省XX市XX县XX镇XX村XX地方', '湖北', '汉族', '777888999@qq.com', '1985-07', '中共党员', NULL, 1);
 INSERT INTO `user` VALUES (2, 2, '李四', '数据维护人员', 'data01', '$2a$10$TU17nXCRbnPAqGMTaKiJlerE15PWC/YAVrjFoQYLIkVdE/UVUhPhm', '2022-01-18 16:47:44', '2025-01-08 20:09:26', '数据部门', '男', '431423198612127037', '数据维护职工', '略', '硕士', '2025-12-28', '13216547985', '2024-05-16', NULL, '水利', 'XX省XX市XX县XX镇XX村XX地方', '湖北', '汉族', '777888555@qq.com', '1986/12/12', '中共预备党员', NULL, 2);
 INSERT INTO `user` VALUES (3, 3, '王五', '只读用户', 'ord01', '$2a$10$cznxL0OOeMm5yM88.5tky.o1Y8k.ZxpeMwDIswAuzVCXiMRoVZbDq', '2022-01-18 16:47:08', '2024-12-21 14:29:00', '无', '女', '431423198712127046', NULL, '略', '硕士', '2025-12-28', '13216547986', '2024-05-28', NULL, '水利', 'XX省XX市XX县XX镇XX村XX地方', '湖北', '汉族', '777888444@qq.com', '1987/12/12', '党员', NULL, 3);
 INSERT INTO `user` VALUES (4, NULL, '只读功能测试', '只读用户', 'test02', '$2a$10$rY2rtvZI2tYIpJ/EX68cr.M3ua7bSsl1CYs2DaA2A71reOI4qaTs6', '2024-12-20 16:22:48', '2025-01-08 20:03:07', NULL, '女', '420118198804251111', NULL, '略', '', NULL, '13397143212', NULL, '', '', '', NULL, NULL, '123456@163.com', '', '群众', '', 4);

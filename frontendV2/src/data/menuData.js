@@ -21,22 +21,11 @@ export const staticMenuData = [
   },
   {
     id: generateId(),
-    name: '设备监控',
-    code: 'device_monitor',
-    path: '/home/monitor/device',
-    icon: 'fa fa-heartbeat',
-    ordernum: 2,
-    status: '启用',
-    subsystemid: 0,
-    children: []
-  },
-  {
-    id: generateId(),
     name: '水雨情管理',
     code: 'water_rain',
     path: '',
     icon: 'fa fa-tint',
-    ordernum: 3,
+    ordernum: 2,
     status: '启用',
     subsystemid: 0,
     children: [
@@ -50,7 +39,7 @@ export const staticMenuData = [
     code: 'video',
     path: '',
     icon: 'fa fa-video-camera',
-    ordernum: 4,
+    ordernum: 3,
     status: '启用',
     subsystemid: 0,
     children: [
@@ -63,7 +52,7 @@ export const staticMenuData = [
     code: 'dam_safety',
     path: '',
     icon: 'fa fa-shield',
-    ordernum: 5,
+    ordernum: 4,
     status: '启用',
     subsystemid: 0,
     children: [
@@ -78,7 +67,7 @@ export const staticMenuData = [
     code: 'gate',
     path: '',
     icon: 'fa fa-columns',
-    ordernum: 6,
+    ordernum: 5,
     status: '启用',
     subsystemid: 0,
     children: [
@@ -92,7 +81,7 @@ export const staticMenuData = [
     code: 'warning',
     path: '',
     icon: 'fa fa-bell',
-    ordernum: 7,
+    ordernum: 6,
     status: '启用',
     subsystemid: 0,
     children: [
@@ -106,7 +95,7 @@ export const staticMenuData = [
     code: 'report',
     path: '',
     icon: 'fa fa-file-text',
-    ordernum: 8,
+    ordernum: 7,
     status: '启用',
     subsystemid: 0,
     children: [
@@ -120,7 +109,7 @@ export const staticMenuData = [
     code: 'inspection',
     path: '',
     icon: 'fa fa-clipboard-check',
-    ordernum: 9,
+    ordernum: 8,
     status: '启用',
     subsystemid: 0,
     children: [
@@ -134,7 +123,7 @@ export const staticMenuData = [
     code: 'basic_info',
     path: '',
     icon: 'fa fa-database',
-    ordernum: 10,
+    ordernum: 9,
     status: '启用',
     subsystemid: 0,
     children: [
@@ -151,7 +140,7 @@ export const staticMenuData = [
     code: 'download',
     path: '',
     icon: 'fa fa-download',
-    ordernum: 11,
+    ordernum: 10,
     status: '启用',
     subsystemid: 0,
     children: [
@@ -164,7 +153,7 @@ export const staticMenuData = [
     code: 'system',
     path: '',
     icon: 'fa fa-cog',
-    ordernum: 12,
+    ordernum: 11,
     status: '启用',
     subsystemid: 0,
     children: [
@@ -176,5 +165,16 @@ export const staticMenuData = [
       { id: generateId(), name: '字典管理', code: 'system_dict', path: '/home/dictmanage', ordernum: 6, status: '启用', subsystemid: 128, children: [] },
       { id: generateId(), name: '菜单管理', code: 'system_menu', path: '/home/menumanage', ordernum: 7, status: '启用', subsystemid: 128, children: [] }
     ]
+  },
+  {
+    id: generateId(),
+    name: '设备监控',
+    code: 'device_monitor',
+    path: '/home/monitor/device',
+    icon: 'fa fa-heartbeat',
+    ordernum: 12,
+    status: '启用',
+    subsystemid: 0,
+    children: []
   }
 ]

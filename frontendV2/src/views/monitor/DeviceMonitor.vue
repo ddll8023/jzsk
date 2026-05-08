@@ -9,9 +9,18 @@
             实时监控 GNSS 地表位移、水雨情、渗流渗压设备的运行状态
           </p>
         </div>
-        <div v-if="loading" class="flex items-center gap-2 text-sm text-gray-400">
-          <i class="fa fa-spinner fa-spin" aria-hidden="true" />
-          <span>刷新中</span>
+        <div class="flex items-center gap-4">
+          <button
+            class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-amber-500 border border-amber-500 rounded-lg hover:bg-amber-600 hover:border-amber-600 transition-colors shadow-sm"
+            @click="showFaultModal = true"
+          >
+            <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+            <span>历史故障</span>
+          </button>
+          <div v-if="loading" class="flex items-center gap-2 text-sm text-gray-400">
+            <i class="fa fa-spinner fa-spin" aria-hidden="true" />
+            <span>刷新中</span>
+          </div>
         </div>
       </div>
     </header>
@@ -127,6 +136,9 @@
         @status-filter="setStatusFilter"
       />
     </section>
+
+    <!-- 历史故障弹窗 -->
+    <DeviceFaultHistoryModal v-model="showFaultModal" />
   </div>
 </template>
 
@@ -134,12 +146,16 @@
 /**
  * 设备监控页面
  * 功能：展示三种设备类型（GNSS/水雨情/渗流渗压）的实时运行状态
- * 依赖：DeviceTypeCard, DeviceStatusTable, useDeviceMonitor
+ * 依赖：DeviceTypeCard, DeviceStatusTable, DeviceFaultHistoryModal, useDeviceMonitor
  * 特性：三路接口并发加载、渐进式渲染
  */
+import { ref } from 'vue'
 import { useDeviceMonitor } from '@/composables/useDeviceMonitor'
 import DeviceTypeCard from '@/components/business/monitor/DeviceTypeCard.vue'
 import DeviceStatusTable from '@/components/business/monitor/DeviceStatusTable.vue'
+import DeviceFaultHistoryModal from '@/components/business/monitor/DeviceFaultHistoryModal.vue'
+
+const showFaultModal = ref(false)
 
 const {
   loading,

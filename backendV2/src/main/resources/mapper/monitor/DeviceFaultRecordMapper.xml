@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jzsk.backendv2.mapper.monitor.DeviceFaultRecordMapper">
+
+    <resultMap id="BaseResultMap" type="com.jzsk.backendv2.pojo.entity.monitor.DeviceFaultRecordEntity">
+        <id column="id" property="id"/>
+        <result column="device_type" property="deviceType"/>
+        <result column="device_code" property="deviceCode"/>
+        <result column="device_name" property="deviceName"/>
+        <result column="active_key" property="activeKey"/>
+        <result column="first_fault_status" property="firstFaultStatus"/>
+        <result column="current_fault_status" property="currentFaultStatus"/>
+        <result column="fault_type" property="faultType"/>
+        <result column="fault_detail" property="faultDetail"/>
+        <result column="last_collect_time" property="lastCollectTime"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="duration_minutes" property="durationMinutes"/>
+        <result column="process_status" property="processStatus"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, device_type, device_code, device_name, active_key,
+        first_fault_status, current_fault_status, fault_type, fault_detail,
+        last_collect_time, start_time, end_time, duration_minutes,
+        process_status, create_time, update_time
+    </sql>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO device_fault_record (
+            device_type, device_code, device_name, active_key,
+            first_fault_status, current_fault_status, fault_type, fault_detail,
+            last_collect_time, start_time, process_status, create_time, update_time
+        ) VALUES (
+            #{deviceType}, #{deviceCode}, #{deviceName}, #{activeKey},
+            #{firstFaultStatus}, #{currentFaultStatus}, #{faultType}, #{faultDetail},
+            #{lastCollectTime}, #{startTime}, #{processStatus}, #{createTime}, #{updateTime}
+        )
+    </insert>
+
+    <select id="selectByActiveKey" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM device_fault_record
+        WHERE active_key = #{activeKey}
+        LIMIT 1
+    </select>
+
+    <update id="updateActive">
+        UPDATE device_fault_record
+        SET current_fault_status = #{currentFaultStatus},
+            fault_detail = #{faultDetail},
+            last_collect_time = #{lastCollectTime},
+            update_time = #{updateTime}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateResolved">
+        UPDATE device_fault_record
+        SET process_status = #{processStatus},
+            end_time = #{endTime},
+            duration_minutes = #{durationMinutes},
+            active_key = NULL,
+            update_time = #{updateTime}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 分页查询故障记录 -->
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM device_fault_record
+        <where>
+            <if test="query.deviceType != null and query.deviceType != ''">
+                AND device_type = #{query.deviceType}
+            </if>
+            <if test="query.faultStatus != null and query.faultStatus != ''">
+                AND current_fault_status = #{query.faultStatus}
+            </if>
+            <if test="query.processStatus != null and query.processStatus != ''">
+                AND process_status = #{query.processStatus}
+            </if>
+            <if test="query.keyword != null and query.keyword != ''">
+                AND (device_name LIKE CONCAT('%', #{query.keyword}, '%')
+                     OR device_code LIKE CONCAT('%', #{query.keyword}, '%'))
+            </if>
+            <if test="query.startTime != null and query.startTime != ''">
+                AND start_time &gt;= #{query.startTime}
+            </if>
+            <if test="query.endTime != null and query.endTime != ''">
+                AND start_time &lt;= #{query.endTime}
+            </if>
+        </where>
+        ORDER BY start_time DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <!-- 统计故障记录总数 -->
+    <select id="countPage" resultType="long">
+        SELECT COUNT(*) FROM device_fault_record
+        <where>
+            <if test="query.deviceType != null and query.deviceType != ''">
+                AND device_type = #{query.deviceType}
+            </if>
+            <if test="query.faultStatus != null and query.faultStatus != ''">
+                AND current_fault_status = #{query.faultStatus}
+            </if>
+            <if test="query.processStatus != null and query.processStatus != ''">
+                AND process_status = #{query.processStatus}
+            </if>
+            <if test="query.keyword != null and query.keyword != ''">
+                AND (device_name LIKE CONCAT('%', #{query.keyword}, '%')
+                     OR device_code LIKE CONCAT('%', #{query.keyword}, '%'))
+            </if>
+            <if test="query.startTime != null and query.startTime != ''">
+                AND start_time &gt;= #{query.startTime}
+            </if>
+            <if test="query.endTime != null and query.endTime != ''">
+                AND start_time &lt;= #{query.endTime}
+            </if>
+        </where>
+    </select>
+
+    <delete id="deleteById">
+        DELETE FROM device_fault_record WHERE id = #{id}
+    </delete>
+
+</mapper>

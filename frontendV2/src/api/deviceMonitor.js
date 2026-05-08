@@ -27,3 +27,30 @@ export function getRainStatus() {
 export function getSeepageStatus() {
   return request.get('/api/device-monitor/seepage')
 }
+
+/**
+ * 分页查询历史故障记录
+ * @param {Object} data - 查询参数（page, size, deviceType, faultStatus, processStatus, keyword, startTime, endTime）
+ * @returns {Promise} 分页故障记录列表
+ */
+export function getDeviceFaultRecordPage(data) {
+  return request.post('/api/device-monitor/fault-record/page', data)
+}
+
+/**
+ * 查询故障事件明细
+ * @param {number} id - 故障主记录ID
+ * @returns {Promise} 事件明细列表
+ */
+export function getDeviceFaultEvents(id) {
+  return request.get(`/api/device-monitor/fault-record/${id}/events`)
+}
+
+/**
+ * 删除故障记录
+ * @param {number} id - 故障记录ID
+ * @returns {Promise}
+ */
+export function deleteDeviceFaultRecord(id) {
+  return request.post('/api/device-monitor/fault-record/delete', { id })
+}

@@ -17,6 +17,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class DeviceStatusVO {
 
+    @Schema(description = "设备编码", example = "33210")
+    private String code;
+
     @Schema(description = "设备名称", example = "LJ1-1")
     private String name;
 
