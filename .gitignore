@@ -23,7 +23,6 @@
 /backendV2/target
 
 /SK/
-/SKV2/
 
 /SKV2/node_modules/
 
@@ -31,3 +30,4 @@ nul
 
 /nul
 *.db
+*.zip

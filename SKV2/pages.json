@@ -1,0 +1,120 @@
+{
+  "pages": [
+    {
+      "path": "pages/login/login",
+      "style": {
+        "navigationBarTitleText": "登录",
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/tabbar/index/index",
+      "style": {
+        "navigationBarTitleText": "首页",
+        "navigationStyle": "custom",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/tabbar/function/function",
+      "style": {
+        "navigationBarTitleText": "功能",
+        "navigationBarBackgroundColor": "#00b783",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/tabbar/user/user",
+      "style": {
+        "navigationBarTitleText": "我的",
+        "navigationBarBackgroundColor": "#00b783",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/modules/water-level/water-level",
+      "style": {
+        "navigationBarTitleText": "水位监测",
+        "navigationBarBackgroundColor": "#00b783",
+        "navigationBarTextStyle": "white",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/modules/rainfall/rainfall",
+      "style": {
+        "navigationBarTitleText": "雨量监测",
+        "navigationBarBackgroundColor": "#00b783",
+        "navigationBarTextStyle": "white",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/modules/seepage/seepage",
+      "style": {
+        "navigationBarTitleText": "渗压监测",
+        "navigationBarBackgroundColor": "#00b783",
+        "navigationBarTextStyle": "white",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/modules/seepage/seepage-flow",
+      "style": {
+        "navigationBarTitleText": "渗流量监测",
+        "navigationBarBackgroundColor": "#00b783",
+        "navigationBarTextStyle": "white",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/modules/inspection/inspection",
+      "style": {
+        "navigationBarTitleText": "巡检记录",
+        "navigationBarBackgroundColor": "#00b783",
+        "navigationBarTextStyle": "white",
+        "enablePullDownRefresh": true
+      }
+    },
+    {
+      "path": "pages/modules/inspection/inspection-form",
+      "style": {
+        "navigationBarTitleText": "巡检表单",
+        "navigationBarBackgroundColor": "#00b783",
+        "navigationBarTextStyle": "white"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "智慧水利",
+    "navigationBarBackgroundColor": "#00b783",
+    "backgroundColor": "#f8f8f8"
+  },
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#00b783",
+    "borderStyle": "white",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/tabbar/index/index",
+        "text": "首页",
+        "iconPath": "static/icons/home.svg",
+        "selectedIconPath": "static/icons/home-active.svg"
+      },
+      {
+        "pagePath": "pages/tabbar/function/function",
+        "text": "功能",
+        "iconPath": "static/icons/function.svg",
+        "selectedIconPath": "static/icons/function-active.svg"
+      },
+      {
+        "pagePath": "pages/tabbar/user/user",
+        "text": "我的",
+        "iconPath": "static/icons/user.svg",
+        "selectedIconPath": "static/icons/user-active.svg"
+      }
+    ]
+  }
+}
