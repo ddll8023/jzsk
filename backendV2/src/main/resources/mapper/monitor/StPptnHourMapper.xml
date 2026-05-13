@@ -19,20 +19,6 @@
         ORDER BY TM DESC
     </select>
 
-    <!-- 统计小时雨量数据总数（SQL Server语法） -->
-    <select id="countPage" resultType="long">
-        SELECT COUNT(*)
-        FROM ST_PPTN_HOUR
-        <where>
-            <if test="startDate != null">
-                AND TM &gt;= #{startDate}
-            </if>
-            <if test="endDate != null">
-                AND TM &lt;= #{endDate}
-            </if>
-        </where>
-    </select>
-
     <!-- 查询所有小时雨量数据（SQL Server语法） -->
     <select id="selectAll" resultMap="BaseResultMap">
         SELECT STCD, TM, DRP, INTV, PDR, DYP, WTH
@@ -53,22 +39,6 @@
             </if>
         </where>
         ORDER BY TM DESC
-    </select>
-
-    <!-- 分页查询小时雨量数据（SQL Server语法） -->
-    <select id="selectPage" resultMap="BaseResultMap">
-        SELECT STCD, TM, DRP, INTV, PDR, DYP, WTH
-        FROM ST_PPTN_HOUR
-        <where>
-            <if test="startDate != null">
-                AND TM &gt;= #{startDate}
-            </if>
-            <if test="endDate != null">
-                AND TM &lt;= #{endDate}
-            </if>
-        </where>
-        ORDER BY TM DESC
-        OFFSET #{offset} ROWS FETCH NEXT #{size} ROWS ONLY
     </select>
 
 </mapper>

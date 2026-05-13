@@ -1,9 +1,7 @@
 package com.jzsk.backendv2.controller.water;
 
-import com.jzsk.backendv2.pojo.dto.water.HourlyRainfallPageQueryDTO;
 import com.jzsk.backendv2.pojo.dto.water.HourlyRainfallQueryDTO;
 import com.jzsk.backendv2.pojo.vo.ApiResult;
-import com.jzsk.backendv2.pojo.vo.PageResultVO;
 import com.jzsk.backendv2.pojo.vo.water.HourlyRainfallVO;
 import com.jzsk.backendv2.service.water.HourlyRainfallService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,19 +45,5 @@ public class HourlyRainfallController {
 
         List<HourlyRainfallVO> list = hourlyRainfallService.getHourlyRainfallList(queryDTO);
         return ResponseEntity.ok(ApiResult.success(list, "查询成功"));
-    }
-
-    /**
-     * 分页查询小时雨量数据
-     * 权限: 需要登录
-     */
-    @Operation(summary = "分页查询小时雨量数据", description = "按条件分页查询小时雨量数据")
-    @GetMapping("/page")
-    public ResponseEntity<ApiResult<PageResultVO<HourlyRainfallVO>>> getHourlyRainfallPage(
-        @Parameter(description = "分页查询条件")
-        @Valid HourlyRainfallPageQueryDTO queryDTO) {
-
-        PageResultVO<HourlyRainfallVO> result = hourlyRainfallService.getHourlyRainfallPage(queryDTO);
-        return ResponseEntity.ok(ApiResult.success(result, "查询成功"));
     }
 }

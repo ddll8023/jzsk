@@ -1,0 +1,17 @@
+{
+  "name": "jzsk-skv2",
+  "version": "1.0.0",
+  "description": "智慧水利移动端",
+  "private": true,
+  "dependencies": {
+    "pinia": "^2.1.7",
+    "pinia-plugin-persistedstate": "^3.2.0",
+    "vue": "^3.4.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.23",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.19",
+    "weapp-tailwindcss": "^3.4.0"
+  }
+}

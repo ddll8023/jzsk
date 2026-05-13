@@ -57,11 +57,11 @@
               class="w-3.5 h-3.5 text-blue-600 rounded border-gray-300 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer"
             />
             <div class="flex items-center gap-2">
-              <!-- GNSS测站 - 使用地图实际图标（在线状态） -->
+              <!-- GNSS测站 - 使用地图实际图标（已到报状态） -->
               <img v-if="item.key === 'gnss'" src="https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png" class="w-5 h-5 object-contain" alt="GNSS" />
-              <!-- 雨量水位站 - 使用地图实际图标（在线状态） -->
+              <!-- 雨量水位站 - 使用地图实际图标（已到报状态） -->
               <img v-else-if="item.key === 'rain'" src="/icons/流量站点.png" class="w-5 h-5 object-contain" alt="雨量水位站" />
-              <!-- 渗压测站 - 使用地图实际图标（在线状态） -->
+              <!-- 渗压测站 - 使用地图实际图标（已到报状态） -->
               <img v-else-if="item.key === 'seepage'" src="/icons/水厂.png" class="w-5 h-5 object-contain" alt="渗压测站" />
               <span class="text-xs text-gray-600 font-medium group-hover:text-gray-800">{{ item.label }}</span>
             </div>
@@ -74,12 +74,12 @@
             <!-- GNSS测站 -->
             <div class="flex items-center gap-4">
               <div class="flex items-center gap-2">
-                <img src="https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png" class="w-5 h-5 object-contain" alt="GNSS在线" />
-                <span class="text-xs text-gray-500">在线</span>
+                <img src="https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png" class="w-5 h-5 object-contain" alt="GNSS已到报" />
+                <span class="text-xs text-gray-500">已到报</span>
               </div>
               <div class="flex items-center gap-2">
-                <img src="https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png" class="w-5 h-5 object-contain grayscale opacity-50" alt="GNSS离线" />
-                <span class="text-xs text-gray-500">离线</span>
+                <img src="https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png" class="w-5 h-5 object-contain grayscale opacity-50" alt="GNSS未到报" />
+                <span class="text-xs text-gray-500">未到报</span>
               </div>
               <span class="text-xs text-gray-400 ml-auto">GNSS</span>
             </div>
@@ -87,12 +87,12 @@
             <!-- 雨量水位站 -->
             <div class="flex items-center gap-4">
               <div class="flex items-center gap-2">
-                <img src="/icons/流量站点.png" class="w-5 h-5 object-contain" alt="雨量水位站在线" />
-                <span class="text-xs text-gray-500">在线</span>
+                <img src="/icons/流量站点.png" class="w-5 h-5 object-contain" alt="雨量水位站已到报" />
+                <span class="text-xs text-gray-500">已到报</span>
               </div>
               <div class="flex items-center gap-2">
-                <img src="/icons/流量站点.png" class="w-5 h-5 object-contain grayscale opacity-50" alt="雨量水位站离线" />
-                <span class="text-xs text-gray-500">离线</span>
+                <img src="/icons/流量站点.png" class="w-5 h-5 object-contain grayscale opacity-50" alt="雨量水位站未到报" />
+                <span class="text-xs text-gray-500">未到报</span>
               </div>
               <span class="text-xs text-gray-400 ml-auto">雨量水位</span>
             </div>
@@ -100,12 +100,12 @@
             <!-- 渗压测站 -->
             <div class="flex items-center gap-4">
               <div class="flex items-center gap-2">
-                <img src="/icons/水厂.png" class="w-5 h-5 object-contain" alt="渗压在线" />
-                <span class="text-xs text-gray-500">在线</span>
+                <img src="/icons/水厂.png" class="w-5 h-5 object-contain" alt="渗压已到报" />
+                <span class="text-xs text-gray-500">已到报</span>
               </div>
               <div class="flex items-center gap-2">
-                <img src="/icons/水厂.png" class="w-5 h-5 object-contain grayscale opacity-50" alt="渗压离线" />
-                <span class="text-xs text-gray-500">离线</span>
+                <img src="/icons/水厂.png" class="w-5 h-5 object-contain grayscale opacity-50" alt="渗压未到报" />
+                <span class="text-xs text-gray-500">未到报</span>
               </div>
               <span class="text-xs text-gray-400 ml-auto">渗压测站</span>
             </div>
@@ -113,7 +113,7 @@
 
           <!-- 超时阈值说明 -->
           <div class="text-xs text-gray-400 pt-1 border-t border-gray-100 space-y-0.5">
-            <div>超时阈值：GNSS 60min | 雨量水位 5min | 渗压 10min</div>
+            <div>到报阈值：GNSS 60min | 雨量水位 5min | 渗压 10min</div>
           </div>
         </div>
       </transition>

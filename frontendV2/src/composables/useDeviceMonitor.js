@@ -1,13 +1,13 @@
 /**
  * 设备监控 Composable
- * 功能：分类型获取设备监控数据、管理独立的 loading/error 状态、筛选逻辑
+ * 功能：分类型获取设备到报数据、管理独立的 loading/error 状态、筛选逻辑
  * 遵循原则：KISS、YAGNI
  */
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { getGnssStatus, getRainStatus, getSeepageStatus } from '@/api/deviceMonitor'
 
 /**
- * 设备状态枚举
+ * 设备到报状态枚举
  */
 export const DEVICE_STATUS = {
   ONLINE: 'online',
@@ -28,8 +28,8 @@ export const DEVICE_TYPES = {
  * 状态显示配置
  */
 export const STATUS_CONFIG = {
-  [DEVICE_STATUS.ONLINE]: { label: '在线', color: 'emerald', dotClass: 'bg-emerald-500' },
-  [DEVICE_STATUS.OFFLINE]: { label: '离线', color: 'red', dotClass: 'bg-red-500' },
+  [DEVICE_STATUS.ONLINE]: { label: '已到报', color: 'emerald', dotClass: 'bg-emerald-500' },
+  [DEVICE_STATUS.OFFLINE]: { label: '未到报', color: 'red', dotClass: 'bg-red-500' },
   [DEVICE_STATUS.ABNORMAL]: { label: '采集异常', color: 'amber', dotClass: 'bg-amber-500' }
 }
 
@@ -64,6 +64,8 @@ const SEEPAGE_NAME_MAP = {
   '1130221528902795264': 'UPB1-3',
   '1130221539753459712': 'UPB1-2',
   '1130221562159431680': 'UPR1-2',
+  'P0108206': 'UPR2-1',
+  'P0108311': 'UPR2-2',
   '1130221574088032256': 'UPB3-5'
 }
 

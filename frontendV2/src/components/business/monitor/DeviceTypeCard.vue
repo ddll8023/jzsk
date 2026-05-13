@@ -25,10 +25,10 @@
         <span class="text-2xl font-bold tracking-tight text-gray-900">{{ stats.total }}</span>
       </div>
 
-      <!-- 在线率进度条 -->
+      <!-- 到报率进度条 -->
       <div class="mb-3">
         <div class="flex items-center justify-between mb-1">
-          <span class="text-xs text-gray-400">在线率</span>
+          <span class="text-xs text-gray-400">到报率</span>
           <span class="text-xs font-semibold" :class="rateColorClass">{{ onlineRate }}%</span>
         </div>
         <div class="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
@@ -40,16 +40,16 @@
         </div>
       </div>
 
-      <!-- 状态行 -->
+      <!-- 到报状态行 -->
       <div class="flex items-center gap-4 text-xs">
         <div class="flex items-center gap-1.5">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span class="text-gray-500">在线</span>
+          <span class="text-gray-500">已到报</span>
           <span class="font-semibold text-emerald-600">{{ stats.online }}</span>
         </div>
         <div class="flex items-center gap-1.5">
           <span class="w-2 h-2 rounded-full bg-red-500" />
-          <span class="text-gray-500">离线</span>
+          <span class="text-gray-500">未到报</span>
           <span class="font-semibold text-red-600">{{ stats.offline }}</span>
         </div>
         <div class="flex items-center gap-1.5">
@@ -65,7 +65,7 @@
 <script setup>
 /**
  * 设备类型统计卡片
- * 功能: 展示单个设备类型（GNSS/雨水情/渗流渗压）的统计信息
+ * 功能: 展示单个设备类型（GNSS/雨水情/渗流渗压）的到报统计信息
  * 交互: 点击可筛选该类型的设备列表
  */
 import { computed } from 'vue'

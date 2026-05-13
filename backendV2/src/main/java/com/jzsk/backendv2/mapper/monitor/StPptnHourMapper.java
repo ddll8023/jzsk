@@ -29,18 +29,6 @@ public interface StPptnHourMapper {
     StPptnHourEntity selectLatestByStcd(@Param("stcd") String stcd);
 
     /**
-     * 统计小时雨量数据总数（SQL Server语法）
-     * 数据源：dbo（SQL Server）
-     *
-     * @param startDate 开始时间(可选)
-     * @param endDate 结束时间(可选)
-     * @return 总数
-     */
-    @DS("dbo")
-    long countPage(@Param("startDate") LocalDateTime startDate,
-                   @Param("endDate") LocalDateTime endDate);
-
-    /**
      * 查询所有小时雨量数据（SQL Server语法）
      * 数据源：dbo（SQL Server）
      *
@@ -60,20 +48,4 @@ public interface StPptnHourMapper {
     @DS("dbo")
     List<StPptnHourEntity> selectByTimeRange(@Param("startDate") LocalDateTime startDate,
                                                @Param("endDate") LocalDateTime endDate);
-
-    /**
-     * 分页查询小时雨量数据（SQL Server语法）
-     * 数据源：dbo（SQL Server）
-     *
-     * @param startDate 开始时间(可选)
-     * @param endDate 结束时间(可选)
-     * @param offset 偏移量
-     * @param size 每页大小
-     * @return 小时雨量数据列表
-     */
-    @DS("dbo")
-    List<StPptnHourEntity> selectPage(@Param("startDate") LocalDateTime startDate,
-                                       @Param("endDate") LocalDateTime endDate,
-                                       @Param("offset") long offset,
-                                       @Param("size") long size);
 }

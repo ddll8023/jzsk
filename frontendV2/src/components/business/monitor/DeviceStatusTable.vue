@@ -10,7 +10,7 @@
         </span>
       </div>
 
-      <!-- 状态筛选 -->
+      <!-- 到报状态筛选 -->
       <div class="flex items-center gap-2">
         <button
           v-for="item in statusFilters"
@@ -50,7 +50,7 @@
         </span>
       </template>
 
-      <!-- 状态 -->
+      <!-- 到报状态 -->
       <template #status="{ row }">
         <div class="flex items-center gap-2">
           <span
@@ -149,7 +149,7 @@
 <script setup>
 /**
  * 设备状态列表组件
- * 功能: 展示所有设备的详细状态信息，支持按状态筛选
+ * 功能: 展示所有设备的详细到报状态信息，支持按状态筛选
  * 特性: 根据当前设备类型动态切换表格列，展示对应的结构化数据
  * 依赖: Card, Table 基础组件
  */
@@ -185,14 +185,14 @@ defineEmits(['status-filter'])
 const COLUMNS_ALL = [
   { key: 'name', title: '设备名称', width: '180px' },
   { key: 'type', title: '设备类型', width: '120px' },
-  { key: 'status', title: '状态', width: '110px' },
+  { key: 'status', title: '到报状态', width: '110px' },
   { key: 'lastCollectTime', title: '最后采集时间', width: '170px' },
   { key: 'summary', title: '关键指标' }
 ]
 
 const COLUMNS_GNSS = [
   { key: 'name', title: '设备名称', width: '100px' },
-  { key: 'status', title: '状态', width: '100px' },
+  { key: 'status', title: '到报状态', width: '100px' },
   { key: 'lastCollectTime', title: '最后采集时间', width: '160px' },
   { key: 'displacement2d', title: '2D合位移', width: '100px' },
   { key: 'displacement3d', title: '3D合位移', width: '100px' },
@@ -203,7 +203,7 @@ const COLUMNS_GNSS = [
 
 const COLUMNS_RAIN = [
   { key: 'name', title: '设备名称', width: '160px' },
-  { key: 'status', title: '状态', width: '110px' },
+  { key: 'status', title: '到报状态', width: '110px' },
   { key: 'lastCollectTime', title: '最后采集时间', width: '170px' },
   { key: 'waterLevel', title: '水位', width: '120px' },
   { key: 'rainfall', title: '雨量', width: '120px' }
@@ -211,7 +211,7 @@ const COLUMNS_RAIN = [
 
 const COLUMNS_SEEPAGE = [
   { key: 'name', title: '设备名称', width: '200px' },
-  { key: 'status', title: '状态', width: '100px' },
+  { key: 'status', title: '到报状态', width: '100px' },
   { key: 'lastCollectTime', title: '最后采集时间', width: '160px' },
   { key: 'waterElevation', title: '水位高程', width: '120px' },
   { key: 'waterLevel', title: '水位', width: '120px' },
@@ -230,8 +230,8 @@ const activeColumns = computed(() => {
 
 const statusFilters = [
   { value: null, label: '全部', activeClass: 'bg-gray-100 text-gray-700 border-gray-300' },
-  { value: 'online', label: '在线', activeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  { value: 'offline', label: '离线', activeClass: 'bg-red-50 text-red-700 border-red-200' },
+  { value: 'online', label: '已到报', activeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  { value: 'offline', label: '未到报', activeClass: 'bg-red-50 text-red-700 border-red-200' },
   { value: 'abnormal', label: '采集异常', activeClass: 'bg-amber-50 text-amber-700 border-amber-200' }
 ]
 

@@ -51,14 +51,14 @@ const RAIN_STATION = {
 }
 
 /**
- * 渗压测站配置（UPB系列）
+ * 渗压测站配置（UPB/UPR系列）
  * Source: frontend/src/components/menu/OneMaps.vue mcuPressureStationsOnlyLine
  */
 const SEEPAGE_STATIONS = [
   { name: 'UPR1-1', position: [115.693391, 30.130486], piezometerId: 'P0108118', type: 'upb' },
-  { name: 'UPB1-1', position: [115.692855899, 30.129744369], piezometerId: 'P0108248', type: 'upb' },
-  { name: 'UPB2-1', position: [115.692551468314, 30.1293836116865], piezometerId: 'P0108310', type: 'upb' },
-  { name: 'UPA1-1', position: [115.692538058, 30.129391659], piezometerId: 'P0108190', type: 'upb' },
+  { name: 'UPB1-1', position: [115.692855899, 30.129744369], piezometerId: 'P0108248', type: 'upb', offset: [-0.000055, 0.000055] },
+  { name: 'UPB2-1', position: [115.692551468314, 30.1293836116865], piezometerId: 'P0108310', type: 'upb', offset: [-0.000055, 0.000055] },
+  { name: 'UPA1-1', position: [115.692538058, 30.129391659], piezometerId: 'P0108190', type: 'upb', offset: [0.000055, -0.000055] },
   { name: 'UPB3-1', position: [115.691938261, 30.128661055], piezometerId: 'P0108267', type: 'upb' },
   { name: 'UPB4-1', position: [115.691328058, 30.127916742], piezometerId: 'P0108174', type: 'upb' },
   { name: 'UPB4-4', position: [115.691895507, 30.127457935], piezometerId: 'P0108181', type: 'upb' },
@@ -68,30 +68,32 @@ const SEEPAGE_STATIONS = [
   { name: 'UPB3-2', position: [115.692014864906, 30.1286018975696], piezometerId: 'P0108282', type: 'upb' },
   { name: 'UPB3-4', position: [115.692505709, 30.12825321], piezometerId: 'P0108100', type: 'upb' },
   { name: 'UPB3-3', position: [115.692210666, 30.128486562], piezometerId: 'P0108033', type: 'upb' },
-  { name: 'UPB2-2', position: [115.69261568, 30.129344869], piezometerId: 'P0108046', type: 'upb' },
-  { name: 'UPA1-2', position: [115.692626409, 30.12933414], piezometerId: 'P0108050', type: 'upb' },
-  { name: 'UPB2-3', position: [115.692808799, 30.129206735], piezometerId: 'P0108235', type: 'upb' },
-  { name: 'UPA1-3', position: [115.692826233, 30.129193324], piezometerId: 'P0108242', type: 'upb' },
-  { name: 'UPB2-4', position: [115.693127982, 30.128990818], piezometerId: 'P0108066', type: 'upb' },
-  { name: 'UPA1-4', position: [115.693152122, 30.12896936], piezometerId: 'P0108345', type: 'upb' },
-  { name: 'UPB2-5', position: [115.693342559, 30.128851343], piezometerId: 'P0108043', type: 'upb' },
-  { name: 'UPA1-5', position: [115.693366698, 30.128827203], piezometerId: 'P0108154', type: 'upb' },
+  { name: 'UPB2-2', position: [115.69261568, 30.129344869], piezometerId: 'P0108046', type: 'upb', offset: [-0.000055, 0.000055] },
+  { name: 'UPA1-2', position: [115.692626409, 30.12933414], piezometerId: 'P0108050', type: 'upb', offset: [0.000055, -0.000055] },
+  { name: 'UPB2-3', position: [115.692808799, 30.129206735], piezometerId: 'P0108235', type: 'upb', offset: [-0.000055, 0.000055] },
+  { name: 'UPA1-3', position: [115.692826233, 30.129193324], piezometerId: 'P0108242', type: 'upb', offset: [0.000055, -0.000055] },
+  { name: 'UPB2-4', position: [115.693127982, 30.128990818], piezometerId: 'P0108066', type: 'upb', offset: [-0.000055, 0.000055] },
+  { name: 'UPA1-4', position: [115.693152122, 30.12896936], piezometerId: 'P0108345', type: 'upb', offset: [0.000055, -0.000055] },
+  { name: 'UPB2-5', position: [115.693342559, 30.128851343], piezometerId: 'P0108043', type: 'upb', offset: [-0.000055, 0.000055] },
+  { name: 'UPA1-5', position: [115.693366698, 30.128827203], piezometerId: 'P0108154', type: 'upb', offset: [0.000055, -0.000055] },
   { name: 'UPB1-5', position: [115.693602733, 30.12917589], piezometerId: 'P0108236', type: 'upb' },
   { name: 'UPB1-4', position: [115.693404249, 30.129312683], piezometerId: 'P0108173', type: 'upb' },
   { name: 'UPB1-3', position: [115.693117252955, 30.1295594459549], piezometerId: 'P0108376', type: 'upb' },
-  { name: 'UPB1-2', position: [115.692937545, 30.12968551], piezometerId: 'P0108234', type: 'upb' },
+  { name: 'UPB1-2', position: [115.692937545, 30.12968551], piezometerId: 'P0108234', type: 'upb', offset: [0.000055, -0.000055] },
   { name: 'UPR1-2', position: [115.693592003701, 30.1300932054631], piezometerId: 'P0108148', type: 'upb' },
+  { name: 'UPR2-1', position: [115.693726, 30.129831], piezometerId: 'P0108206', type: 'upb' },
+  { name: 'UPR2-2', position: [115.69386, 30.129569], piezometerId: 'P0108311', type: 'upb' },
   { name: 'UPB3-5', position: [115.692727826, 30.12812076], piezometerId: 'P0108377', type: 'upb' }
 ]
 
 /**
  * 图标路径配置
- * 在线：正常颜色
- * 离线：使用 CSS filter 实现灰度效果（所有类型统一用灰度）
+ * 已到报：正常颜色
+ * 未到报：使用 CSS filter 实现灰度效果（所有类型统一用灰度）
  */
 const ICON_PATHS = {
-  gnss: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png', // 蓝色标记（在线）
-  gnssOffline: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png', // 蓝色标记（离线用灰度滤镜）
+  gnss: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png', // 蓝色标记（已到报）
+  gnssOffline: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_b.png', // 蓝色标记（未到报用灰度滤镜）
   rain: '/icons/流量站点.png',
   rainOffline: '/icons/流量站点.png', // 使用CSS滤镜实现灰度
   seepage: '/icons/水厂.png',
@@ -124,7 +126,7 @@ export function useStationMarkers(map) {
   // 数据管理
   const stationData = useStationData()
 
-  // 状态管理（在线/离线）
+  // 状态管理（已到报/未到报）
   const stationStatus = useStationStatus()
 
   /**
@@ -151,18 +153,18 @@ export function useStationMarkers(map) {
    * @returns {string} 状态
    */
   const getStationDisplayStatus = (station) => {
-    // 基准点始终在线
+    // 基准点始终按已到报展示
     if (station.type === 'benchmark') return STATION_STATUS.ONLINE
 
     // 从已有状态中获取状态
     const status = stationStatus.getStationStatus(station.type, station.stationId || station.piezometerId)
 
-    // 隐藏状态直接返回（无数据）
+    // 兼容旧隐藏状态，无数据时按未到报显示
     if (status.status === STATION_STATUS.HIDDEN) {
-      return STATION_STATUS.HIDDEN
+      return STATION_STATUS.OFFLINE
     }
 
-    // 根据采集时间判断是否在线
+    // 根据采集时间判断是否已到报
     const now = Date.now()
     const thresholds = {
       gnss: 61 * 60 * 1000,   // 61分钟
@@ -176,7 +178,7 @@ export function useStationMarkers(map) {
       return (now - collectTime) <= threshold ? STATION_STATUS.ONLINE : STATION_STATUS.OFFLINE
     }
 
-    return STATION_STATUS.HIDDEN
+    return STATION_STATUS.OFFLINE
   }
 
   /**
@@ -206,7 +208,7 @@ export function useStationMarkers(map) {
     const iconUrl = getIconPath(station.type, status)
 
     const feature = new Feature({
-      geometry: new Point(station.position), // 直接使用原始坐标（EPSG:4326）
+      geometry: new Point(getDisplayPosition(station)), // 直接使用原始坐标（EPSG:4326），密集点增加轻微偏移
       name: station.name,
       type: station.type,
       stationId: station.stationId,
@@ -215,8 +217,30 @@ export function useStationMarkers(map) {
       status: status
     })
 
-    feature.setStyle(createIconStyle(iconUrl, 0.8, status))
+    feature.setStyle(createIconStyle(iconUrl, getIconScale(station.type), status))
     return feature
+  }
+
+  /**
+   * 获取展示坐标，针对坐标密集点增加小偏移，避免图标完全重叠。
+   * @param {Object} station - 测站配置
+   * @returns {number[]} 展示坐标
+   */
+  const getDisplayPosition = (station) => {
+    if (!station.offset) return station.position
+    return [
+      station.position[0] + station.offset[0],
+      station.position[1] + station.offset[1]
+    ]
+  }
+
+  /**
+   * 获取图标缩放比例
+   * @param {string} type - 测站类型
+   * @returns {number} 缩放比例
+   */
+  const getIconScale = (type) => {
+    return type === 'upb' ? 0.65 : 0.8
   }
 
   /**
@@ -419,7 +443,7 @@ export function useStationMarkers(map) {
    * Source: 对齐旧项目 fetchLatestUpbStationData 行为
    */
   const updateStationData = async () => {
-    // 1. 首先初始化所有测站为隐藏状态（不显示）
+    // 1. 首先初始化所有测站为未到报状态（无数据也显示）
     stationStatus.initLoadingStatus()
     updateMarkerStyles()
 
@@ -461,7 +485,7 @@ export function useStationMarkers(map) {
    * 更新所有测站图标的样式（根据状态）
    * online: 正常颜色和透明度
    * offline: 灰色 + 50%透明度
-   * hidden: 完全透明（不显示）
+   * hidden: 兼容旧状态，按未到报样式显示
    */
   const updateMarkerStyles = () => {
     const updateLayerStyles = (layer, stationType) => {
@@ -489,7 +513,7 @@ export function useStationMarkers(map) {
         const iconUrl = getIconPath(type, displayStatus)
 
         // 更新 feature 的样式和状态
-        feature.setStyle(createIconStyle(iconUrl, 0.8, displayStatus))
+        feature.setStyle(createIconStyle(iconUrl, getIconScale(type), displayStatus))
         feature.set('status', displayStatus)
       })
     }

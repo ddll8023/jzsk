@@ -8,10 +8,10 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * 设备故障事件明细视图对象
- * 用途：返回给前端的故障事件时间线数据
+ * 设备到报事件明细视图对象
+ * 用途：返回给前端的到报事件时间线数据
  */
-@Schema(name = "故障事件明细VO", description = "故障事件明细视图对象")
+@Schema(name = "到报事件明细VO", description = "到报事件明细视图对象")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,7 +26,7 @@ public class DeviceFaultEventLogVO {
     @Schema(description = "事件类型：fault_start/status_change/fault_recover", example = "fault_start")
     private String eventType;
 
-    @Schema(description = "事件详情", example = "采集超时")
+    @Schema(description = "事件详情", example = "到报超时")
     private String eventDetail;
 
     @Schema(description = "最后采集时间", example = "2026-05-07 09:00:00")

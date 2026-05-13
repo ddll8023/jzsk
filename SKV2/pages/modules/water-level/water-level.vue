@@ -208,3 +208,7 @@ async function loadHistory(reset = false) {
 function loadMore() {
   loadHistory(false)
 }
+</script>
+
+<style scoped>
+</style>

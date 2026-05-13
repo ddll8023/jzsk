@@ -1,7 +1,7 @@
 <template>
   <Modal
     :model-value="modelValue"
-    title="历史故障"
+    title="历史到报情况"
     width="full"
     @update:model-value="$emit('update:modelValue', $event)"
   >
@@ -70,7 +70,7 @@
         <div class="flex items-center gap-3">
           <div class="h-6 w-1 rounded-full bg-primary-500"></div>
           <i class="fa fa-history text-gray-400"></i>
-          <h2 class="text-base font-bold text-gray-800">故障记录列表</h2>
+          <h2 class="text-base font-bold text-gray-800">到报情况列表</h2>
         </div>
         <span class="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">共 {{ total }} 条记录</span>
       </div>
@@ -104,7 +104,7 @@
         </span>
       </template>
 
-      <!-- 首次故障状态 -->
+      <!-- 首次到报状态 -->
       <template #firstFaultStatus="{ row }">
         <span
           class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
@@ -114,7 +114,7 @@
         </span>
       </template>
 
-      <!-- 当前故障状态 -->
+      <!-- 当前到报状态 -->
       <template #currentFaultStatus="{ row }">
         <span
           class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
@@ -153,7 +153,7 @@
         </span>
       </template>
 
-      <!-- 故障详情 -->
+      <!-- 到报详情 -->
       <template #faultDetail="{ row }">
         <span class="text-sm text-gray-600 block max-w-[150px] break-all line-clamp-2" :title="row.faultDetail || ''">
           {{ row.faultDetail || '--' }}
@@ -181,10 +181,10 @@
       </div>
     </Card>
 
-    <!-- 故障详情嵌套弹窗 -->
+    <!-- 到报详情嵌套弹窗 -->
     <Modal
       v-model="detailModalVisible"
-      :title="'故障详情 - ' + (currentRecord?.deviceName || '')"
+      :title="'到报详情 - ' + (currentRecord?.deviceName || '')"
       width="lg"
     >
       <div v-if="currentRecord" class="space-y-4">
@@ -194,7 +194,7 @@
             <span class="text-gray-800">{{ currentRecord.deviceCode }}</span>
           </div>
           <div>
-            <span class="text-gray-500">故障类型：</span>
+            <span class="text-gray-500">情况类型：</span>
             <span class="text-gray-800">{{ faultTypeLabel(currentRecord.faultType) }}</span>
           </div>
           <div>
@@ -202,7 +202,7 @@
             <span class="text-gray-800">{{ formatTime(currentRecord.lastCollectTime) }}</span>
           </div>
           <div class="col-span-2 md:col-span-3">
-            <span class="text-gray-500">故障详情：</span>
+            <span class="text-gray-500">到报详情：</span>
             <span class="text-gray-800 break-all">{{ currentRecord.faultDetail || '--' }}</span>
           </div>
         </div>
@@ -223,7 +223,7 @@
       width="sm"
     >
       <div class="py-4">
-        <p class="text-gray-700 mb-4">确认删除该故障记录吗？删除后不可恢复。</p>
+        <p class="text-gray-700 mb-4">确认删除该到报情况记录吗？删除后不可恢复。</p>
         <div class="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
           <div><span class="text-gray-500">设备名称：</span><span class="text-gray-900">{{ deleteTarget?.deviceName }}</span></div>
           <div><span class="text-gray-500">设备类型：</span><span class="text-gray-900">{{ deviceTypeLabel(deleteTarget?.deviceType) }}</span></div>
@@ -243,8 +243,8 @@
 
 <script setup>
 /**
- * 历史故障弹窗组件
- * 功能：筛选、分页查询、展示设备故障主记录列表，支持查看故障详情和事件时间线
+ * 历史到报情况弹窗组件
+ * 功能：筛选、分页查询、展示设备到报情况主记录列表，支持查看详情和事件时间线
  * 依赖：Modal, Table, Select, Input, DeviceFaultEventTimeline 组件
  * 特性：状态管理内置，弹窗打开自动加载，筛选变更重置分页
  */
@@ -287,7 +287,7 @@ const deviceTypeOptions = [
 ]
 
 const faultStatusOptions = [
-  { label: '离线', value: 'offline' },
+  { label: '未到报', value: 'offline' },
   { label: '采集异常', value: 'abnormal' }
 ]
 
@@ -300,13 +300,13 @@ const processStatusOptions = [
 const columns = [
   { key: 'deviceName', title: '设备名称', width: '120px' },
   { key: 'deviceType', title: '设备类型', width: '100px' },
-  { key: 'firstFaultStatus', title: '首次故障', width: '90px' },
-  { key: 'currentFaultStatus', title: '当前故障', width: '90px' },
+  { key: 'firstFaultStatus', title: '首次状态', width: '90px' },
+  { key: 'currentFaultStatus', title: '当前状态', width: '90px' },
   { key: 'startTime', title: '开始时间', width: '145px' },
   { key: 'endTime', title: '恢复时间', width: '145px' },
   { key: 'durationMinutes', title: '持续时长', width: '85px' },
   { key: 'processStatus', title: '处理状态', width: '85px' },
-  { key: 'faultDetail', title: '故障详情', width: '155px' },
+  { key: 'faultDetail', title: '到报详情', width: '155px' },
   { key: 'action', title: '操作', width: '100px' }
 ]
 
@@ -322,7 +322,7 @@ const deleteTarget = ref(null)
 // ==================== 数据加载 ====================
 
 /**
- * 加载故障记录分页数据
+ * 加载到报情况分页数据
  */
 async function fetchData() {
   loading.value = true
@@ -384,7 +384,7 @@ function handleSizeChange(size) {
 }
 
 /**
- * 打开故障详情弹窗
+ * 打开到报详情弹窗
  */
 function openDetail(row) {
   currentRecord.value = row
@@ -439,14 +439,14 @@ const DEVICE_TYPE_MAP = {
 }
 
 const FAULT_STATUS_MAP = {
-  offline: '离线',
+  offline: '未到报',
   abnormal: '采集异常'
 }
 
 const FAULT_TYPE_MAP = {
   interface_error: '接口异常',
   no_data: '无数据',
-  collect_timeout: '采集超时',
+  collect_timeout: '到报超时',
   db_error: '数据库异常'
 }
 

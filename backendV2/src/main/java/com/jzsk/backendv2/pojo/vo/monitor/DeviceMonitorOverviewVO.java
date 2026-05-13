@@ -9,9 +9,9 @@ import java.util.List;
 
 /**
  * 设备监控总览视图对象
- * 用途: 返回设备监控页面的总览统计数据和设备列表
+ * 用途: 返回设备监控页面的到报统计数据和设备列表
  */
-@Schema(name = "设备监控总览VO", description = "设备监控总览视图对象，包含各类型统计和设备列表")
+@Schema(name = "设备监控总览VO", description = "设备监控总览视图对象，包含各类型到报统计和设备列表")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -54,10 +54,10 @@ public class DeviceMonitorOverviewVO {
         @Schema(description = "总数", example = "8")
         private int total;
 
-        @Schema(description = "在线数", example = "7")
+        @Schema(description = "已到报数", example = "7")
         private int online;
 
-        @Schema(description = "离线数", example = "0")
+        @Schema(description = "未到报数", example = "0")
         private int offline;
 
         @Schema(description = "采集异常数", example = "1")

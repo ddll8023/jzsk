@@ -6,7 +6,7 @@
         <div>
           <h1 class="text-xl font-semibold text-gray-900">设备监控</h1>
           <p class="mt-1 text-sm text-gray-500">
-            实时监控 GNSS 地表位移、水雨情、渗流渗压设备的运行状态
+            实时监控 GNSS 地表位移、水雨情、渗流渗压设备的到报状态
           </p>
         </div>
         <div class="flex items-center gap-4">
@@ -15,7 +15,7 @@
             @click="showFaultModal = true"
           >
             <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
-            <span>历史故障</span>
+            <span>历史到报情况</span>
           </button>
           <div v-if="loading" class="flex items-center gap-2 text-sm text-gray-400">
             <i class="fa fa-spinner fa-spin" aria-hidden="true" />
@@ -137,7 +137,7 @@
       />
     </section>
 
-    <!-- 历史故障弹窗 -->
+    <!-- 历史到报情况弹窗 -->
     <DeviceFaultHistoryModal v-model="showFaultModal" />
   </div>
 </template>
@@ -145,7 +145,7 @@
 <script setup>
 /**
  * 设备监控页面
- * 功能：展示三种设备类型（GNSS/水雨情/渗流渗压）的实时运行状态
+ * 功能：展示三种设备类型（GNSS/水雨情/渗流渗压）的实时到报状态
  * 依赖：DeviceTypeCard, DeviceStatusTable, DeviceFaultHistoryModal, useDeviceMonitor
  * 特性：三路接口并发加载、渐进式渲染
  */

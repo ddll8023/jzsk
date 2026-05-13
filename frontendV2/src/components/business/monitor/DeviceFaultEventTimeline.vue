@@ -53,8 +53,8 @@
 
 <script setup>
 /**
- * 故障事件时间线组件
- * 功能：根据故障主记录ID加载并展示事件时间线
+ * 到报事件时间线组件
+ * 功能：根据到报情况主记录ID加载并展示事件时间线
  * 依赖：getDeviceFaultEvents API
  * 特性：加载状态、空状态、时间线可视化
  */
@@ -97,15 +97,15 @@ watch(() => props.faultRecordId, (val) => {
 }, { immediate: true })
 
 const STATUS_LABEL_MAP = {
-  online: '在线',
-  offline: '离线',
+  online: '已到报',
+  offline: '未到报',
   abnormal: '采集异常'
 }
 
 const TYPE_LABEL_MAP = {
-  fault_start: '故障开始',
+  fault_start: '异常开始',
   status_change: '状态变化',
-  fault_recover: '故障恢复'
+  fault_recover: '恢复到报'
 }
 
 const statusLabel = (status) => STATUS_LABEL_MAP[status] || status

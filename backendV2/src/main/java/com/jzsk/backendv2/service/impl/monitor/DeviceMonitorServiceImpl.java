@@ -2,9 +2,11 @@ package com.jzsk.backendv2.service.impl.monitor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jzsk.backendv2.mapper.mcu.DataNewMapper;
+import com.jzsk.backendv2.mapper.mcu.SensorPointMapper;
 import com.jzsk.backendv2.mapper.monitor.StPptnHourMapper;
 import com.jzsk.backendv2.mapper.monitor.StRiversRMapper;
 import com.jzsk.backendv2.pojo.entity.mcu.DataNewEntity;
+import com.jzsk.backendv2.pojo.entity.mcu.SensorPointEntity;
 import com.jzsk.backendv2.pojo.entity.monitor.StPptnHourEntity;
 import com.jzsk.backendv2.pojo.entity.monitor.StRiversREntity;
 import com.jzsk.backendv2.pojo.vo.dam.DisplacementHistoryVO;
@@ -24,6 +26,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -40,6 +43,7 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
 
     private final DisplacementHistoryService displacementHistoryService;
     private final DataNewMapper dataNewMapper;
+    private final SensorPointMapper sensorPointMapper;
     private final StRiversRMapper stRiversRMapper;
     private final StPptnHourMapper stPptnHourMapper;
     private final ObjectMapper objectMapper;
@@ -59,6 +63,8 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
 
     /** GNSS测站名称映射 */
     private static final Map<Long, String> GNSS_NAME_MAP;
+    /** 渗流渗压设备名称映射 */
+    private static final Map<String, String> SEEPAGE_NAME_MAP;
     static {
         Map<Long, String> map = new java.util.HashMap<>();
         map.put(33210L, "LJ1-1"); map.put(33214L, "LJ1-2");
@@ -66,6 +72,38 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
         map.put(33215L, "LT2-1"); map.put(33211L, "LT2-2");
         map.put(33217L, "LT2-3"); map.put(33213L, "LT2-4");
         GNSS_NAME_MAP = java.util.Collections.unmodifiableMap(map);
+
+        Map<String, String> seepageMap = new LinkedHashMap<>();
+        seepageMap.put("1130221274157547520", "UPR1-1");
+        seepageMap.put("1130221285905793024", "UPB1-1");
+        seepageMap.put("1130221296655794176", "UPB2-1");
+        seepageMap.put("1130221308043329536", "UPA1-1");
+        seepageMap.put("1130221319053377536", "UPB3-1");
+        seepageMap.put("1130221331892142080", "UPB4-1");
+        seepageMap.put("1130221343288066048", "UPB4-4");
+        seepageMap.put("1130221354100981760", "UPB4-2");
+        seepageMap.put("1130221364981006336", "UPB4-3");
+        seepageMap.put("1130221376058163200", "UPB4-5");
+        seepageMap.put("1130221386883661824", "UPB3-2");
+        seepageMap.put("1130221397532999680", "UPB3-4");
+        seepageMap.put("1130221408509493248", "UPB3-3");
+        seepageMap.put("1130221419490181120", "UPB2-2");
+        seepageMap.put("1130221430265348096", "UPA1-2");
+        seepageMap.put("1130221441057292288", "UPB2-3");
+        seepageMap.put("1130221451794710528", "UPA1-3");
+        seepageMap.put("1130221462834118656", "UPB2-4");
+        seepageMap.put("1130221474066464768", "UPA1-4");
+        seepageMap.put("1130221485206536192", "UPB2-5");
+        seepageMap.put("1130221496413716480", "UPA1-5");
+        seepageMap.put("1130221507100803072", "UPB1-5");
+        seepageMap.put("1130221518182154240", "UPB1-4");
+        seepageMap.put("1130221528902795264", "UPB1-3");
+        seepageMap.put("1130221539753459712", "UPB1-2");
+        seepageMap.put("1130221562159431680", "UPR1-2");
+        seepageMap.put("P0108206", "UPR2-1");
+        seepageMap.put("P0108311", "UPR2-2");
+        seepageMap.put("1130221574088032256", "UPB3-5");
+        SEEPAGE_NAME_MAP = java.util.Collections.unmodifiableMap(seepageMap);
     }
 
     @Override
@@ -96,21 +134,22 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
     private List<DeviceStatusVO> checkGnssDevices() {
         List<DeviceStatusVO> devices = new ArrayList<>();
         List<DisplacementHistoryVO> gnssData;
+        LocalDateTime checkTime = LocalDateTime.now();
 
         try {
             gnssData = displacementHistoryService.getDisplacementLatest(
                     GNSS_STATION_IDS, GNSS_SENSOR, GNSS_PROJECT_ID);
         } catch (Exception e) {
-            log.error("[DeviceMonitor] GNSS接口调用失败，所有GNSS设备标记为离线", e);
+            log.error("[DeviceMonitor] GNSS接口调用失败，所有GNSS设备标记为未到报", e);
             GNSS_NAME_MAP.forEach((id, name) ->
-                    devices.add(buildDevice(String.valueOf(id), name, "gnss", "offline", null, "接口连接失败")));
+                    devices.add(buildDevice(String.valueOf(id), name, "gnss", "offline", checkTime, null)));
             return devices;
         }
 
         if (gnssData == null || gnssData.isEmpty()) {
-            log.warn("[DeviceMonitor] GNSS接口返回空数据，所有GNSS设备标记为离线");
+            log.warn("[DeviceMonitor] GNSS接口返回空数据，所有GNSS设备标记为未到报");
             GNSS_NAME_MAP.forEach((id, name) ->
-                    devices.add(buildDevice(String.valueOf(id), name, "gnss", "offline", null, "无数据返回")));
+                    devices.add(buildDevice(String.valueOf(id), name, "gnss", "offline", checkTime, null)));
             return devices;
         }
 
@@ -124,15 +163,16 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
             DisplacementHistoryVO data = dataMap.get(stationId);
 
             if (data == null || data.getCollectTime() == null) {
-                devices.add(buildDevice(String.valueOf(stationId), name, "gnss", "offline", null, "无采集数据"));
+                devices.add(buildDevice(String.valueOf(stationId), name, "gnss", "offline", checkTime, null));
                 continue;
             }
 
             LocalDateTime collectTime = parseCollectTime(data.getCollectTime());
             String status = determineStatus(collectTime, GNSS_TIMEOUT_MINUTES);
-            String detail = extractGnssDetail(data);
+            LocalDateTime displayTime = "online".equals(status) ? collectTime : checkTime;
+            String detail = "online".equals(status) ? extractGnssDetail(data) : null;
 
-            devices.add(buildDevice(String.valueOf(stationId), name, "gnss", status, collectTime, detail));
+            devices.add(buildDevice(String.valueOf(stationId), name, "gnss", status, displayTime, detail));
         }
 
         return devices;
@@ -146,6 +186,7 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
         List<DeviceStatusVO> devices = new ArrayList<>();
         String deviceCode = "RAIN_WATER_MAIN";
         String deviceName = "坝前雨量水位站";
+        LocalDateTime checkTime = LocalDateTime.now();
 
         StRiversREntity latestWater;
         StPptnHourEntity latestRain;
@@ -169,7 +210,7 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
         }
 
         if (latestWater == null && latestRain == null) {
-            devices.add(buildDevice(deviceCode, deviceName, "rain", "offline", null, "水位和雨量接口均无数据"));
+            devices.add(buildDevice(deviceCode, deviceName, "rain", "offline", checkTime, null));
             return devices;
         }
 
@@ -190,8 +231,10 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
             detail.append("雨量: ").append(latestRain.getDrp()).append("mm");
         }
 
-        devices.add(buildDevice(deviceCode, deviceName, "rain", status, lastTime,
-                detail.length() > 0 ? detail.toString() : null));
+        LocalDateTime displayTime = "online".equals(status) ? lastTime : checkTime;
+        String displayDetail = "online".equals(status) && detail.length() > 0 ? detail.toString() : null;
+
+        devices.add(buildDevice(deviceCode, deviceName, "rain", status, displayTime, displayDetail));
         return devices;
     }
 
@@ -202,31 +245,39 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
     private List<DeviceStatusVO> checkSeepageDevices() {
         List<DeviceStatusVO> devices = new ArrayList<>();
         List<DataNewEntity> seepageData;
+        LocalDateTime checkTime = floorToCollectMinute(LocalDateTime.now(), 10);
 
         try {
             seepageData = dataNewMapper.selectLatestForAllPoints();
         } catch (Exception e) {
-            log.error("[DeviceMonitor] 渗压数据查询失败，所有渗压设备标记为离线", e);
-            devices.add(buildDevice("SEEPAGE_ALL", "渗压设备(全部)", "seepage", "offline", null, "数据库连接失败"));
+            log.error("[DeviceMonitor] 渗压数据查询失败，所有渗压设备标记为未到报", e);
+            SEEPAGE_NAME_MAP.forEach((code, name) ->
+                    devices.add(buildDevice(code, name, "seepage", "offline", checkTime, null)));
             return devices;
         }
 
-        if (seepageData == null || seepageData.isEmpty()) {
-            devices.add(buildDevice("SEEPAGE_ALL", "渗压设备(全部)", "seepage", "offline", null, "无数据"));
-            return devices;
-        }
+        Map<String, DataNewEntity> dataMap = seepageData == null ? java.util.Collections.emptyMap() :
+                seepageData.stream()
+                        .filter(entity -> entity.getPointId() != null)
+                        .collect(Collectors.toMap(DataNewEntity::getPointId, entity -> entity, (a, b) -> a));
 
-        for (DataNewEntity entity : seepageData) {
-            String pointId = entity.getPointId();
+        for (Map.Entry<String, String> entry : SEEPAGE_NAME_MAP.entrySet()) {
+            String pointId = entry.getKey();
+            DataNewEntity entity = getSeepageDataByConfiguredPoint(pointId, dataMap);
+            if (entity == null) {
+                devices.add(buildDevice(pointId, entry.getValue(), "seepage", "offline", checkTime, null));
+                continue;
+            }
             OffsetDateTime offsetTime = entity.getTime();
             LocalDateTime collectTime = offsetTime != null
                     ? offsetTime.atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()
                     : null;
 
             String status = determineStatus(collectTime, SEEPAGE_TIMEOUT_MINUTES);
-            String detail = extractSeepageDetail(entity);
+            LocalDateTime displayTime = "online".equals(status) ? collectTime : checkTime;
+            String detail = "online".equals(status) ? extractSeepageDetail(entity) : null;
 
-            devices.add(buildDevice(pointId, pointId, "seepage", status, collectTime, detail));
+            devices.add(buildDevice(pointId, entry.getValue(), "seepage", status, displayTime, detail));
         }
 
         return devices;
@@ -248,9 +299,9 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
 
     /**
      * 判断设备状态
-     * online: 采集时间在阈值内
+     * online: 已到报，采集时间在阈值内
      * abnormal: 采集时间超过阈值（采集异常）
-     * offline: 无采集时间（已在调用方处理）
+     * offline: 未到报，无采集时间（已在调用方处理）
      */
     private String determineStatus(LocalDateTime lastCollectTime, long timeoutMinutes) {
         if (lastCollectTime == null) {
@@ -266,14 +317,50 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
     }
 
     /**
-     * 遍历设备列表，将状态变化同步到故障记录
+     * 按采集周期向下取整到最近一次应采集时间。
+     *
+     * @param time 当前时间
+     * @param intervalMinutes 采集周期（分钟）
+     * @return 最近一次应采集时间
+     */
+    private LocalDateTime floorToCollectMinute(LocalDateTime time, int intervalMinutes) {
+        if (time == null || intervalMinutes <= 0) {
+            return time;
+        }
+        int minute = time.getMinute();
+        int floorMinute = minute - minute % intervalMinutes;
+        return time.withMinute(floorMinute).withSecond(0).withNano(0);
+    }
+
+    /**
+     * 根据配置测点获取渗压数据。配置可能是数字point_id，也可能是P010格式测点名。
+     */
+    private DataNewEntity getSeepageDataByConfiguredPoint(String pointId, Map<String, DataNewEntity> dataMap) {
+        DataNewEntity entity = dataMap.get(pointId);
+        if (entity != null || pointId == null || !pointId.startsWith("P")) {
+            return entity;
+        }
+        try {
+            SensorPointEntity sensorPoint = sensorPointMapper.selectByName(pointId);
+            if (sensorPoint == null || sensorPoint.getId() == null) {
+                return null;
+            }
+            return dataMap.get(String.valueOf(sensorPoint.getId()));
+        } catch (Exception e) {
+            log.warn("[DeviceMonitor] 渗压测点编号解析失败: {}", pointId, e);
+            return null;
+        }
+    }
+
+    /**
+     * 遍历设备列表，将状态变化同步到到报情况记录
      */
     private void processFaultRecords(List<DeviceStatusVO> devices) {
         for (DeviceStatusVO device : devices) {
             try {
                 deviceFaultRecordService.processDeviceStatus(device);
             } catch (Exception e) {
-                log.error("[DeviceMonitor] 故障记录处理失败: {}/{}", device.getType(), device.getCode(), e);
+                log.error("[DeviceMonitor] 到报情况记录处理失败: {}/{}", device.getType(), device.getCode(), e);
             }
         }
     }

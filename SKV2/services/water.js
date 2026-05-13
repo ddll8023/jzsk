@@ -14,11 +14,6 @@ export function getWaterLevelList(params = {}) {
   return get('/api/water-levels/list', params)
 }
 
-/** 雨量分页查询 */
-export function getHourlyRainfallPage(params = {}) {
-  return get('/api/hourly-rainfalls/page', { page: 1, size: 10, ...params })
-}
-
 /** 雨量列表查询 */
 export function getHourlyRainfallList(params = {}) {
   return get('/api/hourly-rainfalls/list', params)

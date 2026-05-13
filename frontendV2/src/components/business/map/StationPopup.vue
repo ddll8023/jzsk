@@ -17,9 +17,9 @@
           Y位移: {{ formatValue(data.gpsTotalY) }} mm
         </div>
         <div v-if="data.collectTime" class="popup-time">
-          时间: {{ formatTime(data.collectTime) }}
+          最后采集时间: {{ formatTime(data.collectTime) }}
         </div>
-        <div v-if="!hasData" class="popup-empty">暂无监测数据</div>
+        <div v-if="!hasData" class="popup-empty">暂无历史采集数据</div>
       </template>
       <template v-else-if="stationType === 'benchmark'">
         <div class="popup-item">类型：基准点</div>
@@ -36,9 +36,9 @@
         降雨量: {{ formatValue(data.rainfall) }} mm
       </div>
       <div v-if="data?.time" class="popup-time">
-        时间: {{ formatTime(data.time) }}
+        最后采集时间: {{ formatTime(data.time) }}
       </div>
-      <div v-if="!hasData" class="popup-empty">暂无监测数据</div>
+      <div v-if="!hasData" class="popup-empty">暂无历史采集数据</div>
     </template>
 
     <!-- 渗压测站 (UPB) -->
@@ -57,9 +57,9 @@
         温度: {{ formatValue(data.temperature, 2) }} °C
       </div>
       <div v-if="data?.time" class="popup-time">
-        时间: {{ formatTime(data.time) }}
+        最后采集时间: {{ formatTime(data.time) }}
       </div>
-      <div v-if="!hasData" class="popup-empty">暂无监测数据</div>
+      <div v-if="!hasData" class="popup-empty">暂无历史采集数据</div>
     </template>
   </div>
 </template>

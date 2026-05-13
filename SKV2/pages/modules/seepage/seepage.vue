@@ -23,7 +23,7 @@
                   <view class="flex items-center">
                     <view class="w-1 h-4 bg-primary rounded mr-2"></view>
                     <text class="text-sm font-medium text-gray-700">{{
-                      currentPoint?.name || '选择测点'
+                      (currentPoint && currentPoint.name) || '选择测点'
                     }}</text>
                   </view>
                   <text class="text-xs text-gray-400">▼ 切换测点</text>

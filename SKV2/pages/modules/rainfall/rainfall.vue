@@ -117,7 +117,7 @@
 import { ref, computed } from 'vue'
 import { onLoad, onPullDownRefresh } from '@dcloudio/uni-app'
 import { formatDate, formatNum, getDefaultDateRange } from '@/utils/format.js'
-import { getHourlyRainfallList, getHourlyRainfallPage } from '@/services/water.js'
+import { getHourlyRainfallList } from '@/services/water.js'
 import SkCard from '@/components/common/SkCard.vue'
 import SkLoading from '@/components/common/SkLoading.vue'
 import SkEmpty from '@/components/common/SkEmpty.vue'
@@ -129,10 +129,7 @@ const refreshing = ref(false)
 const latestData = ref(null)
 const allRainfallData = ref([])
 
-const historyList = ref([])
-const historyLoading = ref(false)
-const hasMore = ref(true)
-const currentPage = ref(1)
+const historyPage = ref(1)
 const pageSize = 10
 
 const currentDrp = computed(() => formatNum(latestData.value?.drp))
@@ -155,6 +152,11 @@ const trendData = computed(() => {
   const list = allRainfallData.value
   return list.slice(-24)
 })
+const hasMore = computed(() => historyPage.value * pageSize < allRainfallData.value.length)
+const historyList = computed(() => {
+  const list = allRainfallData.value
+  return list.slice(0, historyPage.value * pageSize)
+})
 
 function formatTime(val) {
   return val ? formatDate(val, 'MM-DD HH:mm') : '--'
@@ -173,7 +175,7 @@ onPullDownRefresh(() => {
 async function loadData() {
   loading.value = true
   try {
-    await Promise.all([loadLatestAndTrend(), loadHistory(true)])
+    await loadList()
   } finally {
     loading.value = false
   }
@@ -182,55 +184,27 @@ async function loadData() {
 async function refreshData() {
   refreshing.value = true
   try {
-    await Promise.all([loadLatestAndTrend(), loadHistory(true)])
+    await loadList()
   } finally {
     refreshing.value = false
   }
 }
 
-async function loadLatestAndTrend() {
+async function loadList() {
   const { startDate, endDate } = getDefaultDateRange()
   const res = await getHourlyRainfallList({ startDate, endDate })
   const list = res.data || []
   allRainfallData.value = list
+  historyPage.value = 1
   if (list.length > 0) {
     latestData.value = list[list.length - 1]
   }
 }
 
-async function loadHistory(reset = false) {
-  if (historyLoading.value) return
-  if (reset) {
-    currentPage.value = 1
-    hasMore.value = true
-  }
-  if (!hasMore.value) return
-
-  historyLoading.value = true
-  try {
-    const { startDate, endDate } = getDefaultDateRange()
-    const res = await getHourlyRainfallPage({
-      page: currentPage.value,
-      size: pageSize,
-      startDate,
-      endDate,
-    })
-    const records = res.data?.list || []
-    if (reset) {
-      historyList.value = records
-    } else {
-      historyList.value = [...historyList.value, ...records]
-    }
-    if (records.length < pageSize) {
-      hasMore.value = false
-    } else {
-      currentPage.value++
-    }
-  } finally {
-    historyLoading.value = false
-  }
-}
-
 function loadMore() {
-  loadHistory(false)
+  historyPage.value++
 }
+</script>
+
+<style scoped>
+</style>

@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 设备故障记录服务实现类
- * 职责：处理设备状态变化，维护故障记录的创建、更新、恢复，以及故障记录分页查询
- * 遵循KISS原则：一次故障一条主记录，状态变化更新不新增
+ * 设备到报情况记录服务实现类
+ * 职责：处理设备到报状态变化，维护到报情况记录的创建、更新、恢复，以及分页查询
+ * 遵循KISS原则：一次异常到报情况一条主记录，状态变化更新不新增
  */
 @Slf4j
 @Service
@@ -50,7 +50,7 @@ public class DeviceFaultRecordServiceImpl implements DeviceFaultRecordService {
     }
 
     /**
-     * 设备恢复在线，将活跃故障标记为已恢复
+     * 设备恢复到报，将活跃异常记录标记为已恢复
      */
     private void resolveActiveFault(String deviceType, String deviceCode) {
         String activeKey = deviceType + ":" + deviceCode;
@@ -66,11 +66,11 @@ public class DeviceFaultRecordServiceImpl implements DeviceFaultRecordService {
         activeFault.setUpdateTime(now);
         deviceFaultRecordMapper.updateResolved(activeFault);
         insertEventLog(activeFault.getId(), deviceType, deviceCode, "online", "fault_recover", null, null, now);
-        log.info("[DeviceFault] 故障恢复: {}/{}, 持续{}分钟", deviceType, deviceCode, minutes);
+        log.info("[DeviceFault] 到报恢复: {}/{}, 持续{}分钟", deviceType, deviceCode, minutes);
     }
 
     /**
-     * 设备故障，新增或更新故障记录
+     * 设备未到报或采集异常，新增或更新到报情况记录
      */
     private void upsertFaultRecord(DeviceStatusVO device) {
         String activeKey = device.getType() + ":" + device.getCode();
@@ -100,8 +100,8 @@ public class DeviceFaultRecordServiceImpl implements DeviceFaultRecordService {
             record.setFaultDetail(device.getDetail());
             record.setLastCollectTime(device.getLastCollectTime());
             LocalDateTime now = LocalDateTime.now();
-            // offline: 无法确定离线时刻，使用检测时刻
-            // abnormal: 故障从最后一次成功采集后开始
+            // offline: 无法确定未到报时刻，使用检测时刻
+            // abnormal: 异常从本次检测采集后开始
             LocalDateTime startTime = "abnormal".equals(device.getStatus()) && device.getLastCollectTime() != null
                     ? device.getLastCollectTime() : now;
             record.setStartTime(startTime);
@@ -112,12 +112,12 @@ public class DeviceFaultRecordServiceImpl implements DeviceFaultRecordService {
             insertEventLog(record.getId(), device.getType(), device.getCode(),
                     device.getStatus(), "fault_start", device.getDetail(),
                     device.getLastCollectTime(), startTime);
-            log.info("[DeviceFault] 故障发生: {}/{}, 状态: {}", device.getType(), device.getCode(), device.getStatus());
+            log.info("[DeviceFault] 到报异常发生: {}/{}, 状态: {}", device.getType(), device.getCode(), device.getStatus());
         }
     }
 
     /**
-     * 推断故障类型
+     * 推断到报异常类型
      */
     private String determineFaultType(DeviceStatusVO device) {
         if ("abnormal".equals(device.getStatus())) {
@@ -130,7 +130,7 @@ public class DeviceFaultRecordServiceImpl implements DeviceFaultRecordService {
     }
 
     /**
-     * 分页查询故障记录
+     * 分页查询到报情况记录
      * @param queryDTO 分页查询参数
      * @return 分页结果
      */
@@ -248,12 +248,12 @@ public class DeviceFaultRecordServiceImpl implements DeviceFaultRecordService {
     }
 
     /**
-     * 删除故障记录（级联删除事件明细）
+     * 删除到报情况记录（级联删除事件明细）
      */
     @Override
     public void delete(Long id) {
         deviceFaultEventLogMapper.deleteByFaultRecordId(id);
         deviceFaultRecordMapper.deleteById(id);
-        log.info("[DeviceFault] 故障记录已删除: id={}", id);
+        log.info("[DeviceFault] 到报情况记录已删除: id={}", id);
     }
 }

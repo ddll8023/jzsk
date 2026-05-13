@@ -1,6 +1,6 @@
 /**
- * 测站在线状态检测 Composable
- * 功能：根据数据采集时间判断设备是否在线（超时离线）
+ * 测站到报状态检测 Composable
+ * 功能：根据数据采集时间判断设备是否到报（超时未到报）
  * 超时阈值（含1分钟缓冲，应对四舍五入显示）：
  * - GNSS测站：61分钟（每小时采集一次）
  * - 雨量水位站：6分钟
@@ -12,9 +12,9 @@ import { ref, computed, onUnmounted } from 'vue'
  * 测站状态枚举
  */
 export const STATION_STATUS = {
-  HIDDEN: 'hidden',  // 隐藏（暂无数据）
-  ONLINE: 'online',   // 在线
-  OFFLINE: 'offline' // 离线
+  HIDDEN: 'hidden',  // 兼容旧状态，不再用于初始化
+  ONLINE: 'online',   // 已到报
+  OFFLINE: 'offline' // 未到报
 }
 
 /**
@@ -43,25 +43,25 @@ const SEEPAGE_PIEZOMETER_IDS = [
   'P0108282', 'P0108100', 'P0108033', 'P0108046', 'P0108050',
   'P0108235', 'P0108242', 'P0108066', 'P0108345', 'P0108043',
   'P0108154', 'P0108236', 'P0108173', 'P0108376', 'P0108234',
-  'P0108148', 'P0108377'
+  'P0108148', 'P0108206', 'P0108311', 'P0108377'
 ]
 
 /**
- * 测站在线状态管理
- * @returns {Object} 在线状态和方法
+ * 测站到报状态管理
+ * @returns {Object} 到报状态和方法
  */
 export function useStationStatus() {
-  // 测站在线状态 Map：stationId/key -> { isOnline, lastCollectTime, status }
+  // 测站到报状态 Map：stationId/key -> { isOnline, lastCollectTime, status }
   const stationStatus = ref(new Map())
 
   // 定时刷新引用
   let refreshInterval = null
 
   /**
-   * 判断单个测站是否在线
+   * 判断单个测站是否已到报
    * @param {string} stationType - 测站类型
    * @param {string|Date} collectTime - 数据采集时间
-   * @returns {boolean} 是否在线
+   * @returns {boolean} 是否已到报
    */
   const isStationOnline = (stationType, collectTime) => {
     if (!collectTime) return false
@@ -97,7 +97,7 @@ export function useStationStatus() {
    * @returns {string} 格式化字符串
    */
   const formatRemainingTime = (ms) => {
-    if (ms <= 0) return '已离线'
+    if (ms <= 0) return '未到报'
 
     const minutes = Math.floor(ms / 60000)
     const seconds = Math.floor((ms % 60000) / 1000)
@@ -114,7 +114,7 @@ export function useStationStatus() {
   }
 
   /**
-   * 初始化所有测站为隐藏状态（无数据时不显示）
+   * 初始化所有测站为未到报状态（无数据时也显示）
    * 用于数据开始加载时调用
    */
   const initLoadingStatus = () => {
@@ -124,7 +124,7 @@ export function useStationStatus() {
       stationStatus.value.set(key, {
         isOnline: null,
         lastCollectTime: null,
-        status: STATION_STATUS.HIDDEN
+        status: STATION_STATUS.OFFLINE
       })
     })
 
@@ -132,7 +132,7 @@ export function useStationStatus() {
     stationStatus.value.set('rain', {
       isOnline: null,
       lastCollectTime: null,
-      status: STATION_STATUS.HIDDEN
+      status: STATION_STATUS.OFFLINE
     })
 
     // 渗压测站
@@ -141,7 +141,7 @@ export function useStationStatus() {
       stationStatus.value.set(key, {
         isOnline: null,
         lastCollectTime: null,
-        status: STATION_STATUS.HIDDEN
+        status: STATION_STATUS.OFFLINE
       })
     })
   }
@@ -212,7 +212,7 @@ export function useStationStatus() {
       return stationStatus.value.get('rain') || {
         isOnline: null,
         lastCollectTime: null,
-        status: STATION_STATUS.HIDDEN
+        status: STATION_STATUS.OFFLINE
       }
     }
     // upb 类型映射到 seepage_ 前缀（useStationMarkers 中渗压测站的类型是 'upb'）
@@ -220,12 +220,12 @@ export function useStationStatus() {
     return stationStatus.value.get(key) || {
       isOnline: null,
       lastCollectTime: null,
-      status: STATION_STATUS.HIDDEN
+      status: STATION_STATUS.OFFLINE
     }
   }
 
   /**
-   * 获取所有离线测站数量统计
+   * 获取所有未到报测站数量统计
    */
   const offlineStats = computed(() => {
     let gnss = 0, rain = 0, seepage = 0

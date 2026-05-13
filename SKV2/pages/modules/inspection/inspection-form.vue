@@ -79,7 +79,7 @@
               :rows="4"
             />
             <text class="text-xs text-gray-400 text-right block mt-1">
-              {{ formData.situation?.length || 0 }}/255
+              {{ (formData.situation && formData.situation.length) || 0 }}/255
             </text>
           </view>
         </view>

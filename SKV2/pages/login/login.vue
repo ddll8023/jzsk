@@ -1,98 +1,84 @@
 <template>
   <view class="flex flex-col min-h-screen bg-white">
-    <!-- 顶部装饰 -->
-    <view class="bg-primary pt-16 pb-24 px-8 rounded-b-3xl">
-      <view class="flex items-center justify-center mb-4">
-        <image
-          src="/static/img/sk.jpg"
-          mode="aspectFill"
-          class="w-20 h-20 rounded-full"
-        />
+    <!-- 主内容区 -->
+    <view class="flex-1 flex flex-col items-center justify-center px-10">
+      <!-- 水库图片 -->
+      <view class="w-20 h-20 rounded-full overflow-hidden mb-5 border-2 border-primary/20">
+        <image src="/static/img/sk.jpg" mode="aspectFill" class="w-full h-full" />
       </view>
-      <text class="text-white text-2xl font-bold text-center block">
-        武穴市荆竹水库
-      </text>
-      <text class="text-white/80 text-sm text-center block mt-2">
-        智慧水利管理系统
-      </text>
-    </view>
 
-    <!-- 登录表单 -->
-    <view class="px-8 -mt-12">
-      <view class="bg-white rounded-2xl shadow-lg p-8">
-        <text class="text-xl font-bold text-gray-900 block mb-6 text-center">
-          账号登录
-        </text>
+      <!-- 系统名称 -->
+      <text class="text-xl font-bold text-gray-900 tracking-wide">武穴市荆竹水库</text>
+      <text class="text-sm text-gray-400 mt-1.5 tracking-widest">智慧水利管理系统</text>
 
+      <!-- 表单卡片 -->
+      <view class="w-full mt-10 border border-gray-100 rounded-2xl p-6">
         <!-- 用户名 -->
-        <view class="mb-5">
+        <view class="mb-4">
           <view
-            class="flex items-center border rounded-xl px-4 py-3"
-            :class="errors.username ? 'border-error' : 'border-gray-200'"
+            class="flex items-center bg-gray-50 rounded-lg px-4 py-3"
+            :class="errors.username ? 'border border-error' : 'border border-transparent'"
           >
-            <text class="text-gray-400 mr-3 text-lg">
-              &#xe60a;
-            </text>
+            <image src="/static/icons/user.svg" mode="aspectFit" class="w-5 h-5 mr-3 flex-shrink-0" />
             <input
               v-model="form.username"
               type="text"
               placeholder="请输入用户名"
-              class="flex-1 text-base"
+              placeholder-class="text-gray-300"
+              class="flex-1 text-sm text-gray-900"
               @blur="validateField('username')"
             />
           </view>
-          <text v-if="errors.username" class="text-error text-xs mt-1 block">
+          <text v-if="errors.username" class="text-error text-xs mt-1.5 block px-1">
             {{ errors.username }}
           </text>
         </view>
 
         <!-- 密码 -->
-        <view class="mb-8">
+        <view class="mb-6">
           <view
-            class="flex items-center border rounded-xl px-4 py-3"
-            :class="errors.password ? 'border-error' : 'border-gray-200'"
+            class="flex items-center bg-gray-50 rounded-lg px-4 py-3"
+            :class="errors.password ? 'border border-error' : 'border border-transparent'"
           >
-            <text class="text-gray-400 mr-3 text-lg">
-              &#xe634;
-            </text>
+            <image src="/static/icons/lock.svg" mode="aspectFit" class="w-5 h-5 mr-3 flex-shrink-0" />
             <input
               v-model="form.password"
               :password="!showPassword"
               type="text"
               placeholder="请输入密码"
-              class="flex-1 text-base"
+              placeholder-class="text-gray-300"
+              class="flex-1 text-sm text-gray-900"
               @blur="validateField('password')"
             />
-            <text class="text-gray-400 text-sm" @click="showPassword = !showPassword">
+            <text
+              class="text-xs ml-2 flex-shrink-0"
+              :class="showPassword ? 'text-primary' : 'text-gray-400'"
+              @click="showPassword = !showPassword"
+            >
               {{ showPassword ? '隐藏' : '显示' }}
             </text>
           </view>
-          <text v-if="errors.password" class="text-error text-xs mt-1 block">
+          <text v-if="errors.password" class="text-error text-xs mt-1.5 block px-1">
             {{ errors.password }}
           </text>
         </view>
 
         <!-- 登录按钮 -->
         <view
-          class="rounded-xl py-3.5 text-center"
-          :class="loading ? 'bg-primary/60' : 'bg-primary'"
+          class="w-full py-3.5 rounded-lg text-center"
+          :class="loading ? 'bg-primary/50' : 'bg-primary active:bg-primary/80'"
           @click="handleLogin"
         >
-          <text v-if="loading" class="text-white text-base">
-            登录中...
-          </text>
-          <text v-else class="text-white text-base font-medium">
-            登 录
+          <text class="text-white text-sm font-medium tracking-wider">
+            {{ loading ? '登录中...' : '登 录' }}
           </text>
         </view>
       </view>
     </view>
 
-    <!-- 底部 -->
-    <view class="flex-1 flex items-end justify-center pb-10">
-      <text class="text-gray-400 text-xs">
-        智慧水利移动端 v1.0.0
-      </text>
+    <!-- 底部版本号 -->
+    <view class="flex justify-center pb-10">
+      <text class="text-xs text-gray-300 tracking-wide">智慧水利移动端 v1.0.0</text>
     </view>
   </view>
 </template>
