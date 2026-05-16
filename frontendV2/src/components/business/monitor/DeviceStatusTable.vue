@@ -231,8 +231,8 @@ const activeColumns = computed(() => {
 const statusFilters = [
   { value: null, label: '全部', activeClass: 'bg-gray-100 text-gray-700 border-gray-300' },
   { value: 'online', label: '已到报', activeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  { value: 'offline', label: '未到报', activeClass: 'bg-red-50 text-red-700 border-red-200' },
-  { value: 'abnormal', label: '采集异常', activeClass: 'bg-amber-50 text-amber-700 border-amber-200' }
+  { value: 'offline', label: '未到报', activeClass: 'bg-amber-50 text-amber-700 border-amber-200' },
+  { value: 'abnormal', label: '采集异常', activeClass: 'bg-red-50 text-red-700 border-red-200' }
 ]
 
 const TYPE_BADGE_MAP = {
@@ -243,8 +243,8 @@ const TYPE_BADGE_MAP = {
 
 const STATUS_BADGE_MAP = {
   online: 'bg-emerald-50 text-emerald-700',
-  offline: 'bg-red-50 text-red-700',
-  abnormal: 'bg-amber-50 text-amber-700'
+  offline: 'bg-amber-50 text-amber-700',
+  abnormal: 'bg-red-50 text-red-700'
 }
 
 const typeLabel = (type) => DEVICE_TYPES[type]?.label || type

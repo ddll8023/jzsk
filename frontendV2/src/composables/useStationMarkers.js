@@ -442,10 +442,12 @@ export function useStationMarkers(map) {
    * 优化：改为渐进式加载，收到数据后立即显示对应测站图标
    * Source: 对齐旧项目 fetchLatestUpbStationData 行为
    */
-  const updateStationData = async () => {
-    // 1. 首先初始化所有测站为未到报状态（无数据也显示）
-    stationStatus.initLoadingStatus()
-    updateMarkerStyles()
+  const updateStationData = async ({ initial = false } = {}) => {
+    // 首次加载时初始化占位状态；定时刷新保留旧状态，避免请求慢或失败导致在线图标变灰。
+    if (initial) {
+      stationStatus.initLoadingStatus()
+      updateMarkerStyles()
+    }
 
     // 2. 渐进式加载数据，每个请求完成后立即显示对应测站
     // GNSS 数据
@@ -532,7 +534,7 @@ export function useStationMarkers(map) {
    */
   const startStatusRefresh = () => {
     stationStatus.startAutoRefresh(() => {
-      updateStationData().catch(err => {
+      updateStationData({ initial: false }).catch(err => {
         console.warn('[测站标注] 定时刷新数据失败:', err)
       })
     }, 60000) // 1分钟

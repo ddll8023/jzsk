@@ -119,7 +119,7 @@ const handleMapReady = async (mapInstance) => {
 
   if (stationPopupRef.value) {
     stationMarkerManager.createStationMarkers(stationPopupRef.value)
-    stationMarkerManager.updateStationData().catch(error => {
+    stationMarkerManager.updateStationData({ initial: true }).catch(error => {
       console.error('[OneMap] 测站数据加载失败:', error)
     })
     // 启动定时刷新测站状态（每分钟检查一次）

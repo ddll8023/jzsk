@@ -61,6 +61,7 @@ jzsk:
         warning.water-level-rainfall-check: true
         warning.gnss-check: true
         warning.mcu-check: true
+        sync.device-fault-retention-clean: true
       zone: Asia/Shanghai
       pool-size: 4
       thread-name-prefix: jzsk-task-

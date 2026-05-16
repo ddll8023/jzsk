@@ -19,16 +19,21 @@ import com.jzsk.backendv2.service.monitor.DeviceFaultRecordService;
 import com.jzsk.backendv2.service.monitor.DeviceMonitorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -48,6 +53,9 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
     private final StPptnHourMapper stPptnHourMapper;
     private final ObjectMapper objectMapper;
     private final DeviceFaultRecordService deviceFaultRecordService;
+    private final ThreadPoolTaskScheduler threadPoolTaskScheduler;
+
+    private final Set<String> retryingDeviceTypes = ConcurrentHashMap.newKeySet();
 
     /** GNSS超时阈值（分钟）: 60分钟采集周期 + 1分钟缓冲 */
     private static final long GNSS_TIMEOUT_MINUTES = 61;
@@ -55,6 +63,11 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
     private static final long RAIN_TIMEOUT_MINUTES = 6;
     /** 渗流渗压超时阈值（分钟）: 10分钟采集周期 + 1分钟缓冲 */
     private static final long SEEPAGE_TIMEOUT_MINUTES = 11;
+    /** 网络故障后台重试间隔 */
+    private static final long[] NETWORK_RETRY_DELAY_MILLIS = {5000L, 15000L, 30000L};
+    private static final String DETAIL_NETWORK_FAULT = "网络故障";
+    private static final String DETAIL_COLLECT_ABNORMAL = "采集异常";
+    private static final String DETAIL_LATEST_EMPTY = "最新采集时间无数据";
 
     /** GNSS测站配置 */
     private static final String GNSS_STATION_IDS = "33210,33214,33216,33212,33215,33211,33217,33213";
@@ -108,21 +121,21 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
 
     @Override
     public DeviceTypeStatusVO getGnssStatus() {
-        List<DeviceStatusVO> devices = checkGnssDevices();
+        List<DeviceStatusVO> devices = checkGnssDevices(true);
         processFaultRecords(devices);
         return buildTypeResult(devices);
     }
 
     @Override
     public DeviceTypeStatusVO getRainStatus() {
-        List<DeviceStatusVO> devices = checkRainDevices();
+        List<DeviceStatusVO> devices = checkRainDevices(true);
         processFaultRecords(devices);
         return buildTypeResult(devices);
     }
 
     @Override
     public DeviceTypeStatusVO getSeepageStatus() {
-        List<DeviceStatusVO> devices = checkSeepageDevices();
+        List<DeviceStatusVO> devices = checkSeepageDevices(true);
         processFaultRecords(devices);
         return buildTypeResult(devices);
     }
@@ -131,25 +144,27 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
      * 检测GNSS设备状态
      * 数据源: 外部HTTP API
      */
-    private List<DeviceStatusVO> checkGnssDevices() {
+    private List<DeviceStatusVO> checkGnssDevices(boolean scheduleRetry) {
         List<DeviceStatusVO> devices = new ArrayList<>();
         List<DisplacementHistoryVO> gnssData;
-        LocalDateTime checkTime = LocalDateTime.now();
 
         try {
             gnssData = displacementHistoryService.getDisplacementLatest(
                     GNSS_STATION_IDS, GNSS_SENSOR, GNSS_PROJECT_ID);
         } catch (Exception e) {
-            log.error("[DeviceMonitor] GNSS接口调用失败，所有GNSS设备标记为未到报", e);
+            log.error("[DeviceMonitor] GNSS接口调用失败，所有GNSS设备标记为采集异常", e);
+            if (scheduleRetry) {
+                scheduleNetworkRetry("gnss");
+            }
             GNSS_NAME_MAP.forEach((id, name) ->
-                    devices.add(buildDevice(String.valueOf(id), name, "gnss", "offline", checkTime, null)));
+                    devices.add(buildDevice(String.valueOf(id), name, "gnss", "abnormal", null, DETAIL_NETWORK_FAULT)));
             return devices;
         }
 
         if (gnssData == null || gnssData.isEmpty()) {
-            log.warn("[DeviceMonitor] GNSS接口返回空数据，所有GNSS设备标记为未到报");
+            log.warn("[DeviceMonitor] GNSS接口返回空数据，所有GNSS设备标记为采集异常");
             GNSS_NAME_MAP.forEach((id, name) ->
-                    devices.add(buildDevice(String.valueOf(id), name, "gnss", "offline", checkTime, null)));
+                    devices.add(buildDevice(String.valueOf(id), name, "gnss", "abnormal", null, DETAIL_COLLECT_ABNORMAL)));
             return devices;
         }
 
@@ -163,14 +178,14 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
             DisplacementHistoryVO data = dataMap.get(stationId);
 
             if (data == null || data.getCollectTime() == null) {
-                devices.add(buildDevice(String.valueOf(stationId), name, "gnss", "offline", checkTime, null));
+                devices.add(buildDevice(String.valueOf(stationId), name, "gnss", "abnormal", null, DETAIL_COLLECT_ABNORMAL));
                 continue;
             }
 
             LocalDateTime collectTime = parseCollectTime(data.getCollectTime());
             String status = determineStatus(collectTime, GNSS_TIMEOUT_MINUTES);
-            LocalDateTime displayTime = "online".equals(status) ? collectTime : checkTime;
-            String detail = "online".equals(status) ? extractGnssDetail(data) : null;
+            LocalDateTime displayTime = "abnormal".equals(status) ? null : collectTime;
+            String detail = "online".equals(status) ? extractGnssDetail(data) : faultDetail(status);
 
             devices.add(buildDevice(String.valueOf(stationId), name, "gnss", status, displayTime, detail));
         }
@@ -182,14 +197,14 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
      * 检测雨水情设备状态
      * 数据源: SQL Server (水位ST_RIVERS_R + 雨量ST_PPTN_HOUR)
      */
-    private List<DeviceStatusVO> checkRainDevices() {
+    private List<DeviceStatusVO> checkRainDevices(boolean scheduleRetry) {
         List<DeviceStatusVO> devices = new ArrayList<>();
         String deviceCode = "RAIN_WATER_MAIN";
         String deviceName = "坝前雨量水位站";
-        LocalDateTime checkTime = LocalDateTime.now();
 
         StRiversREntity latestWater;
         StPptnHourEntity latestRain;
+        boolean hasQueryError = false;
 
         try {
             latestWater = stRiversRMapper.selectAll().stream()
@@ -198,6 +213,7 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
         } catch (Exception e) {
             log.error("[DeviceMonitor] 水位数据查询失败", e);
             latestWater = null;
+            hasQueryError = true;
         }
 
         try {
@@ -207,10 +223,15 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
         } catch (Exception e) {
             log.error("[DeviceMonitor] 雨量数据查询失败", e);
             latestRain = null;
+            hasQueryError = true;
         }
 
         if (latestWater == null && latestRain == null) {
-            devices.add(buildDevice(deviceCode, deviceName, "rain", "offline", checkTime, null));
+            if (hasQueryError && scheduleRetry) {
+                scheduleNetworkRetry("rain");
+            }
+            String detail = hasQueryError ? DETAIL_NETWORK_FAULT : DETAIL_COLLECT_ABNORMAL;
+            devices.add(buildDevice(deviceCode, deviceName, "rain", "abnormal", null, detail));
             return devices;
         }
 
@@ -231,8 +252,8 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
             detail.append("雨量: ").append(latestRain.getDrp()).append("mm");
         }
 
-        LocalDateTime displayTime = "online".equals(status) ? lastTime : checkTime;
-        String displayDetail = "online".equals(status) && detail.length() > 0 ? detail.toString() : null;
+        LocalDateTime displayTime = "abnormal".equals(status) ? null : lastTime;
+        String displayDetail = "online".equals(status) && detail.length() > 0 ? detail.toString() : faultDetail(status);
 
         devices.add(buildDevice(deviceCode, deviceName, "rain", status, displayTime, displayDetail));
         return devices;
@@ -242,17 +263,19 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
      * 检测渗流渗压设备状态
      * 数据源: PostgreSQL (data_new表)
      */
-    private List<DeviceStatusVO> checkSeepageDevices() {
+    private List<DeviceStatusVO> checkSeepageDevices(boolean scheduleRetry) {
         List<DeviceStatusVO> devices = new ArrayList<>();
         List<DataNewEntity> seepageData;
-        LocalDateTime checkTime = floorToCollectMinute(LocalDateTime.now(), 10);
 
         try {
             seepageData = dataNewMapper.selectLatestForAllPoints();
         } catch (Exception e) {
-            log.error("[DeviceMonitor] 渗压数据查询失败，所有渗压设备标记为未到报", e);
+            log.error("[DeviceMonitor] 渗压数据查询失败，所有渗压设备标记为采集异常", e);
+            if (scheduleRetry) {
+                scheduleNetworkRetry("seepage");
+            }
             SEEPAGE_NAME_MAP.forEach((code, name) ->
-                    devices.add(buildDevice(code, name, "seepage", "offline", checkTime, null)));
+                    devices.add(buildDevice(code, name, "seepage", "abnormal", null, DETAIL_NETWORK_FAULT)));
             return devices;
         }
 
@@ -265,7 +288,7 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
             String pointId = entry.getKey();
             DataNewEntity entity = getSeepageDataByConfiguredPoint(pointId, dataMap);
             if (entity == null) {
-                devices.add(buildDevice(pointId, entry.getValue(), "seepage", "offline", checkTime, null));
+                devices.add(buildDevice(pointId, entry.getValue(), "seepage", "abnormal", null, DETAIL_COLLECT_ABNORMAL));
                 continue;
             }
             OffsetDateTime offsetTime = entity.getTime();
@@ -274,8 +297,8 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
                     : null;
 
             String status = determineStatus(collectTime, SEEPAGE_TIMEOUT_MINUTES);
-            LocalDateTime displayTime = "online".equals(status) ? collectTime : checkTime;
-            String detail = "online".equals(status) ? extractSeepageDetail(entity) : null;
+            LocalDateTime displayTime = "abnormal".equals(status) ? null : collectTime;
+            String detail = "online".equals(status) ? extractSeepageDetail(entity) : faultDetail(status);
 
             devices.add(buildDevice(pointId, entry.getValue(), "seepage", status, displayTime, detail));
         }
@@ -300,15 +323,15 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
     /**
      * 判断设备状态
      * online: 已到报，采集时间在阈值内
-     * abnormal: 采集时间超过阈值（采集异常）
-     * offline: 未到报，无采集时间（已在调用方处理）
+     * offline: 未到报，设备在线但未按定时采集
+     * abnormal: 采集异常，接口失败、网络波动或无有效采集数据
      */
     private String determineStatus(LocalDateTime lastCollectTime, long timeoutMinutes) {
         if (lastCollectTime == null) {
-            return "offline";
+            return "abnormal";
         }
         long minutesDiff = ChronoUnit.MINUTES.between(lastCollectTime, LocalDateTime.now());
-        return minutesDiff <= timeoutMinutes ? "online" : "abnormal";
+        return minutesDiff <= timeoutMinutes ? "online" : "offline";
     }
 
     private DeviceStatusVO buildDevice(String code, String name, String type, String status,
@@ -317,19 +340,16 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
     }
 
     /**
-     * 按采集周期向下取整到最近一次应采集时间。
-     *
-     * @param time 当前时间
-     * @param intervalMinutes 采集周期（分钟）
-     * @return 最近一次应采集时间
+     * 获取异常详情文案。
      */
-    private LocalDateTime floorToCollectMinute(LocalDateTime time, int intervalMinutes) {
-        if (time == null || intervalMinutes <= 0) {
-            return time;
+    private String faultDetail(String status) {
+        if ("offline".equals(status)) {
+            return DETAIL_LATEST_EMPTY;
         }
-        int minute = time.getMinute();
-        int floorMinute = minute - minute % intervalMinutes;
-        return time.withMinute(floorMinute).withSecond(0).withNano(0);
+        if ("abnormal".equals(status)) {
+            return DETAIL_COLLECT_ABNORMAL;
+        }
+        return null;
     }
 
     /**
@@ -356,13 +376,79 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
      * 遍历设备列表，将状态变化同步到到报情况记录
      */
     private void processFaultRecords(List<DeviceStatusVO> devices) {
+        processFaultRecords(devices, false);
+    }
+
+    /**
+     * 遍历设备列表，将状态变化同步到到报情况记录。
+     *
+     * @param devices 设备状态列表
+     * @param includeNetworkFault 是否写入已确认的网络故障
+     */
+    private void processFaultRecords(List<DeviceStatusVO> devices, boolean includeNetworkFault) {
         for (DeviceStatusVO device : devices) {
             try {
+                if (!includeNetworkFault && isNetworkFaultDevice(device)) {
+                    continue;
+                }
                 deviceFaultRecordService.processDeviceStatus(device);
             } catch (Exception e) {
                 log.error("[DeviceMonitor] 到报情况记录处理失败: {}/{}", device.getType(), device.getCode(), e);
             }
         }
+    }
+
+    /**
+     * 数据源网络故障先返回页面，再后台重试确认。
+     */
+    private void scheduleNetworkRetry(String deviceType) {
+        if (!retryingDeviceTypes.add(deviceType)) {
+            return;
+        }
+        scheduleNetworkRetry(deviceType, 0);
+    }
+
+    private void scheduleNetworkRetry(String deviceType, int attemptIndex) {
+        long delayMillis = NETWORK_RETRY_DELAY_MILLIS[attemptIndex];
+        Date retryTime = Date.from(Instant.now().plusMillis(delayMillis));
+        threadPoolTaskScheduler.schedule(() -> executeNetworkRetry(deviceType, attemptIndex), retryTime);
+    }
+
+    private void executeNetworkRetry(String deviceType, int attemptIndex) {
+        List<DeviceStatusVO> devices = checkDevicesForRetry(deviceType);
+        boolean stillNetworkFault = isNetworkFaultResult(devices);
+        if (stillNetworkFault && attemptIndex + 1 < NETWORK_RETRY_DELAY_MILLIS.length) {
+            scheduleNetworkRetry(deviceType, attemptIndex + 1);
+            return;
+        }
+        try {
+            processFaultRecords(devices, true);
+        } finally {
+            retryingDeviceTypes.remove(deviceType);
+        }
+    }
+
+    private List<DeviceStatusVO> checkDevicesForRetry(String deviceType) {
+        if ("gnss".equals(deviceType)) {
+            return checkGnssDevices(false);
+        }
+        if ("rain".equals(deviceType)) {
+            return checkRainDevices(false);
+        }
+        if ("seepage".equals(deviceType)) {
+            return checkSeepageDevices(false);
+        }
+        return java.util.Collections.emptyList();
+    }
+
+    private boolean isNetworkFaultResult(List<DeviceStatusVO> devices) {
+        return devices != null && !devices.isEmpty() && devices.stream().allMatch(this::isNetworkFaultDevice);
+    }
+
+    private boolean isNetworkFaultDevice(DeviceStatusVO device) {
+        return device != null
+                && "abnormal".equals(device.getStatus())
+                && DETAIL_NETWORK_FAULT.equals(device.getDetail());
     }
 
     /**

@@ -39,4 +39,10 @@ public interface DeviceFaultRecordService {
      * @param id 故障记录ID
      */
     void delete(Long id);
+
+    /**
+     * 清理超过保留天数的故障记录和事件明细
+     * @param retentionDays 数据保留天数
+     */
+    void cleanExpiredRecords(int retentionDays);
 }

@@ -29,8 +29,8 @@ export const DEVICE_TYPES = {
  */
 export const STATUS_CONFIG = {
   [DEVICE_STATUS.ONLINE]: { label: '已到报', color: 'emerald', dotClass: 'bg-emerald-500' },
-  [DEVICE_STATUS.OFFLINE]: { label: '未到报', color: 'red', dotClass: 'bg-red-500' },
-  [DEVICE_STATUS.ABNORMAL]: { label: '采集异常', color: 'amber', dotClass: 'bg-amber-500' }
+  [DEVICE_STATUS.OFFLINE]: { label: '未到报', color: 'amber', dotClass: 'bg-amber-500' },
+  [DEVICE_STATUS.ABNORMAL]: { label: '采集异常', color: 'red', dotClass: 'bg-red-500' }
 }
 
 /**

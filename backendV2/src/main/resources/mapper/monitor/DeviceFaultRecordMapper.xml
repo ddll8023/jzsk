@@ -125,4 +125,9 @@
         DELETE FROM device_fault_record WHERE id = #{id}
     </delete>
 
+    <delete id="deleteBeforeTime">
+        DELETE FROM device_fault_record
+        WHERE start_time &lt; #{cutoffTime}
+    </delete>
+
 </mapper>

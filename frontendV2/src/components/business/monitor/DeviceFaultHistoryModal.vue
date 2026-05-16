@@ -104,17 +104,7 @@
         </span>
       </template>
 
-      <!-- 首次到报状态 -->
-      <template #firstFaultStatus="{ row }">
-        <span
-          class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-          :class="faultStatusBadgeClass(row.firstFaultStatus)"
-        >
-          {{ faultStatusLabel(row.firstFaultStatus) }}
-        </span>
-      </template>
-
-      <!-- 当前到报状态 -->
+      <!-- 故障状态 -->
       <template #currentFaultStatus="{ row }">
         <span
           class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
@@ -162,13 +152,7 @@
 
       <!-- 操作 -->
       <template #action="{ row }">
-        <div class="flex items-center gap-3">
-          <button
-            class="text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors"
-            @click="openDetail(row)"
-          >
-            详情
-          </button>
+        <div class="flex items-center">
           <button
             class="text-sm text-red-500 hover:text-red-700 font-medium transition-colors"
             @click="confirmDelete(row)"
@@ -180,41 +164,6 @@
     </Table>
       </div>
     </Card>
-
-    <!-- 到报详情嵌套弹窗 -->
-    <Modal
-      v-model="detailModalVisible"
-      :title="'到报详情 - ' + (currentRecord?.deviceName || '')"
-      width="lg"
-    >
-      <div v-if="currentRecord" class="space-y-4">
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2 text-sm">
-          <div>
-            <span class="text-gray-500">设备编码：</span>
-            <span class="text-gray-800">{{ currentRecord.deviceCode }}</span>
-          </div>
-          <div>
-            <span class="text-gray-500">情况类型：</span>
-            <span class="text-gray-800">{{ faultTypeLabel(currentRecord.faultType) }}</span>
-          </div>
-          <div>
-            <span class="text-gray-500">最后采集时间：</span>
-            <span class="text-gray-800">{{ formatTime(currentRecord.lastCollectTime) }}</span>
-          </div>
-          <div class="col-span-2 md:col-span-3">
-            <span class="text-gray-500">到报详情：</span>
-            <span class="text-gray-800 break-all">{{ currentRecord.faultDetail || '--' }}</span>
-          </div>
-        </div>
-        <div class="border-t border-gray-200 pt-3">
-          <div class="flex items-center gap-2 mb-2">
-            <i class="fa fa-stream text-primary-500 text-xs" aria-hidden="true"></i>
-            <span class="text-sm font-semibold text-gray-700">事件时间线</span>
-          </div>
-          <DeviceFaultEventTimeline :fault-record-id="currentRecord?.id" />
-        </div>
-      </div>
-    </Modal>
 
     <!-- 删除确认弹窗 -->
     <Modal
@@ -244,8 +193,8 @@
 <script setup>
 /**
  * 历史到报情况弹窗组件
- * 功能：筛选、分页查询、展示设备到报情况主记录列表，支持查看详情和事件时间线
- * 依赖：Modal, Table, Select, Input, DeviceFaultEventTimeline 组件
+ * 功能：筛选、分页查询、展示设备到报情况主记录列表，支持删除记录
+ * 依赖：Modal, Table, Select, Input 组件
  * 特性：状态管理内置，弹窗打开自动加载，筛选变更重置分页
  */
 import { ref, watch } from 'vue'
@@ -255,7 +204,6 @@ import Button from '@/components/basic/Button.vue'
 import Table from '@/components/basic/Table.vue'
 import Select from '@/components/basic/Select.vue'
 import Input from '@/components/basic/Input.vue'
-import DeviceFaultEventTimeline from '@/components/business/monitor/DeviceFaultEventTimeline.vue'
 import { getDeviceFaultRecordPage, deleteDeviceFaultRecord } from '@/api/deviceMonitor'
 
 const props = defineProps({
@@ -273,7 +221,7 @@ const query = ref({
   size: 10,
   deviceType: '',
   faultStatus: '',
-  processStatus: '',
+  processStatus: 'active',
   keyword: '',
   startTime: '',
   endTime: ''
@@ -300,22 +248,19 @@ const processStatusOptions = [
 const columns = [
   { key: 'deviceName', title: '设备名称', width: '120px' },
   { key: 'deviceType', title: '设备类型', width: '100px' },
-  { key: 'firstFaultStatus', title: '首次状态', width: '90px' },
-  { key: 'currentFaultStatus', title: '当前状态', width: '90px' },
+  { key: 'currentFaultStatus', title: '故障状态', width: '90px' },
   { key: 'startTime', title: '开始时间', width: '145px' },
   { key: 'endTime', title: '恢复时间', width: '145px' },
   { key: 'durationMinutes', title: '持续时长', width: '85px' },
   { key: 'processStatus', title: '处理状态', width: '85px' },
   { key: 'faultDetail', title: '到报详情', width: '155px' },
-  { key: 'action', title: '操作', width: '100px' }
+  { key: 'action', title: '操作', width: '70px' }
 ]
 
 // ==================== 数据状态 ====================
 const loading = ref(false)
 const records = ref([])
 const total = ref(0)
-const detailModalVisible = ref(false)
-const currentRecord = ref(null)
 const deleteModalVisible = ref(false)
 const deleteTarget = ref(null)
 
@@ -384,14 +329,6 @@ function handleSizeChange(size) {
 }
 
 /**
- * 打开到报详情弹窗
- */
-function openDetail(row) {
-  currentRecord.value = row
-  detailModalVisible.value = true
-}
-
-/**
  * 重置筛选条件
  */
 function resetQuery() {
@@ -400,7 +337,7 @@ function resetQuery() {
     size: query.value.size,
     deviceType: '',
     faultStatus: '',
-    processStatus: '',
+    processStatus: 'active',
     keyword: '',
     startTime: '',
     endTime: ''
@@ -443,13 +380,6 @@ const FAULT_STATUS_MAP = {
   abnormal: '采集异常'
 }
 
-const FAULT_TYPE_MAP = {
-  interface_error: '接口异常',
-  no_data: '无数据',
-  collect_timeout: '到报超时',
-  db_error: '数据库异常'
-}
-
 const PROCESS_STATUS_MAP = {
   active: '未恢复',
   resolved: '已恢复'
@@ -462,8 +392,8 @@ const DEVICE_TYPE_BADGE = {
 }
 
 const FAULT_STATUS_BADGE = {
-  offline: 'bg-red-50 text-red-700',
-  abnormal: 'bg-amber-50 text-amber-700'
+  offline: 'bg-amber-50 text-amber-700',
+  abnormal: 'bg-red-50 text-red-700'
 }
 
 const PROCESS_STATUS_BADGE = {
@@ -475,7 +405,6 @@ const deviceTypeLabel = (type) => DEVICE_TYPE_MAP[type] || type
 const deviceTypeBadgeClass = (type) => DEVICE_TYPE_BADGE[type] || 'bg-gray-50 text-gray-700'
 const faultStatusLabel = (status) => FAULT_STATUS_MAP[status] || status
 const faultStatusBadgeClass = (status) => FAULT_STATUS_BADGE[status] || 'bg-gray-50 text-gray-700'
-const faultTypeLabel = (type) => FAULT_TYPE_MAP[type] || type
 const processStatusLabel = (status) => PROCESS_STATUS_MAP[status] || status
 const processStatusBadgeClass = (status) => PROCESS_STATUS_BADGE[status] || 'bg-gray-50 text-gray-700'
 
@@ -510,8 +439,6 @@ function formatTime(time) {
 watch(() => props.modelValue, (val) => {
   if (val) {
     query.value.page = 1
-    detailModalVisible.value = false
-    currentRecord.value = null
     deleteModalVisible.value = false
     deleteTarget.value = null
     fetchData()

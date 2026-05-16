@@ -172,7 +172,10 @@ export function useStationStatus() {
   const updateRainStatus = (waterLevelData, rainfallData) => {
     const waterTime = waterLevelData?.time
     const rainTime = rainfallData?.time
-    const lastTime = waterTime || rainTime
+    const times = [waterTime, rainTime]
+      .filter(Boolean)
+      .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
+    const lastTime = times[0]
 
     const isOnline = isStationOnline('rain', lastTime)
     stationStatus.value.set('rain', {

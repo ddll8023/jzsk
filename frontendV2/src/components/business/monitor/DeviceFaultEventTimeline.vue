@@ -113,8 +113,8 @@ const typeLabel = (type) => TYPE_LABEL_MAP[type] || type
 
 const statusTextColor = (status) => {
   if (status === 'online') return 'text-emerald-600'
-  if (status === 'offline') return 'text-red-600'
-  return 'text-amber-600'
+  if (status === 'offline') return 'text-amber-600'
+  return 'text-red-600'
 }
 
 const typeBadgeClass = (type) => {

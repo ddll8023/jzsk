@@ -48,14 +48,14 @@
           <span class="font-semibold text-emerald-600">{{ stats.online }}</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-red-500" />
+          <span class="w-2 h-2 rounded-full bg-amber-500" />
           <span class="text-gray-500">未到报</span>
-          <span class="font-semibold text-red-600">{{ stats.offline }}</span>
+          <span class="font-semibold text-amber-600">{{ stats.offline }}</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse" style="animation-duration: 2s" />
+          <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse" style="animation-duration: 2s" />
           <span class="text-gray-500">异常</span>
-          <span class="font-semibold text-amber-600">{{ stats.abnormal }}</span>
+          <span class="font-semibold text-red-600">{{ stats.abnormal }}</span>
         </div>
       </div>
     </div>

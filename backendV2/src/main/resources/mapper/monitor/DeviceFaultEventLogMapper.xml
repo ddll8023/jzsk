@@ -41,4 +41,14 @@
         DELETE FROM device_fault_event_log WHERE fault_record_id = #{faultRecordId}
     </delete>
 
+    <delete id="deleteBeforeTime">
+        DELETE FROM device_fault_event_log
+        WHERE event_time &lt; #{cutoffTime}
+           OR fault_record_id IN (
+               SELECT id
+               FROM device_fault_record
+               WHERE start_time &lt; #{cutoffTime}
+           )
+    </delete>
+
 </mapper>

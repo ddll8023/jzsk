@@ -5,6 +5,7 @@ import com.jzsk.backendv2.pojo.entity.monitor.DeviceFaultRecordEntity;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -63,4 +64,10 @@ public interface DeviceFaultRecordMapper {
      * @param id 故障记录ID
      */
     int deleteById(@Param("id") Long id);
+
+    /**
+     * 删除截止时间之前的故障记录
+     * @param cutoffTime 截止时间
+     */
+    int deleteBeforeTime(@Param("cutoffTime") LocalDateTime cutoffTime);
 }

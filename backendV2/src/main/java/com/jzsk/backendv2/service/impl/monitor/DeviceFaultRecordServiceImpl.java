@@ -14,6 +14,7 @@ import com.jzsk.backendv2.utils.PageUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -100,10 +101,8 @@ public class DeviceFaultRecordServiceImpl implements DeviceFaultRecordService {
             record.setFaultDetail(device.getDetail());
             record.setLastCollectTime(device.getLastCollectTime());
             LocalDateTime now = LocalDateTime.now();
-            // offline: 无法确定未到报时刻，使用检测时刻
-            // abnormal: 异常从本次检测采集后开始
-            LocalDateTime startTime = "abnormal".equals(device.getStatus()) && device.getLastCollectTime() != null
-                    ? device.getLastCollectTime() : now;
+            // 未到报优先使用最后采集时间作为异常起点；无采集时间时使用检测时刻。
+            LocalDateTime startTime = device.getLastCollectTime() != null ? device.getLastCollectTime() : now;
             record.setStartTime(startTime);
             record.setProcessStatus("active");
             record.setCreateTime(now);
@@ -120,10 +119,7 @@ public class DeviceFaultRecordServiceImpl implements DeviceFaultRecordService {
      * 推断到报异常类型
      */
     private String determineFaultType(DeviceStatusVO device) {
-        if ("abnormal".equals(device.getStatus())) {
-            return "collect_timeout";
-        }
-        if (device.getLastCollectTime() == null) {
+        if ("abnormal".equals(device.getStatus()) || device.getLastCollectTime() == null) {
             return "no_data";
         }
         return "collect_timeout";
@@ -255,5 +251,21 @@ public class DeviceFaultRecordServiceImpl implements DeviceFaultRecordService {
         deviceFaultEventLogMapper.deleteByFaultRecordId(id);
         deviceFaultRecordMapper.deleteById(id);
         log.info("[DeviceFault] 到报情况记录已删除: id={}", id);
+    }
+
+    /**
+     * 清理超过保留天数的到报情况记录和事件明细
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void cleanExpiredRecords(int retentionDays) {
+        if (retentionDays < 1) {
+            throw new IllegalArgumentException("数据保留天数必须大于0");
+        }
+        LocalDateTime cutoffTime = LocalDateTime.now().minusDays(retentionDays);
+        int eventCount = deviceFaultEventLogMapper.deleteBeforeTime(cutoffTime);
+        int recordCount = deviceFaultRecordMapper.deleteBeforeTime(cutoffTime);
+        log.info("[DeviceFault] 过期到报情况记录清理完成，cutoffTime={}, recordCount={}, eventCount={}",
+                cutoffTime, recordCount, eventCount);
     }
 }
