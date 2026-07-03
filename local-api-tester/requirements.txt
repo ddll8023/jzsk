@@ -1,5 +1,0 @@
-pyside6>=6.6
-requests>=2.31
-sqlalchemy>=2.0
-pydantic>=2.0
-pydantic-settings>=2.0
