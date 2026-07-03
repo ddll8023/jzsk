@@ -80,66 +80,73 @@
         </span>
       </template>
 
-      <!-- 2D合位移 -->
+      <!-- 水平位移 -->
       <template #displacement2d="{ row }">
         <span class="text-sm font-mono" :class="valueColor(parseDetailValue(row.detail, 'displacement2d'), 10)">
-          {{ formatValue(parseDetailValue(row.detail, 'displacement2d'), 'mm') }}
+          {{ formatValue(parseDetailValue(row.detail, 'displacement2d'), '', 2) }}
         </span>
       </template>
 
-      <!-- 3D合位移 -->
+      <!-- 合位移 -->
       <template #displacement3d="{ row }">
         <span class="text-sm font-mono" :class="valueColor(parseDetailValue(row.detail, 'displacement3d'), 10)">
-          {{ formatValue(parseDetailValue(row.detail, 'displacement3d'), 'mm') }}
+          {{ formatValue(parseDetailValue(row.detail, 'displacement3d'), '', 2) }}
         </span>
       </template>
 
       <!-- X位移 -->
       <template #gpsTotalX="{ row }">
         <span class="text-sm font-mono text-gray-700">
-          {{ formatValue(parseDetailValue(row.detail, 'gpsTotalX'), 'mm') }}
+          {{ formatValue(parseDetailValue(row.detail, 'gpsTotalX'), '', 2) }}
         </span>
       </template>
 
       <!-- Y位移 -->
       <template #gpsTotalY="{ row }">
         <span class="text-sm font-mono text-gray-700">
-          {{ formatValue(parseDetailValue(row.detail, 'gpsTotalY'), 'mm') }}
+          {{ formatValue(parseDetailValue(row.detail, 'gpsTotalY'), '', 2) }}
         </span>
       </template>
 
       <!-- Z位移 -->
       <template #gpsTotalZ="{ row }">
         <span class="text-sm font-mono text-gray-700">
-          {{ formatValue(parseDetailValue(row.detail, 'gpsTotalZ'), 'mm') }}
-        </span>
-      </template>
-
-      <!-- 水位 -->
-      <template #waterLevel="{ row }">
-        <span class="text-sm font-mono text-gray-700">
-          {{ row.type === 'seepage' ? formatValue(parseDetailValue(row.detail, '水位'), 'm', 3) : formatValue(parseDetailValue(row.detail, '水位'), 'm') }}
-        </span>
-      </template>
-
-      <!-- 雨量 -->
-      <template #rainfall="{ row }">
-        <span class="text-sm font-mono text-gray-700">
-          {{ formatValue(parseDetailValue(row.detail, '雨量'), 'mm') }}
+          {{ formatValue(parseDetailValue(row.detail, 'gpsTotalZ'), '', 2) }}
         </span>
       </template>
 
       <!-- 水位高程 -->
       <template #waterElevation="{ row }">
         <span class="text-sm font-mono text-gray-700">
-          {{ formatValue(parseDetailValue(row.detail, '水位高程'), 'm', 3) }}
+          {{ formatValue(parseDetailValue(row.detail, '水位高程'), '', 2) }}
+        </span>
+      </template>
+
+      <!-- 水位 -->
+      <template #waterLevel="{ row }">
+        <span class="text-sm font-mono text-gray-700">
+          {{ row.type === 'seepage' ? formatValue(parseDetailValue(row.detail, '水位'), '', 2) : formatValue(parseDetailValue(row.detail, '水位'), '', 2) }}
+        </span>
+      </template>
+
+      <!-- 雨量 -->
+      <template #rainfall="{ row }">
+        <span class="text-sm font-mono text-gray-700">
+          {{ formatValue(parseDetailValue(row.detail, '雨量'), '', 2) }}
+        </span>
+      </template>
+
+      <!-- 温度 -->
+      <template #temperature="{ row }">
+        <span class="text-sm font-mono text-gray-700">
+          {{ formatValue(parseDetailValue(row.detail, '温度'), '', 2) }}
         </span>
       </template>
 
       <!-- 渗压水压 -->
       <template #waterPressure="{ row }">
         <span class="text-sm font-mono text-gray-700">
-          {{ formatValue(parseDetailValue(row.detail, '水压'), 'kPa', 3) }}
+          {{ formatValue(parseDetailValue(row.detail, '水压'), '', 2) }}
         </span>
       </template>
     </Table>
@@ -157,6 +164,7 @@ import { computed } from 'vue'
 import Card from '@/components/basic/Card.vue'
 import Table from '@/components/basic/Table.vue'
 import { DEVICE_TYPES, STATUS_CONFIG } from '@/composables/useDeviceMonitor'
+import { formatMinute } from '@/utils/time'
 
 const props = defineProps({
   devices: {
@@ -194,28 +202,29 @@ const COLUMNS_GNSS = [
   { key: 'name', title: '设备名称', width: '100px' },
   { key: 'status', title: '到报状态', width: '100px' },
   { key: 'lastCollectTime', title: '最后采集时间', width: '160px' },
-  { key: 'displacement2d', title: '2D合位移', width: '100px' },
-  { key: 'displacement3d', title: '3D合位移', width: '100px' },
-  { key: 'gpsTotalX', title: 'X位移', width: '100px' },
-  { key: 'gpsTotalY', title: 'Y位移', width: '100px' },
-  { key: 'gpsTotalZ', title: 'Z位移', width: '100px' }
+  { key: 'displacement2d', title: '水平位移(mm)', width: '100px' },
+  { key: 'displacement3d', title: '合位移(mm)', width: '100px' },
+  { key: 'gpsTotalX', title: 'X位移(mm)', width: '100px' },
+  { key: 'gpsTotalY', title: 'Y位移(mm)', width: '100px' },
+  { key: 'gpsTotalZ', title: 'Z位移(mm)', width: '100px' }
 ]
 
 const COLUMNS_RAIN = [
   { key: 'name', title: '设备名称', width: '160px' },
   { key: 'status', title: '到报状态', width: '110px' },
   { key: 'lastCollectTime', title: '最后采集时间', width: '170px' },
-  { key: 'waterLevel', title: '水位', width: '120px' },
-  { key: 'rainfall', title: '雨量', width: '120px' }
+  { key: 'waterLevel', title: '水位(m)', width: '120px' },
+  { key: 'rainfall', title: '雨量(mm)', width: '120px' }
 ]
 
 const COLUMNS_SEEPAGE = [
   { key: 'name', title: '设备名称', width: '200px' },
   { key: 'status', title: '到报状态', width: '100px' },
   { key: 'lastCollectTime', title: '最后采集时间', width: '160px' },
-  { key: 'waterElevation', title: '水位高程', width: '120px' },
-  { key: 'waterLevel', title: '水位', width: '120px' },
-  { key: 'waterPressure', title: '水压', width: '120px' }
+  { key: 'waterElevation', title: '水位高程(m)', width: '100px' },
+  { key: 'waterLevel', title: '水位(mm)', width: '100px' },
+  { key: 'temperature', title: '温度(°C)', width: '100px' },
+  { key: 'waterPressure', title: '水压(kPa)', width: '100px' }
 ]
 
 const TYPE_COLUMNS_MAP = {
@@ -293,7 +302,7 @@ const formatSummary = (row) => {
     const d2 = parseDetailValue(row.detail, 'displacement2d')
     const d3 = parseDetailValue(row.detail, 'displacement3d')
     if (d2 === null) return row.detail
-    return `2D: ${d2}mm / 3D: ${d3}mm`
+    return `水平: ${d2.toFixed(2)}mm / 合: ${d3.toFixed(2)}mm`
   }
   if (row.type === 'rain') {
     return row.detail
@@ -302,15 +311,12 @@ const formatSummary = (row) => {
     const wp = parseDetailValue(row.detail, '水压')
     const wl = parseDetailValue(row.detail, '水位')
     if (wp === null) return row.detail
-    return `水位: ${wl.toFixed(3)}m / 水压: ${wp.toFixed(3)}kPa`
+    return `水位: ${wl.toFixed(2)}mm / 水压: ${wp.toFixed(2)}kPa`
   }
   return row.detail
 }
 
 const formatTime = (time) => {
-  if (!time) return '--'
-  const d = new Date(time)
-  const pad = (n) => String(n).padStart(2, '0')
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+  return formatMinute(time) || '--'
 }
 </script>

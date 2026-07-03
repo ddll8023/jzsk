@@ -29,7 +29,6 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -57,12 +56,12 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
 
     private final Set<String> retryingDeviceTypes = ConcurrentHashMap.newKeySet();
 
-    /** GNSS超时阈值（分钟）: 60分钟采集周期 + 1分钟缓冲 */
-    private static final long GNSS_TIMEOUT_MINUTES = 61;
-    /** 雨水情超时阈值（分钟）: 5分钟采集周期 + 1分钟缓冲 */
-    private static final long RAIN_TIMEOUT_MINUTES = 6;
-    /** 渗流渗压超时阈值（分钟）: 10分钟采集周期 + 1分钟缓冲 */
-    private static final long SEEPAGE_TIMEOUT_MINUTES = 11;
+    /** GNSS超时阈值（分钟）: 60分钟采集周期 + 5分钟缓冲 */
+    private static final long GNSS_TIMEOUT_MINUTES = 65;
+    /** 雨水情超时阈值（分钟）: 5分钟采集周期 + 5分钟缓冲 */
+    private static final long RAIN_TIMEOUT_MINUTES = 10;
+    /** 渗流渗压超时阈值（分钟）: 60分钟采集周期 + 5分钟缓冲 */
+    private static final long SEEPAGE_TIMEOUT_MINUTES = 65;
     /** 网络故障后台重试间隔 */
     private static final long[] NETWORK_RETRY_DELAY_MILLIS = {5000L, 15000L, 30000L};
     private static final String DETAIL_NETWORK_FAULT = "网络故障";
@@ -74,10 +73,11 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
     private static final String GNSS_SENSOR = "L1_GP";
     private static final Integer GNSS_PROJECT_ID = 1681;
 
+    /** 坝前水位站编码（SQL Server ST_RIVER_R 表） */
+    private static final String RAIN_STATION_STCD = "4211820043";
+
     /** GNSS测站名称映射 */
     private static final Map<Long, String> GNSS_NAME_MAP;
-    /** 渗流渗压设备名称映射 */
-    private static final Map<String, String> SEEPAGE_NAME_MAP;
     static {
         Map<Long, String> map = new java.util.HashMap<>();
         map.put(33210L, "LJ1-1"); map.put(33214L, "LJ1-2");
@@ -85,38 +85,6 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
         map.put(33215L, "LT2-1"); map.put(33211L, "LT2-2");
         map.put(33217L, "LT2-3"); map.put(33213L, "LT2-4");
         GNSS_NAME_MAP = java.util.Collections.unmodifiableMap(map);
-
-        Map<String, String> seepageMap = new LinkedHashMap<>();
-        seepageMap.put("1130221274157547520", "UPR1-1");
-        seepageMap.put("1130221285905793024", "UPB1-1");
-        seepageMap.put("1130221296655794176", "UPB2-1");
-        seepageMap.put("1130221308043329536", "UPA1-1");
-        seepageMap.put("1130221319053377536", "UPB3-1");
-        seepageMap.put("1130221331892142080", "UPB4-1");
-        seepageMap.put("1130221343288066048", "UPB4-4");
-        seepageMap.put("1130221354100981760", "UPB4-2");
-        seepageMap.put("1130221364981006336", "UPB4-3");
-        seepageMap.put("1130221376058163200", "UPB4-5");
-        seepageMap.put("1130221386883661824", "UPB3-2");
-        seepageMap.put("1130221397532999680", "UPB3-4");
-        seepageMap.put("1130221408509493248", "UPB3-3");
-        seepageMap.put("1130221419490181120", "UPB2-2");
-        seepageMap.put("1130221430265348096", "UPA1-2");
-        seepageMap.put("1130221441057292288", "UPB2-3");
-        seepageMap.put("1130221451794710528", "UPA1-3");
-        seepageMap.put("1130221462834118656", "UPB2-4");
-        seepageMap.put("1130221474066464768", "UPA1-4");
-        seepageMap.put("1130221485206536192", "UPB2-5");
-        seepageMap.put("1130221496413716480", "UPA1-5");
-        seepageMap.put("1130221507100803072", "UPB1-5");
-        seepageMap.put("1130221518182154240", "UPB1-4");
-        seepageMap.put("1130221528902795264", "UPB1-3");
-        seepageMap.put("1130221539753459712", "UPB1-2");
-        seepageMap.put("1130221562159431680", "UPR1-2");
-        seepageMap.put("P0108206", "UPR2-1");
-        seepageMap.put("P0108311", "UPR2-2");
-        seepageMap.put("1130221574088032256", "UPB3-5");
-        SEEPAGE_NAME_MAP = java.util.Collections.unmodifiableMap(seepageMap);
     }
 
     @Override
@@ -207,11 +175,9 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
         boolean hasQueryError = false;
 
         try {
-            latestWater = stRiversRMapper.selectAll().stream()
-                    .max((a, b) -> a.getTm() != null && b.getTm() != null ? a.getTm().compareTo(b.getTm()) : 0)
-                    .orElse(null);
+            latestWater = stRiversRMapper.selectLatestByStcd(RAIN_STATION_STCD);
         } catch (Exception e) {
-            log.error("[DeviceMonitor] 水位数据查询失败", e);
+            log.error("[DeviceMonitor] 水位数据查询失败，stcd={}", RAIN_STATION_STCD, e);
             latestWater = null;
             hasQueryError = true;
         }
@@ -261,7 +227,8 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
 
     /**
      * 检测渗流渗压设备状态
-     * 数据源: PostgreSQL (data_new表)
+     * 数据源: PostgreSQL (data_new表 + sensor_point表动态映射)
+     * 测点列表从sensor_point表动态查询，与/dam-monitoring/seepage/*接口保持一致
      */
     private List<DeviceStatusVO> checkSeepageDevices(boolean scheduleRetry) {
         List<DeviceStatusVO> devices = new ArrayList<>();
@@ -274,8 +241,6 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
             if (scheduleRetry) {
                 scheduleNetworkRetry("seepage");
             }
-            SEEPAGE_NAME_MAP.forEach((code, name) ->
-                    devices.add(buildDevice(code, name, "seepage", "abnormal", null, DETAIL_NETWORK_FAULT)));
             return devices;
         }
 
@@ -284,23 +249,45 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
                         .filter(entity -> entity.getPointId() != null)
                         .collect(Collectors.toMap(DataNewEntity::getPointId, entity -> entity, (a, b) -> a));
 
-        for (Map.Entry<String, String> entry : SEEPAGE_NAME_MAP.entrySet()) {
-            String pointId = entry.getKey();
-            DataNewEntity entity = getSeepageDataByConfiguredPoint(pointId, dataMap);
+        List<SensorPointEntity> allPoints;
+        try {
+            allPoints = sensorPointMapper.selectAll();
+        } catch (Exception e) {
+            log.error("[DeviceMonitor] 测点列表查询失败", e);
+            if (scheduleRetry) {
+                scheduleNetworkRetry("seepage");
+            }
+            return devices;
+        }
+
+        if (allPoints == null || allPoints.isEmpty()) {
+            log.warn("[DeviceMonitor] 测点列表为空");
+            return devices;
+        }
+
+        for (SensorPointEntity point : allPoints) {
+            String numericId = String.valueOf(point.getId());
+            String pName = point.getName();
+            DataNewEntity entity = dataMap.get(numericId);
+
             if (entity == null) {
-                devices.add(buildDevice(pointId, entry.getValue(), "seepage", "abnormal", null, DETAIL_COLLECT_ABNORMAL));
+                devices.add(buildDevice(numericId, pName, "seepage", "abnormal", null, DETAIL_COLLECT_ABNORMAL));
                 continue;
             }
+
             OffsetDateTime offsetTime = entity.getTime();
             LocalDateTime collectTime = offsetTime != null
                     ? offsetTime.atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()
                     : null;
 
             String status = determineStatus(collectTime, SEEPAGE_TIMEOUT_MINUTES);
+            if ("online".equals(status) && !hasValidSeepageData(entity)) {
+                status = "offline";
+            }
             LocalDateTime displayTime = "abnormal".equals(status) ? null : collectTime;
             String detail = "online".equals(status) ? extractSeepageDetail(entity) : faultDetail(status);
 
-            devices.add(buildDevice(pointId, entry.getValue(), "seepage", status, displayTime, detail));
+            devices.add(buildDevice(numericId, pName, "seepage", status, displayTime, detail));
         }
 
         return devices;
@@ -350,26 +337,6 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
             return DETAIL_COLLECT_ABNORMAL;
         }
         return null;
-    }
-
-    /**
-     * 根据配置测点获取渗压数据。配置可能是数字point_id，也可能是P010格式测点名。
-     */
-    private DataNewEntity getSeepageDataByConfiguredPoint(String pointId, Map<String, DataNewEntity> dataMap) {
-        DataNewEntity entity = dataMap.get(pointId);
-        if (entity != null || pointId == null || !pointId.startsWith("P")) {
-            return entity;
-        }
-        try {
-            SensorPointEntity sensorPoint = sensorPointMapper.selectByName(pointId);
-            if (sensorPoint == null || sensorPoint.getId() == null) {
-                return null;
-            }
-            return dataMap.get(String.valueOf(sensorPoint.getId()));
-        } catch (Exception e) {
-            log.warn("[DeviceMonitor] 渗压测点编号解析失败: {}", pointId, e);
-            return null;
-        }
     }
 
     /**
@@ -492,25 +459,63 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
     }
 
     /**
-     * 提取渗压数据详情
+     * 提取渗压数据详情（含温度）
      */
     private String extractSeepageDetail(DataNewEntity entity) {
-        if (entity.getResultData() == null) return null;
+        if (entity.getResultData() == null && entity.getOriginalData() == null) return null;
         try {
-            @SuppressWarnings("unchecked")
-            Map<String, Object> result = objectMapper.readValue(entity.getResultData(), Map.class);
             StringBuilder sb = new StringBuilder();
-            String[] keys = {"水位高程", "水位", "水压"};
-            for (String key : keys) {
-                Object val = result.get(key);
-                if (val != null) {
-                    if (sb.length() > 0) sb.append("; ");
-                    sb.append(key).append(": ").append(val);
+
+            if (entity.getResultData() != null) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> result = objectMapper.readValue(entity.getResultData(), Map.class);
+                for (String key : new String[]{"水位高程", "水位", "水压"}) {
+                    Object val = result.get(key);
+                    if (val != null) {
+                        if (sb.length() > 0) sb.append("; ");
+                        sb.append(key).append(": ").append(val);
+                    }
                 }
             }
+
+            if (entity.getOriginalData() != null && !entity.getOriginalData().trim().isEmpty()) {
+                try {
+                    @SuppressWarnings("unchecked")
+                    Map<String, Object> original = objectMapper.readValue(entity.getOriginalData(), Map.class);
+                    Object temp = original.get("温度");
+                    if (temp != null) {
+                        if (sb.length() > 0) sb.append("; ");
+                        sb.append("温度").append(": ").append(temp);
+                    }
+                } catch (Exception ignored) {
+                }
+            }
+
             return sb.length() > 0 ? sb.toString() : null;
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    /**
+     * 校验渗压数据是否有效：resultData 存在且至少包含一个有效字段
+     */
+    private boolean hasValidSeepageData(DataNewEntity entity) {
+        if (entity == null || entity.getResultData() == null) {
+            return false;
+        }
+        try {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result = objectMapper.readValue(entity.getResultData(), Map.class);
+            String[] keys = {"水位高程", "水位", "水压"};
+            for (String key : keys) {
+                if (result.get(key) != null) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (Exception e) {
+            return false;
         }
     }
 }

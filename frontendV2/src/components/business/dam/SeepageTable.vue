@@ -24,7 +24,7 @@ const columns = [
   { title: '水位高程(m)', key: 'waterElevation', width: '15%' },
   { title: '水位(mm)', key: 'waterLevel', width: '15%' },
   { title: '温度(°C)', key: 'temperature', width: '15%' },
-  { title: '水压', key: 'pressure', width: '15%' }
+  { title: '水压(kPa)', key: 'pressure', width: '15%' }
 ]
 
 // 分页变化

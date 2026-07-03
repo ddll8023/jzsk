@@ -113,7 +113,7 @@
 
           <!-- 超时阈值说明 -->
           <div class="text-xs text-gray-400 pt-1 border-t border-gray-100 space-y-0.5">
-            <div>到报阈值：GNSS 60min | 雨量水位 5min | 渗压 10min</div>
+            <div>到报阈值：GNSS 60min | 雨量水位 5min | 渗压 60min</div>
           </div>
         </div>
       </transition>

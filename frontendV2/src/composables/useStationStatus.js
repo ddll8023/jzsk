@@ -1,10 +1,10 @@
 /**
  * 测站到报状态检测 Composable
  * 功能：根据数据采集时间判断设备是否到报（超时未到报）
- * 超时阈值（含1分钟缓冲，应对四舍五入显示）：
- * - GNSS测站：61分钟（每小时采集一次）
- * - 雨量水位站：6分钟
- * - 渗流量测站：11分钟
+ * 超时阈值（采集周期 + 5分钟缓冲）：
+ * - GNSS测站：65分钟（每小时采集一次）
+ * - 雨量水位站：10分钟
+ * - 渗流渗压测站：65分钟
  */
 import { ref, computed, onUnmounted } from 'vue'
 
@@ -19,12 +19,12 @@ export const STATION_STATUS = {
 
 /**
  * 超时阈值配置（毫秒）
- * 说明：阈值已预留1分钟缓冲，用于应对界面显示四舍五入导致的误判
+ * 说明：阈值 = 采集周期 + 5分钟缓冲
  */
 const TIMEOUT_THRESHOLDS = {
-  gnss: 61 * 60 * 1000,       // GNSS：61分钟（原60分钟+1分钟缓冲）
-  rain: 6 * 60 * 1000,         // 雨量水位站：6分钟（原5分钟+1分钟缓冲）
-  seepage: 11 * 60 * 1000       // 渗流量测站：11分钟（原10分钟+1分钟缓冲）
+  gnss: 65 * 60 * 1000,        // GNSS：65分钟（60分钟+5分钟缓冲）
+  rain: 10 * 60 * 1000,         // 雨量水位站：10分钟（5分钟+5分钟缓冲）
+  seepage: 65 * 60 * 1000       // 渗流渗压测站：65分钟（60分钟+5分钟缓冲）
 }
 
 /**
@@ -141,6 +141,7 @@ export function useStationStatus() {
       stationStatus.value.set(key, {
         isOnline: null,
         lastCollectTime: null,
+        hasValidData: false,
         status: STATION_STATUS.OFFLINE
       })
     })
@@ -194,10 +195,12 @@ export function useStationStatus() {
 
     seepageData.forEach(item => {
       const key = `seepage_${item.piezometerId}`
-      const isOnline = isStationOnline('seepage', item.time)
+      const hasValidData = hasValidSeepageData(item)
+      let isOnline = isStationOnline('seepage', item.time) && hasValidData
       stationStatus.value.set(key, {
         isOnline,
         lastCollectTime: item.time,
+        hasValidData,
         status: isOnline ? STATION_STATUS.ONLINE : STATION_STATUS.OFFLINE
       })
     })
@@ -274,6 +277,16 @@ export function useStationStatus() {
       clearInterval(refreshInterval)
       refreshInterval = null
     }
+  }
+
+  /**
+   * 校验渗压数据是否有效：水位高程/水位/水压 至少一个非空
+   */
+  const hasValidSeepageData = (item) => {
+    if (!item) return false
+    return item.waterLevelElevation != null
+      || item.waterLevel != null
+      || item.pressure != null
   }
 
   // 组件卸载时清理

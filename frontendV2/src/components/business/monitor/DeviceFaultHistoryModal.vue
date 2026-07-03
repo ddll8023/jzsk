@@ -221,7 +221,7 @@ const query = ref({
   size: 10,
   deviceType: '',
   faultStatus: '',
-  processStatus: 'active',
+    processStatus: 'active',
   keyword: '',
   startTime: '',
   endTime: ''
@@ -240,6 +240,7 @@ const faultStatusOptions = [
 ]
 
 const processStatusOptions = [
+  { label: '全部处理', value: '' },
   { label: '未恢复', value: 'active' },
   { label: '已恢复', value: 'resolved' }
 ]
@@ -337,7 +338,7 @@ function resetQuery() {
     size: query.value.size,
     deviceType: '',
     faultStatus: '',
-    processStatus: 'active',
+  processStatus: '',
     keyword: '',
     startTime: '',
     endTime: ''

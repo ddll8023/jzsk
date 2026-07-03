@@ -164,18 +164,21 @@ export function useStationMarkers(map) {
       return STATION_STATUS.OFFLINE
     }
 
-    // 根据采集时间判断是否已到报
-    const now = Date.now()
-    const thresholds = {
-      gnss: 61 * 60 * 1000,   // 61分钟
-      rain: 6 * 60 * 1000,   // 6分钟
-      upb: 11 * 60 * 1000     // 11分钟
-    }
-    const threshold = thresholds[station.type] || thresholds.gnss
-
+    // 根据采集时间和数据有效性判断是否已到报（与设备监控保持一致）
     if (status.lastCollectTime) {
       const collectTime = new Date(status.lastCollectTime).getTime()
-      return (now - collectTime) <= threshold ? STATION_STATUS.ONLINE : STATION_STATUS.OFFLINE
+      const now = Date.now()
+      const typeKey = station.type === 'upb' ? 'seepage' : station.type
+      const threshold = stationStatus.TIMEOUT_THRESHOLDS[typeKey]
+        || stationStatus.TIMEOUT_THRESHOLDS.gnss
+      const isTimeValid = (now - collectTime) <= threshold
+      // 渗压设备需同时满足数据有效性
+      const isDataValid = typeKey === 'seepage'
+        ? status.hasValidData === true
+        : true
+      return isTimeValid && isDataValid
+        ? STATION_STATUS.ONLINE
+        : STATION_STATUS.OFFLINE
     }
 
     return STATION_STATUS.OFFLINE
