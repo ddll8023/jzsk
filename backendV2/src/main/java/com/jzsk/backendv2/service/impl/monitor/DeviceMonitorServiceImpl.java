@@ -56,6 +56,42 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
 
     private final Set<String> retryingDeviceTypes = ConcurrentHashMap.newKeySet();
 
+    /** 固定渗流渗压设备清单：设备数量和设备编码不依赖外部数据库可用性。 */
+    private static final Map<String, String> SEEPAGE_DEVICE_MAP;
+    static {
+        Map<String, String> map = new java.util.LinkedHashMap<>();
+        map.put("1130221274157547520", "UPR1-1");
+        map.put("1130221285905793024", "UPB1-1");
+        map.put("1130221296655794176", "UPB2-1");
+        map.put("1130221308043329536", "UPA1-1");
+        map.put("1130221319053377536", "UPB3-1");
+        map.put("1130221331892142080", "UPB4-1");
+        map.put("1130221343288066048", "UPB4-4");
+        map.put("1130221354100981760", "UPB4-2");
+        map.put("1130221364981006336", "UPB4-3");
+        map.put("1130221376058163200", "UPB4-5");
+        map.put("1130221386883661824", "UPB3-2");
+        map.put("1130221397532999680", "UPB3-4");
+        map.put("1130221408509493248", "UPB3-3");
+        map.put("1130221419490181120", "UPB2-2");
+        map.put("1130221430265348096", "UPA1-2");
+        map.put("1130221441057292288", "UPB2-3");
+        map.put("1130221451794710528", "UPA1-3");
+        map.put("1130221462834118656", "UPB2-4");
+        map.put("1130221474066464768", "UPA1-4");
+        map.put("1130221485206536192", "UPB2-5");
+        map.put("1130221496413716480", "UPA1-5");
+        map.put("1130221507100803072", "UPB1-5");
+        map.put("1130221518182154240", "UPB1-4");
+        map.put("1130221528902795264", "UPB1-3");
+        map.put("1130221539753459712", "UPB1-2");
+        map.put("1130221562159431680", "UPR1-2");
+        map.put("P0108206", "UPR2-1");
+        map.put("P0108311", "UPR2-2");
+        map.put("1130221574088032256", "UPB3-5");
+        SEEPAGE_DEVICE_MAP = java.util.Collections.unmodifiableMap(map);
+    }
+
     /** GNSS超时阈值（分钟）: 60分钟采集周期 + 5分钟缓冲 */
     private static final long GNSS_TIMEOUT_MINUTES = 65;
     /** 雨水情超时阈值（分钟）: 5分钟采集周期 + 5分钟缓冲 */
@@ -227,51 +263,63 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
 
     /**
      * 检测渗流渗压设备状态
-     * 数据源: PostgreSQL (data_new表 + sensor_point表动态映射)
-     * 测点列表从sensor_point表动态查询，与/dam-monitoring/seepage/*接口保持一致
+     * 数据源: PostgreSQL (data_new表 + sensor_point表编号映射)
+     * 设备清单固定为29个，sensor_point仅用于少数P编号测点的数据映射
      */
     private List<DeviceStatusVO> checkSeepageDevices(boolean scheduleRetry) {
-        List<DeviceStatusVO> devices = new ArrayList<>();
         List<DataNewEntity> seepageData;
-
         try {
             seepageData = dataNewMapper.selectLatestForAllPoints();
         } catch (Exception e) {
-            log.error("[DeviceMonitor] 渗压数据查询失败，所有渗压设备标记为采集异常", e);
+            log.error("[DeviceMonitor] 渗压数据查询失败，固定29个渗流渗压设备标记为网络故障", e);
             if (scheduleRetry) {
                 scheduleNetworkRetry("seepage");
             }
-            return devices;
+            return buildFixedSeepageFaultDevices(DETAIL_NETWORK_FAULT);
         }
-
-        Map<String, DataNewEntity> dataMap = seepageData == null ? java.util.Collections.emptyMap() :
-                seepageData.stream()
-                        .filter(entity -> entity.getPointId() != null)
-                        .collect(Collectors.toMap(DataNewEntity::getPointId, entity -> entity, (a, b) -> a));
 
         List<SensorPointEntity> allPoints;
         try {
             allPoints = sensorPointMapper.selectAll();
         } catch (Exception e) {
-            log.error("[DeviceMonitor] 测点列表查询失败", e);
+            log.error("[DeviceMonitor] 测点映射查询失败，固定29个渗流渗压设备标记为网络故障", e);
             if (scheduleRetry) {
                 scheduleNetworkRetry("seepage");
             }
-            return devices;
+            return buildFixedSeepageFaultDevices(DETAIL_NETWORK_FAULT);
         }
 
         if (allPoints == null || allPoints.isEmpty()) {
-            log.warn("[DeviceMonitor] 测点列表为空");
-            return devices;
+            log.warn("[DeviceMonitor] 测点映射为空，固定29个渗流渗压设备标记为采集异常");
+            return buildFixedSeepageFaultDevices(DETAIL_COLLECT_ABNORMAL);
         }
 
-        for (SensorPointEntity point : allPoints) {
-            String numericId = String.valueOf(point.getId());
-            String pName = point.getName();
-            DataNewEntity entity = dataMap.get(numericId);
+        Map<String, DataNewEntity> dataMap = seepageData == null ? java.util.Collections.emptyMap() :
+                seepageData.stream()
+                        .filter(entity -> entity != null && entity.getPointId() != null)
+                        .collect(Collectors.toMap(DataNewEntity::getPointId, entity -> entity, (a, b) -> a));
+        Map<String, String> pointNameToId = allPoints.stream()
+                .filter(point -> point != null && point.getId() != null && point.getName() != null)
+                .collect(Collectors.toMap(SensorPointEntity::getName,
+                        point -> String.valueOf(point.getId()), (a, b) -> a));
+
+        List<DeviceStatusVO> devices = new ArrayList<>();
+        for (Map.Entry<String, String> entry : SEEPAGE_DEVICE_MAP.entrySet()) {
+            String fixedCode = entry.getKey();
+            String deviceName = entry.getValue();
+            DataNewEntity entity = dataMap.get(fixedCode);
+
+            // 旧数据源中少数测点以P编号维护，先按P编号查找，找不到时再通过sensor_point映射到数字ID。
+            if (entity == null && fixedCode.startsWith("P")) {
+                String numericId = pointNameToId.get(fixedCode);
+                if (numericId != null) {
+                    entity = dataMap.get(numericId);
+                }
+            }
 
             if (entity == null) {
-                devices.add(buildDevice(numericId, pName, "seepage", "abnormal", null, DETAIL_COLLECT_ABNORMAL));
+                devices.add(buildDevice(fixedCode, deviceName, "seepage",
+                        "abnormal", null, DETAIL_COLLECT_ABNORMAL));
                 continue;
             }
 
@@ -287,9 +335,20 @@ public class DeviceMonitorServiceImpl implements DeviceMonitorService {
             LocalDateTime displayTime = "abnormal".equals(status) ? null : collectTime;
             String detail = "online".equals(status) ? extractSeepageDetail(entity) : faultDetail(status);
 
-            devices.add(buildDevice(numericId, pName, "seepage", status, displayTime, detail));
+            devices.add(buildDevice(fixedCode, deviceName, "seepage", status, displayTime, detail));
         }
+        return devices;
+    }
 
+    /**
+     * 按固定设备清单构造故障状态，保证外部数据源不可用时设备总数仍保持一致。
+     */
+    private List<DeviceStatusVO> buildFixedSeepageFaultDevices(String detail) {
+        List<DeviceStatusVO> devices = new ArrayList<>();
+        for (Map.Entry<String, String> entry : SEEPAGE_DEVICE_MAP.entrySet()) {
+            devices.add(buildDevice(entry.getKey(), entry.getValue(),
+                    "seepage", "abnormal", null, detail));
+        }
         return devices;
     }
 

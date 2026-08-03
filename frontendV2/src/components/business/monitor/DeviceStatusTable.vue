@@ -73,6 +73,16 @@
         </span>
       </template>
 
+      <!-- 异常详情（渗流渗压单类型模式显示） -->
+      <template #faultDetail="{ row }">
+        <span
+          class="text-sm"
+          :class="row.status === 'abnormal' ? 'text-red-600' : row.status === 'offline' ? 'text-amber-600' : 'text-gray-400'"
+        >
+          {{ row.status === 'online' ? '--' : (row.detail || '--') }}
+        </span>
+      </template>
+
       <!-- 关键指标（全部模式下显示，按类型摘要） -->
       <template #summary="{ row }">
         <span class="text-sm text-gray-500">
@@ -220,6 +230,7 @@ const COLUMNS_RAIN = [
 const COLUMNS_SEEPAGE = [
   { key: 'name', title: '设备名称', width: '200px' },
   { key: 'status', title: '到报状态', width: '100px' },
+  { key: 'faultDetail', title: '状态详情', width: '140px' },
   { key: 'lastCollectTime', title: '最后采集时间', width: '160px' },
   { key: 'waterElevation', title: '水位高程(m)', width: '100px' },
   { key: 'waterLevel', title: '水位(mm)', width: '100px' },
